@@ -1,0 +1,69 @@
+object DataModule1: TDataModule1
+  OldCreateOrder = False
+  OnCreate = DataModuleCreate
+  Height = 459
+  Width = 650
+  object Connection: TADOConnection
+    Left = 288
+    Top = 96
+  end
+  object Query: TADOQuery
+    Parameters = <>
+    Left = 160
+    Top = 32
+  end
+  object dsUserTB: TADODataSet
+    Parameters = <>
+    Left = 120
+    Top = 208
+  end
+  object UserTB: TADOTable
+    Left = 48
+    Top = 192
+  end
+  object dsItemTB: TADODataSet
+    Parameters = <>
+    Left = 144
+    Top = 280
+  end
+  object ItemTB: TADOTable
+    Left = 72
+    Top = 264
+  end
+  object dsStatsTB: TADODataSet
+    Parameters = <>
+    Left = 296
+    Top = 224
+  end
+  object StatsTB: TADOTable
+    Left = 224
+    Top = 208
+  end
+  object dsTransactionItemTB: TADODataSet
+    Parameters = <>
+    Left = 320
+    Top = 296
+  end
+  object TransactionItemTB: TADOTable
+    Left = 232
+    Top = 280
+  end
+  object dsTransactionTB: TADODataSet
+    Parameters = <>
+    Left = 192
+    Top = 360
+  end
+  object TransactionTB: TADOTable
+    Left = 120
+    Top = 344
+  end
+  object dsSellerTB: TADODataSet
+    Parameters = <>
+    Left = 120
+    Top = 144
+  end
+  object SellerTB: TADOTable
+    Left = 48
+    Top = 128
+  end
+end

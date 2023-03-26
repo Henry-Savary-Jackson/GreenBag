@@ -1,0 +1,45 @@
+unit DMUNIT_u;
+
+interface
+
+uses
+  System.SysUtils, System.Classes, Data.Win.ADODB, Data.DB;
+
+type
+  TDataModule1 = class(TDataModule)
+    Connection: TADOConnection;
+    Query: TADOQuery;
+    dsUsers: TADODataSet;
+    UserTB: TADOTable;
+    dsItem: TADODataSet;
+    ItemTB: TADOTable;
+    dsStats: TADODataSet;
+    StatsTB: TADOTable;
+    dsTransactionItem: TADODataSet;
+    TransactionItemTB: TADOTable;
+    dsTransaction: TADODataSet;
+    TransactionTB: TADOTable;
+    dsSeller: TADODataSet;
+    SellerTB: TADOTable;
+    procedure DataModuleCreate(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  DataModule1: TDataModule1;
+
+implementation
+
+{%CLASSGROUP 'Vcl.Controls.TControl'}
+
+{$R *.dfm}
+
+procedure TDataModule1.DataModuleCreate(Sender: TObject);
+begin
+//
+end;
+
+end.
