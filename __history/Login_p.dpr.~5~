@@ -1,0 +1,18 @@
+program Login_p;
+
+uses
+  Vcl.Forms,
+  Loginu in 'Loginu.pas' {Login_u},
+  DMUNIT_u in 'DMUNIT_u.pas' {DataModule1: TDataModule},
+  Signupu in 'Signupu.pas' {SignUp_u};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TLogin_u, Login_u);
+  Application.CreateForm(TDataModule1, DataModule1);
+  Application.CreateForm(TSignUp_u, SignUp_u);
+  Application.Run;
+end.

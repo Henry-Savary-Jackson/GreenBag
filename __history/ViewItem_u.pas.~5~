@@ -1,0 +1,40 @@
+unit ViewItem_u;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls;
+
+type
+  TfrmViewItem = class(TForm)
+    btnBack: TButton;
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure btnBackClick(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  frmViewItem: TfrmViewItem;
+
+implementation
+uses
+BrowseItems_u;
+
+{$R *.dfm}
+
+procedure TfrmViewItem.btnBackClick(Sender: TObject);
+begin
+  frmViewItem.Hide;
+ frmBrowse.Show;
+end;
+
+procedure TfrmViewItem.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+Application.Terminate;
+end;
+
+end.

@@ -1,0 +1,110 @@
+object frmViewItem: TfrmViewItem
+  Left = 0
+  Top = 0
+  Caption = 'View Item'
+  ClientHeight = 421
+  ClientWidth = 418
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  OnClose = FormClose
+  PixelsPerInch = 96
+  TextHeight = 13
+  object Image1: TImage
+    Left = 152
+    Top = 24
+    Width = 105
+    Height = 105
+  end
+  object lblDesc: TLabel
+    Left = 96
+    Top = 290
+    Width = 57
+    Height = 13
+    Caption = 'Description:'
+  end
+  object lblCategory: TLabel
+    Left = 128
+    Top = 256
+    Width = 49
+    Height = 13
+    Caption = 'Category:'
+  end
+  object Label1: TLabel
+    Left = 96
+    Top = 216
+    Width = 31
+    Height = 13
+    Caption = 'Label1'
+  end
+  object Label2: TLabel
+    Left = 188
+    Top = 216
+    Width = 31
+    Height = 13
+    Caption = 'Label2'
+  end
+  object Label3: TLabel
+    Left = 280
+    Top = 216
+    Width = 31
+    Height = 13
+    Caption = 'Label3'
+  end
+  object lblPrice: TLabel
+    Left = 168
+    Top = 184
+    Width = 27
+    Height = 13
+    Caption = 'Price:'
+  end
+  object lblName: TLabel
+    Left = 168
+    Top = 143
+    Width = 31
+    Height = 13
+    Caption = 'Name:'
+  end
+  object lblSeller: TLabel
+    Left = 168
+    Top = 162
+    Width = 30
+    Height = 16
+    Caption = 'Seller:'
+  end
+  object btnBack: TButton
+    Left = 8
+    Top = 8
+    Width = 75
+    Height = 25
+    Caption = 'back'
+    TabOrder = 0
+    OnClick = btnBackClick
+  end
+  object btnAddToCart: TButton
+    Left = 144
+    Top = 382
+    Width = 75
+    Height = 25
+    Caption = 'Add to Cart'
+    TabOrder = 1
+  end
+  object redDesc: TRichEdit
+    Left = 168
+    Top = 287
+    Width = 185
+    Height = 89
+    Font.Charset = ANSI_CHARSET
+    Font.Color = clWindowText
+    Font.Height = -11
+    Font.Name = 'Tahoma'
+    Font.Style = []
+    ParentFont = False
+    TabOrder = 2
+    Zoom = 100
+  end
+end

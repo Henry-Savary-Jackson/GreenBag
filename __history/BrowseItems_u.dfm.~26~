@@ -1,0 +1,233 @@
+object frmBrowse: TfrmBrowse
+  Left = 0
+  Top = 0
+  Caption = 'Browse items'
+  ClientHeight = 587
+  ClientWidth = 944
+  Color = clBtnFace
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  OnClose = FormClose
+  PixelsPerInch = 96
+  TextHeight = 13
+  object grpSideBar: TGroupBox
+    Left = 0
+    Top = 0
+    Width = 139
+    Height = 587
+    Align = alLeft
+    TabOrder = 0
+    object Image3: TImage
+      Left = 32
+      Top = 27
+      Width = 73
+      Height = 58
+    end
+    object btnProfile: TButton
+      Left = 32
+      Top = 285
+      Width = 75
+      Height = 25
+      Caption = 'Profile'
+      TabOrder = 0
+      OnClick = btnProfileClick
+    end
+    object btnCheckout: TButton
+      Left = 30
+      Top = 389
+      Width = 75
+      Height = 25
+      Caption = 'Checkout'
+      TabOrder = 1
+      OnClick = btnCheckoutClick
+    end
+    object btnLogout: TButton
+      Left = 32
+      Top = 171
+      Width = 75
+      Height = 25
+      Caption = 'Logout'
+      TabOrder = 2
+      OnClick = btnLogoutClick
+    end
+  end
+  object grpHeader: TGroupBox
+    Left = 168
+    Top = 27
+    Width = 529
+    Height = 105
+    TabOrder = 1
+    DesignSize = (
+      529
+      105)
+    object scrbxCategories: TScrollBox
+      Left = 77
+      Top = 48
+      Width = 368
+      Height = 41
+      HorzScrollBar.Tracking = True
+      TabOrder = 0
+      object Button1: TButton
+        AlignWithMargins = True
+        Left = 5
+        Top = 5
+        Width = 100
+        Height = 27
+        Margins.Left = 5
+        Margins.Top = 5
+        Margins.Right = 5
+        Margins.Bottom = 5
+        Align = alLeft
+        Caption = 'Eco-Friendly Food'
+        TabOrder = 0
+      end
+    end
+    object srchSearchItems: TSearchBox
+      Left = 77
+      Top = 21
+      Width = 368
+      Height = 21
+      Anchors = []
+      TabOrder = 1
+    end
+  end
+  object scrbxItems: TScrollBox
+    Left = 168
+    Top = 136
+    Width = 529
+    Height = 443
+    TabOrder = 2
+    object flpnlItems: TFlowPanel
+      Left = 0
+      Top = 0
+      Width = 525
+      Height = 252
+      Align = alTop
+      AutoSize = True
+      TabOrder = 0
+      ExplicitLeft = -2
+      object GroupBox1: TGroupBox
+        AlignWithMargins = True
+        Left = 11
+        Top = 11
+        Width = 238
+        Height = 230
+        Margins.Left = 10
+        Margins.Top = 10
+        Margins.Right = 10
+        Margins.Bottom = 10
+        Align = alLeft
+        Caption = 'Itemname'
+        TabOrder = 0
+        OnClick = GroupBox1Click
+        object lblPrice: TLabel
+          Left = 64
+          Top = 179
+          Width = 27
+          Height = 13
+          Caption = 'Price:'
+        end
+        object lblCF: TLabel
+          Left = 56
+          Top = 122
+          Width = 82
+          Height = 13
+          Caption = 'Carbon Footprint'
+        end
+        object lblEU: TLabel
+          Left = 64
+          Top = 141
+          Width = 71
+          Height = 13
+          Caption = 'Energy Usage:'
+        end
+        object lblWU: TLabel
+          Left = 67
+          Top = 160
+          Width = 67
+          Height = 13
+          Caption = 'Water Usage:'
+        end
+        object Image1: TImage
+          Left = 66
+          Top = 22
+          Width = 100
+          Height = 94
+          Center = True
+        end
+        object btnViewItem: TButton
+          Left = 72
+          Top = 198
+          Width = 75
+          Height = 25
+          Caption = 'View Item'
+          TabOrder = 0
+        end
+      end
+      object GroupBox2: TGroupBox
+        AlignWithMargins = True
+        Left = 269
+        Top = 11
+        Width = 238
+        Height = 230
+        Margins.Left = 10
+        Margins.Top = 10
+        Margins.Right = 10
+        Margins.Bottom = 10
+        Align = alLeft
+        Caption = 'Itemname'
+        TabOrder = 1
+        OnClick = GroupBox1Click
+        ExplicitLeft = 262
+        ExplicitTop = 4
+        object Label1: TLabel
+          Left = 64
+          Top = 179
+          Width = 27
+          Height = 13
+          Caption = 'Price:'
+        end
+        object Label2: TLabel
+          Left = 56
+          Top = 122
+          Width = 82
+          Height = 13
+          Caption = 'Carbon Footprint'
+        end
+        object Label3: TLabel
+          Left = 64
+          Top = 141
+          Width = 71
+          Height = 13
+          Caption = 'Energy Usage:'
+        end
+        object Label4: TLabel
+          Left = 67
+          Top = 160
+          Width = 67
+          Height = 13
+          Caption = 'Water Usage:'
+        end
+        object Image2: TImage
+          Left = 66
+          Top = 22
+          Width = 100
+          Height = 94
+          Center = True
+        end
+        object Button2: TButton
+          Left = 72
+          Top = 198
+          Width = 75
+          Height = 25
+          Caption = 'View Item'
+          TabOrder = 0
+        end
+      end
+    end
+  end
+end

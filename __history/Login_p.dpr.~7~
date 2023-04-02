@@ -1,0 +1,24 @@
+program Login_p;
+
+uses
+  Vcl.Forms,
+  Loginu in 'Loginu.pas' {frmLogin},
+  DMUNIT_u in 'DMUNIT_u.pas' {DataModule1: TDataModule},
+  Signupu in 'Signupu.pas' {frmSignUp},
+  BrowseItems_u in 'BrowseItems_u.pas' {frmBrowse},
+  AddItem_u in 'AddItem_u.pas' {frmAddItem},
+  ViewItem_u in 'ViewItem_u.pas' {frmViewItem};
+
+{$R *.res}
+
+begin
+  Application.Initialize;
+  Application.MainFormOnTaskbar := True;
+  Application.CreateForm(TfrmLogin, frmLogin);
+  Application.CreateForm(TDataModule1, DataModule1);
+  Application.CreateForm(TfrmSignUp, frmSignUp);
+  Application.CreateForm(TfrmBrowse, frmBrowse);
+  Application.CreateForm(TfrmAddItem, frmAddItem);
+  Application.CreateForm(TfrmViewItem, frmViewItem);
+  Application.Run;
+end.

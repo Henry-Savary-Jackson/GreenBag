@@ -99,7 +99,7 @@
             <MainSource>MainSource</MainSource>
         </DelphiCompile>
         <DCCReference Include="Loginu.pas">
-            <Form>Form2</Form>
+            <Form>frmLogin</Form>
             <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="DMUNIT_u.pas">
@@ -107,6 +107,35 @@
             <FormType>dfm</FormType>
             <DesignClass>TDataModule</DesignClass>
         </DCCReference>
+        <DCCReference Include="Signupu.pas">
+            <Form>frmSignUp</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="BrowseItems_u.pas">
+            <Form>frmBrowse</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="AddItem_u.pas">
+            <Form>frmAddItem</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="ViewItem_u.pas">
+            <Form>frmViewItem</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="CheckOut_u.pas">
+            <Form>frmCheckout</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="Profile_u.pas">
+            <Form>frmProfile</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="YourProducts_u.pas">
+            <Form>frmYourProducts</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <None Include="ModelSupport_Login_p\default.txaPackage"/>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -132,6 +161,12 @@
                 <DeployFile LocalName="Win32\Debug\Login_p.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>Login_p.exe</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="ModelSupport_Login_p\default.txaPackage" Configuration="Debug" Class="ProjectFile">
+                    <Platform Name="Win32">
+                        <RemoteDir>.\</RemoteDir>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
@@ -966,6 +1001,7 @@
                 <Platform value="Win32">True</Platform>
                 <Platform value="Win64">False</Platform>
             </Platforms>
+            <ModelSupport>True</ModelSupport>
         </BorlandProject>
         <ProjectFileVersion>12</ProjectFileVersion>
     </ProjectExtensions>
