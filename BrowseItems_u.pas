@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
-  Vcl.WinXCtrls, Vcl.Imaging.pngimage;
+  Vcl.WinXCtrls, Vcl.Imaging.pngimage, BrowseItemContainer_u;
 
 type
   TfrmBrowse = class(TForm)
@@ -17,21 +17,7 @@ type
     flpnlItems: TFlowPanel;
     scrbxItems: TScrollBox;
     buttonn: TButton;
-    GroupBox1: TGroupBox;
-    Image1: TImage;
-    lblPrice: TLabel;
-    lblCF: TLabel;
-    lblEU: TLabel;
-    lblWU: TLabel;
     imgProfile: TImage;
-    btnViewItem: TButton;
-    GroupBox2: TGroupBox;
-    Label1: TLabel;
-    Label2: TLabel;
-    Label3: TLabel;
-    Label4: TLabel;
-    Image2: TImage;
-    Button2: TButton;
     grpMain: TGroupBox;
     grpCheckout: TGroupBox;
     lblCheckout: TLabel;
@@ -45,6 +31,7 @@ type
     procedure btnViewItemClick(Sender: TObject);
     procedure imgProfileClick(Sender: TObject);
     procedure grpCheckoutClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     { Private declarations }
   public
@@ -91,6 +78,20 @@ Application.Terminate;
 end;
 
 
+
+procedure TfrmBrowse.FormShow(Sender: TObject);
+var
+items :array [1..5] of BrowseItem;
+  I: Integer;
+begin
+//
+
+for I := 1 to 5 do
+begin
+  items[I] := BrowseItem.Create(self,flpnlItems, 'Null');
+end;
+
+end;
 
 procedure TfrmBrowse.grpCheckoutClick(Sender: TObject);
 begin

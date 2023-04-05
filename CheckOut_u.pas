@@ -11,22 +11,15 @@ type
   TfrmCheckout = class(TForm)
     btnBack: TButton;
     flpnlItems: TFlowPanel;
-    grpItem: TGroupBox;
     btnCheckout: TButton;
     scrbxItems: TScrollBox;
-    redItemInfo: TRichEdit;
-    spnQuantity: TSpinEdit;
-    lblQuantity: TLabel;
     lblTotalCost: TLabel;
     lblTotalCF: TLabel;
     lblTotalEU: TLabel;
     lblTotalWU: TLabel;
-    grpRemoveItem: TGroupBox;
-    imgRemoveItem: TImage;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnBackClick(Sender: TObject);
     procedure btnCheckoutClick(Sender: TObject);
-    procedure imgRemoveItemClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
   private
     { Private declarations }
@@ -62,16 +55,14 @@ end;
 
 procedure TfrmCheckout.FormShow(Sender: TObject);
 var
-item :  CartItem;
+items: array[1..8] of CartItem;
+  i: Integer;
 begin
-item := CartItem.Create(frmCheckout, flpnlItems, 'lol', 10);
+for i := 1 to 8 do
+begin
+  items[i]:= CartItem.Create(self, flpnlItems, 'Lol', 22);
+end;
 end;
 
-procedure TfrmCheckout.imgRemoveItemClick(Sender: TObject);
-var
-item :  CartItem;
-begin
-item := CartItem.Create(frmCheckout, flpnlItems, 'lol', 10);
-end;
 
 end.

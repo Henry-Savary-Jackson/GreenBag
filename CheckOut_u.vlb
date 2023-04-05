@@ -13,21 +13,8 @@ Coordinates=166,10,74,58
 [lblTotalWU]
 Coordinates=250,10,78,58
 
-[grpRemoveItem]
-Coordinates=192,78,106,58
-
-[grpItem]
-Coordinates=338,10,58,58
-Visible=True
-
 [lblTotalCost]
 Coordinates=99,78,83,58
-
-[imgRemoveItem]
-Coordinates=10,146,108,58
-
-[lblQuantity]
-Coordinates=388,78,76,58
 
 [flpnlItems]
 Coordinates=308,78,70,58
@@ -35,12 +22,7 @@ Coordinates=308,78,70,58
 [btnCheckout]
 Coordinates=73,214,87,58
 
-[redItemInfo]
-Coordinates=352,214,80,36
-
-[spnQuantity]
-Coordinates=259,214,83,36
-
 []
-Coordinates=128,146,79,58
+Coordinates=338,10,58,58
+Visible=True
 

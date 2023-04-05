@@ -12,6 +12,7 @@ object frmBrowse: TfrmBrowse
   Font.Style = []
   OldCreateOrder = False
   OnClose = FormClose
+  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object grpMain: TGroupBox
@@ -101,121 +102,8 @@ object frmBrowse: TfrmBrowse
         Align = alTop
         AutoSize = True
         TabOrder = 0
-        object GroupBox1: TGroupBox
-          AlignWithMargins = True
-          Left = 11
-          Top = 11
-          Width = 238
-          Height = 230
-          Margins.Left = 10
-          Margins.Top = 10
-          Margins.Right = 10
-          Margins.Bottom = 10
-          Align = alLeft
-          Caption = 'Itemname'
-          TabOrder = 0
-          object lblPrice: TLabel
-            Left = 64
-            Top = 179
-            Width = 27
-            Height = 13
-            Caption = 'Price:'
-          end
-          object lblCF: TLabel
-            Left = 56
-            Top = 122
-            Width = 82
-            Height = 13
-            Caption = 'Carbon Footprint'
-          end
-          object lblEU: TLabel
-            Left = 64
-            Top = 141
-            Width = 71
-            Height = 13
-            Caption = 'Energy Usage:'
-          end
-          object lblWU: TLabel
-            Left = 67
-            Top = 160
-            Width = 67
-            Height = 13
-            Caption = 'Water Usage:'
-          end
-          object Image1: TImage
-            Left = 66
-            Top = 22
-            Width = 100
-            Height = 94
-            Center = True
-          end
-          object btnViewItem: TButton
-            Left = 74
-            Top = 198
-            Width = 75
-            Height = 25
-            Caption = 'View Item'
-            TabOrder = 0
-            OnClick = btnViewItemClick
-          end
-        end
-        object GroupBox2: TGroupBox
-          AlignWithMargins = True
-          Left = 269
-          Top = 11
-          Width = 238
-          Height = 230
-          Margins.Left = 10
-          Margins.Top = 10
-          Margins.Right = 10
-          Margins.Bottom = 10
-          Align = alLeft
-          Caption = 'Itemname'
-          TabOrder = 1
-          object Label1: TLabel
-            Left = 64
-            Top = 179
-            Width = 27
-            Height = 13
-            Caption = 'Price:'
-          end
-          object Label2: TLabel
-            Left = 56
-            Top = 122
-            Width = 82
-            Height = 13
-            Caption = 'Carbon Footprint'
-          end
-          object Label3: TLabel
-            Left = 64
-            Top = 141
-            Width = 71
-            Height = 13
-            Caption = 'Energy Usage:'
-          end
-          object Label4: TLabel
-            Left = 67
-            Top = 160
-            Width = 67
-            Height = 13
-            Caption = 'Water Usage:'
-          end
-          object Image2: TImage
-            Left = 66
-            Top = 22
-            Width = 100
-            Height = 94
-            Center = True
-          end
-          object Button2: TButton
-            Left = 72
-            Top = 198
-            Width = 75
-            Height = 25
-            Caption = 'View Item'
-            TabOrder = 0
-          end
-        end
+        ExplicitLeft = 2
+        ExplicitTop = 3
       end
     end
   end

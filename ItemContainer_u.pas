@@ -4,23 +4,25 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls,Vcl.StdCtrls,Vcl.Dialogs;
+  Vcl.Controls,Vcl.StdCtrls,Vcl.Dialogs, vcl.Forms;
 
 type
   ItemContainer = class(TGroupBox)
 
   public
     itemID : string;
-    Constructor Create(Owner: TComponent; Parent : TWinControl; ItemID: string) ;virtual ;
+    Owner : tForm;
+    Constructor Create(Owner: tForm; Parent : TWinControl; ItemID: string); virtual ;
     procedure createDesign(); virtual;
     procedure remove(Sender: TObject); virtual;
 
   end;
 
 implementation
-Constructor ItemContainer.Create(Owner: TComponent; Parent : TWinControl; ItemID: string) ;
+Constructor ItemContainer.Create(Owner: tForm; Parent : TWinControl; ItemID: string) ;
 begin
   inherited Create(Owner);
+  self.Owner := Owner;
   self.Parent := Parent;
   self.createDesign;
   self.itemID := ItemID;

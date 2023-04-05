@@ -20,25 +20,7 @@ Coordinates=10,146,68,33
 Coordinates=168,10,62,51
 
 []
-Coordinates=89,78,77,51
-
-[lblPrice]
-Coordinates=383,1,51,51
-
-[GroupBox1]
 Coordinates=204,148,70,51
-
-[Image1]
-Coordinates=383,71,49,51
-
-[lblCF]
-Coordinates=312,218,41,51
-
-[lblWU]
-Coordinates=312,148,43,51
-
-[lblEU]
-Coordinates=383,141,46,51
 Visible=True
 
 [buttonn]
