@@ -20,7 +20,7 @@ type
 
 
   public
-    Constructor Create(Owner: tForm; Parent : TWinControl; ItemID: string;iQuantity: integer) ;
+    Constructor Create(Owner: tForm; Parent : TWinControl; ItemID: string) ;
     procedure createDesign(); override;
     procedure remove(Sender: TObject);override;
     procedure viewItem(Sender : tObject);
@@ -29,7 +29,7 @@ type
 
 implementation
 
-Constructor ProductItem.Create(Owner: tForm; Parent : TWinControl; ItemID: string;iQuantity: integer) ;
+Constructor ProductItem.Create(Owner: tForm; Parent : TWinControl; ItemID: string) ;
 begin
 //
 Inherited Create(Owner, Parent, ItemID);
@@ -42,8 +42,8 @@ begin
   AlignWithMargins := True ;
   Left := 11 ;
   Top := 11 ;
-  Width := 392 ;
-  Height := 104 ;
+  Width := 790 ;
+  Height := 190 ;
   Margins.Left := 10 ;
   Margins.Top := 10;
   Margins.Right := 10 ;
@@ -55,41 +55,41 @@ begin
   imgItem.Parent := self;
   imgItem.Picture.LoadFromFile('cross.png');
   imgItem.Center := true;
-  imgItem.Left := 21;
-  imgItem.Top := 14;
-  imgItem.Width := 70;
-  imgItem.Height := 70 ;
+  imgItem.Left := 70;
+  imgItem.Top := 20;
+  imgItem.Width := 110;
+  imgItem.Height := 110 ;
 
   lblName :=  TLabel.Create(self.Owner);
   lblName.Parent := self;
-  lblName.Left := 136;
-  lblName.Top := 24;
+  lblName.Left := 280;
+  lblName.Top := 15;
   lblName.Width := 31;
   lblName.Height := 13;
   lblName.Caption := 'Name:';
 
   lblRevenue := TLabel.Create(self.Owner);
   lblRevenue.Parent := self;
-  lblRevenue.Left := 136;
-  lblRevenue.Top := 43  ;
+  lblRevenue.Left := 280;
+  lblRevenue.Top := 75  ;
   lblRevenue.Width := 47 ;
   lblRevenue.Height := 13  ;
   lblRevenue.Caption := 'Revenue:';
 
   lblSales :=  TLabel.Create(self.Owner);
   lblSales.Parent := self;
-  lblSales.Left := 136 ;
-  lblSales.Top := 75 ;
+  lblSales.Left := 280 ;
+  lblSales.Top := 135 ;
   lblSales.Width := 29;
   lblSales.Height := 13;
   lblSales.Caption := 'Sales:' ;
 
   btnViewItem :=  TButton.Create(self.Owner);
   btnViewItem.Parent := self;
-  btnViewItem.Left := 21;
-  btnViewItem.Top := 77 ;
-  btnViewItem.Width := 75 ;
-  btnViewItem.Height := 25 ;
+  btnViewItem.Left := 45;
+  btnViewItem.Top := 140 ;
+  btnViewItem.Width := 140 ;
+  btnViewItem.Height := 50 ;
   btnViewItem.Caption := 'View Item' ;
   btnViewItem.TabOrder := 0  ;
   btnViewItem.OnClick := self.viewItem;
@@ -97,10 +97,7 @@ begin
   grpRemoveProduct := TGroupBox.Create(self.Owner);
   grpRemoveProduct.Parent := self;
   grpRemoveProduct.AlignWithMargins := True;
-  grpRemoveProduct.Left := 313;
-  grpRemoveProduct.Top := 25;
-  grpRemoveProduct.Width := 57 ;
-  grpRemoveProduct.Height := 57 ;
+  grpRemoveProduct.Width :=  120;
   grpRemoveProduct.Margins.Left := 20 ;
   grpRemoveProduct.Margins.Top := 10 ;
   grpRemoveProduct.Margins.Right := 20;
@@ -113,14 +110,10 @@ begin
   grpRemoveProduct.OnClick := self.remove;
 
   imgRemoveProduct := TImage.Create(self.Owner);
-  imgRemoveProduct.Parent := self;
+  imgRemoveProduct.Parent := grpRemoveProduct;
   imgRemoveProduct.Center:= true;
   imgRemoveProduct.Picture.LoadFromFile('cross.png');
   imgRemoveProduct.AlignWithMargins := True  ;
-  imgRemoveProduct.Left := 7 ;
-  imgRemoveProduct.Top := 15  ;
-  imgRemoveProduct.Width := 43 ;
-  imgRemoveProduct.Height := 35;
   imgRemoveProduct.Margins.Left := 5 ;
   imgRemoveProduct.Margins.Top := 0 ;
   imgRemoveProduct.Margins.Right := 5 ;
@@ -140,6 +133,9 @@ end;
 procedure ProductItem.viewItem(Sender : tObject);
 begin
   //
+  self.Owner.Hide;
+  frmAddItem.Show;
+
 end;
 
 {

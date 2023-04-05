@@ -77,6 +77,13 @@ object frmAddItem: TfrmAddItem
     Height = 13
     Caption = 'Seller:'
   end
+  object lblRating: TLabel
+    Left = 129
+    Top = 135
+    Width = 38
+    Height = 13
+    Caption = 'Rating: '
+  end
   object btnBack: TButton
     Left = 8
     Top = 8

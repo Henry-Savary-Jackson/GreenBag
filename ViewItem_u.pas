@@ -23,6 +23,10 @@ type
     lblSeller: TLabel;
     spnQuantity: TSpinEdit;
     lblQuantity: TLabel;
+    lblRating: TLabel;
+    trcRating: TTrackBar;
+    lblYourRating: TLabel;
+    btnSendRating: TButton;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnBackClick(Sender: TObject);
     procedure btnAddToCartClick(Sender: TObject);

@@ -5,27 +5,20 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
-  System.ImageList, Vcl.ImgList, Vcl.Imaging.pngimage;
+  System.ImageList, Vcl.ImgList, Vcl.Imaging.pngimage, ProductItem_u;
 
 type
   TfrmYourProducts = class(TForm)
     btnAddItem: TButton;
     flpnlProducts: TFlowPanel;
-    ScrollBox1: TScrollBox;
-    grpProduct: TGroupBox;
-    Image1: TImage;
-    btnViewItem: TButton;
-    lblName: TLabel;
-    lblRevenue: TLabel;
-    lblSales: TLabel;
-    imgRemoveProduct: TImage;
-    grpRemoveProduct: TGroupBox;
+    scrbxProducts: TScrollBox;
     btnBack: TButton;
     procedure btnAddItemClick(Sender: TObject);
     procedure imgRemoveProductClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnBackClick(Sender: TObject);
     procedure btnViewItemClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
   private
     { Private declarations }
   public
@@ -65,6 +58,18 @@ procedure TfrmYourProducts.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
 //
 Application.Terminate;
+end;
+
+procedure TfrmYourProducts.FormShow(Sender: TObject);
+var
+products : array[1..8] of ProductItem;
+  i: Integer;
+begin
+//
+for i := 1 to 8 do
+begin
+  products[i] := ProductItem.Create(self,flpnlProducts, 'Null');
+end;
 end;
 
 procedure TfrmYourProducts.imgRemoveProductClick(Sender: TObject);

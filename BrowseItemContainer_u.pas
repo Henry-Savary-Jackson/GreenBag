@@ -48,7 +48,7 @@ begin
   Margins.Right := 10;
   Margins.Bottom := 10;
   Align := alLeft  ;
-  Caption := 'Itemname';
+  Caption := '(Itemname) by (Seller)';
   TabOrder := 0  ;
 
   lblPrice := TLabel.Create(self.Owner);

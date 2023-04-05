@@ -72,6 +72,12 @@ frmBrowse.Hide;
 frmViewItem.Show;
 end;
 
+
+
+
+
+
+
 procedure TfrmBrowse.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
 Application.Terminate;
@@ -91,6 +97,7 @@ begin
   items[I] := BrowseItem.Create(self,flpnlItems, 'Null');
 end;
 
+items[4].Free;
 end;
 
 procedure TfrmBrowse.grpCheckoutClick(Sender: TObject);

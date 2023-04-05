@@ -2,7 +2,7 @@ object frmViewItem: TfrmViewItem
   Left = 0
   Top = 0
   Caption = 'View Item'
-  ClientHeight = 481
+  ClientHeight = 611
   ClientWidth = 404
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -16,13 +16,13 @@ object frmViewItem: TfrmViewItem
   TextHeight = 13
   object Image1: TImage
     Left = 152
-    Top = 24
+    Top = 8
     Width = 105
     Height = 105
   end
   object lblDesc: TLabel
-    Left = 88
-    Top = 290
+    Left = 80
+    Top = 298
     Width = 57
     Height = 13
     Caption = 'Description:'
@@ -77,11 +77,25 @@ object frmViewItem: TfrmViewItem
     Caption = 'Seller:'
   end
   object lblQuantity: TLabel
-    Left = 121
-    Top = 400
+    Left = 97
+    Top = 408
     Width = 46
     Height = 13
     Caption = 'Quantity:'
+  end
+  object lblRating: TLabel
+    Left = 105
+    Top = 455
+    Width = 38
+    Height = 13
+    Caption = 'Rating: '
+  end
+  object lblYourRating: TLabel
+    Left = 101
+    Top = 488
+    Width = 60
+    Height = 13
+    Caption = 'Your Rating:'
   end
   object btnBack: TButton
     Left = 8
@@ -93,8 +107,8 @@ object frmViewItem: TfrmViewItem
     OnClick = btnBackClick
   end
   object btnAddToCart: TButton
-    Left = 144
-    Top = 438
+    Left = 136
+    Top = 574
     Width = 105
     Height = 35
     Caption = 'Add to Cart'
@@ -102,8 +116,8 @@ object frmViewItem: TfrmViewItem
     OnClick = btnAddToCartClick
   end
   object redDesc: TRichEdit
-    Left = 160
-    Top = 287
+    Left = 152
+    Top = 295
     Width = 185
     Height = 89
     Font.Charset = ANSI_CHARSET
@@ -116,13 +130,29 @@ object frmViewItem: TfrmViewItem
     Zoom = 100
   end
   object spnQuantity: TSpinEdit
-    Left = 208
-    Top = 397
+    Left = 184
+    Top = 405
     Width = 49
     Height = 22
     MaxValue = 1000
     MinValue = -1
     TabOrder = 3
     Value = 0
+  end
+  object trcRating: TTrackBar
+    Left = 184
+    Top = 484
+    Width = 105
+    Height = 37
+    Max = 5
+    TabOrder = 4
+  end
+  object btnSendRating: TButton
+    Left = 150
+    Top = 527
+    Width = 91
+    Height = 25
+    Caption = 'Send your Rating'
+    TabOrder = 5
   end
 end

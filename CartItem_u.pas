@@ -4,8 +4,7 @@ interface
 
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls,
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes, Vcl.Controls, Vcl.ExtCtrls, Vcl.Graphics, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls,
   Vcl.Samples.Spin, Vcl.Imaging.pngimage,ItemContainer_u;
 
 type
@@ -23,17 +22,10 @@ type
     procedure createDesign(); override;
     procedure Remove(Sender: TObject); override;
 
-
   end;
 
-procedure Register;
 
 implementation
-
-procedure Register;
-begin
-  RegisterComponents('Delphi', [CartItem]);
-end;
 
 Constructor CartItem.Create(Owner: tForm; Parent : TWinControl; ItemID: string;iQuantity: integer) ;
 begin;
@@ -137,7 +129,6 @@ procedure CartItem.Remove(Sender: TObject);
 begin
   showMessage('Lollololll');
 end;
-
 
 end.
 

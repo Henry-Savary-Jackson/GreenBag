@@ -3,7 +3,7 @@ unit DMUNIT_u;
 interface
 
 uses
-  System.SysUtils, System.Classes, Data.Win.ADODB, Data.DB;
+  System.SysUtils, System.Classes, Data.Win.ADODB, Data.DB, Datasnap.DBClient;
 
 type
   TDataModule1 = class(TDataModule)
@@ -26,11 +26,15 @@ type
     { Private declarations }
   public
     { Public declarations }
+    function runSQL(): TClientDataSet;
+    function Login(Username, password: string ): string;
+    function SignUp(Username, password, usertype: string): string;
+    function userInfo(UserId: string):TClientDataSet;
+    procedure inserItem(Name, SellerID, category, Desc:string; Price,CF,EU,WU:double);
   end;
 
 var
   DataModule1: TDataModule1;
-  d : TCustomADODataSet;
 
 implementation
 
@@ -78,11 +82,38 @@ Connection.Close;
   //leave this line of code commented
   Query.Connection := Connection;
 
-  with dsuserTB do
-  begin
-  end;
 end;
 
 
+
+procedure TDataModule1.inserItem(Name, SellerID, category, Desc: string; Price,
+  CF, EU, WU: double);
+begin
+
+end;
+
+function TDataModule1.Login(Username, password: string): string;
+begin
+
+end;
+
+function TDataModule1.runSQL: TClientDataSet;
+var
+dsOutput: tClientDataset;
+begin
+//
+//dsOutput := TClientDataSet.Create(self);
+
+end;
+
+function TDataModule1.SignUp(Username, password, usertype: string): string;
+begin
+
+end;
+
+function TDataModule1.userInfo(UserId: string): TClientDataSet;
+begin
+
+end;
 
 end.

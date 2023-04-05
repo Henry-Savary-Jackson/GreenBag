@@ -1,0 +1,231 @@
+unit CartItem_u;
+
+interface
+
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes, Vcl.Controls, Vcl.ExtCtrls, Vcl.Graphics, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls,
+  Vcl.Samples.Spin, Vcl.Imaging.pngimage,ItemContainer_u;
+
+type
+
+  TPaletteColors = array[0..15] of TColor;
+
+  TControlType = (ctUnknown, ctButton, ctCheckBox, ctRadioButton, ctEdit, ctListBox,
+    ctComboBox, ctScrollBar, ctGroupBox, ctPanel, ctLabel, ctStaticText, ctImage,
+    ctShape, ctBevel, ctScrollBarEx, ctSplitter, ctListHeader, ctListView,
+    ctTreeView, ctTabControl, ctPageControl, ctRichEdit, ctGrid, ctHeaderControl,
+    ctStatusBar, ctTrackBar, ctProgressBar, ctUpDown, ctHotKey, ctAnimate, ctCoolBar,
+    ctDateTimePicker, ctMonthCalendar, ctDateTimePickerBase, ctIPAddress);
+
+  CartItem = class(ItemContainer)
+
+  private
+    grpRemoveItem: TGroupBox;
+    imgRemoveItem: TImage;
+    lblQuantity: TLabel;
+    redItemInfo: TRichEdit ;
+    spnQuantity: TSpinEdit ;
+    iQuantity : integer;
+  public
+    Constructor Create(Owner: TForm; Parent : TWinControl; ItemID: string;iQuantity: integer) ;
+    procedure createDesign(); override;
+    procedure Remove(Sender: TObject); override;
+    procedure Paint; override;
+    function GetPalette: HPALETTE; override;
+    function GetPaletteColors: TPaletteColors; override;
+    function GetControlType: TControlType; override;
+    function GetDesignInfo: Longint; override;
+    function GetPropValue(const Name: string): Variant; override;
+    procedure SetPropValue(const Name: string; const Value: Variant); override;
+    function GetChildOwner: TComponent; override;
+    function GetChildParent: TComponent; override;
+  publlished
+
+
+  end;
+
+procedure Register;
+
+implementation
+
+procedure Register;
+begin
+  RegisterComponents('Delphi', [CartItem]);
+end;
+
+Constructor CartItem.Create(Owner: tForm; Parent : TWinControl; ItemID: string;iQuantity: integer) ;
+begin;
+  //
+  self.iQuantity:= iQuantity;
+  Inherited Create(Owner, Parent, ItemID);
+
+
+end;
+
+procedure CartItem.createDesign();
+begin
+
+// set container's properties
+  AlignWithMargins := True;
+  Width := 1150 ;
+  Height := 240   ;
+  Margins.Left := 5 ;
+  Margins.Right := 5 ;
+  Margins.Bottom := 5  ;
+  Align := alTop ;
+  TabOrder := 0  ;
+
+  //lblQuantity's properties
+  lblQuantity := TLabel.Create(self.Owner);
+  lblQuantity.Parent := self;
+  lblQuantity.Left := 570  ;
+  lblQuantity.Top := 100;
+  lblQuantity.Width := 46    ;
+  lblQuantity.Height := 13    ;
+  lblQuantity.AlignWithMargins := True ;
+  lblQuantity.Margins.Right := 10;
+  lblQuantity.Caption := 'Quantity:';
+//
+  redItemInfo := TRichEdit.Create(self.Owner);
+  redItemInfo.Parent := self;
+
+  redItemInfo.Left := 40;
+  redItemInfo.Top := 40;
+  redItemInfo.Width := 400;
+  redItemInfo.Height := 180;
+  redItemInfo.Margins.Right := 20;
+  redItemInfo.AlignWithMargins := True;
+  redItemInfo.Font.Charset := ANSI_CHARSET ;
+  redItemInfo.Font.Color := clWindowText ;
+  redItemInfo.Font.Height := 12;
+  redItemInfo.Font.Name := 'Tahoma';
+  redItemInfo.Font.Style := []   ;
+  redItemInfo.ParentFont := True;
+  redItemInfo.TabOrder := 0 ;
+  redItemInfo.Zoom := 100 ;
+
+  //grpRemoveItem's properties
+
+  grpRemoveItem :=  TgroupBox.Create(self.Owner);
+  grpRemoveItem.Parent := self;
+  grpRemoveItem.AlignWithMargins := True ;
+  grpRemoveItem.Left := 480  ;
+  grpRemoveItem.Top := 25 ;
+  grpRemoveItem.Width := 180 ;
+  grpRemoveItem.Margins.Left := 20 ;
+  grpRemoveItem.Margins.Top := 10 ;
+  grpRemoveItem.Margins.Right := 20 ;
+  grpRemoveItem.Margins.Bottom := 20 ;
+  grpRemoveItem.Align := alRight;
+  grpRemoveItem.Color := clScrollBar ;
+  grpRemoveItem.ParentBackground := False ;
+  grpRemoveItem.ParentColor := False ;
+  grpRemoveItem.TabOrder := 2 ;
+  grpRemoveItem.OnClick := self.Remove ;
+
+  //imgRemoveItem's properties
+  imgRemoveItem :=  TImage.Create(self.Owner);
+  imgRemoveItem.Parent := grpRemoveItem;
+  imgRemoveItem.AlignWithMargins := True ;
+  imgRemoveItem.Left := 7 ;
+  imgRemoveItem.Top := 15 ;
+  imgRemoveItem.Margins.Left := 5;
+  imgRemoveItem.Margins.Top := 0 ;
+  imgRemoveItem.Margins.Right := 5 ;
+  imgRemoveItem.Margins.Bottom := 5 ;
+  imgRemoveItem.Align := alClient;
+  imgRemoveItem.Center := True;
+  imgRemoveItem.Picture.LoadFromFile('cross.png');
+  imgRemoveItem.OnClick := self.remove ;
+
+  spnQuantity :=  TSpinEdit.Create(self.Owner);
+  spnQuantity.Parent := self;
+  spnQuantity.Left := 680;
+  spnQuantity.Top := 100;
+  spnQuantity.Width := 80;
+  spnQuantity.Height := 22 ;
+  spnQuantity.MaxValue := 1000;
+  spnQuantity.MinValue := 0;
+  spnQuantity.TabOrder := 1;
+  spnQuantity.Value := self.iQuantity ;
+
+end;
+
+procedure CartItem.Remove(Sender: TObject);
+begin
+  showMessage('Lollololll');
+end;
+
+function CartItem.GetChildOwner: TComponent;
+begin
+  // Return the component that owns the child components of this component
+  Result := Self;
+end;
+
+function CartItem.GetChildParent: TComponent;
+begin
+  // Return the parent component of a specified child component
+  Result := Self;
+end;
+
+function CartItem.GetControlType: TControlType;
+begin
+  // Specify the type of control that this component represents
+  Result := ctGroupBox;
+end;
+
+function CartItem.GetDesignInfo: Longint;
+begin
+  // Specify the design-time behavior of this component
+  Result := DesignInfo;
+end;
+
+function CartItem.GetPalette: HPALETTE;
+begin
+  // Return the palette that this component should use for drawing at design time
+  Result := 0; // Use the default palette
+end;
+
+function CartItem.GetPaletteColors: TPaletteColors;
+begin
+  // Return the colors that this component should use for drawing at design time
+  Result[0] := clBlack;
+  Result[1] := clMaroon;
+  Result[2] := clGreen;
+  Result[3] := clOlive;
+  Result[4] := clNavy;
+  Result[5] := clPurple;
+  Result[6] := clTeal;
+  Result[7] := clGray;
+  Result[8] := clSilver;
+  Result[9] := clRed;
+  Result[10] := clLime;
+  Result[11] := clYellow;
+  Result[12] := clBlue;
+  Result[13] := clFuchsia;
+  Result[14] := clAqua;
+  Result[15] := clWhite;
+end;
+
+function CartItem.GetPropValue(const Name: string): Variant;
+begin
+// Return the value of the specified property
+Result := inherited GetPropValue(Name);
+end;
+
+procedure CartItem.Paint;
+begin
+// Override the Paint method to perform custom drawing
+inherited;
+// Add custom drawing code here
+end;
+
+procedure CartItem.SetPropValue(const Name: string; const Value: Variant);
+begin
+// Set the value of the specified property
+inherited SetPropValue(Name, Value);
+end;
+
+end.
+

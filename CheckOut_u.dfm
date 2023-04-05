@@ -29,19 +29,19 @@ object frmCheckout: TfrmCheckout
     Height = 13
     Caption = 'Total Carbon Footprint:'
   end
-  object lblTotalEU: TLabel
-    Left = 300
-    Top = 337
-    Width = 98
-    Height = 13
-    Caption = 'Total Energy Usage:'
-  end
   object lblTotalWU: TLabel
     Left = 441
     Top = 342
     Width = 94
     Height = 13
     Caption = 'Total Water Usage:'
+  end
+  object lblTotalEU: TLabel
+    Left = 283
+    Top = 349
+    Width = 98
+    Height = 13
+    Caption = 'Total Energy Usage:'
   end
   object btnBack: TButton
     Left = 8
@@ -71,9 +71,9 @@ object frmCheckout: TfrmCheckout
     TabOrder = 2
     object flpnlItems: TFlowPanel
       Left = 3
-      Top = 0
-      Width = 583
-      Height = 139
+      Top = 3
+      Width = 598
+      Height = 107
       AutoSize = True
       TabOrder = 0
     end

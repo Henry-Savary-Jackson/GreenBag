@@ -27,6 +27,7 @@ type
     edtWU: TEdit;
     btnSaveChanges: TButton;
     cmbCategory: TComboBox;
+    lblRating: TLabel;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure imgProductClick(Sender: TObject);
     procedure btnBackClick(Sender: TObject);

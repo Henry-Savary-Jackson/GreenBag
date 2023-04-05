@@ -17,8 +17,8 @@ object DataModule1: TDataModule1
     Top = 192
   end
   object ItemTB: TADOTable
-    Left = 72
-    Top = 264
+    Left = 65496
+    Top = 256
   end
   object StatsTB: TADOTable
     Left = 224
