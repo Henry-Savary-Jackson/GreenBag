@@ -1,0 +1,41 @@
+unit ProductItem_u;
+
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
+  System.ImageList, Vcl.ImgList, Vcl.Imaging.pngimage, ItemContainer_u;
+
+type
+  ProductItem = class(ItemContainer)
+  private
+
+  public
+    Constructor Create(ItemID: string) ;override;
+    procedure createDesign(); override;
+    procedure remove();override;
+
+  end;
+
+implementation
+
+Constructor ProductItem.Create(ItemID: string) ;
+begin
+//
+Inherited Create(ItemID);
+
+end;
+
+procedure ProductItem.createDesign();
+begin
+  //
+end;
+
+procedure ProductItem.remove();
+begin
+  //
+end;
+
+end.

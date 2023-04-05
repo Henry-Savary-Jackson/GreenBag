@@ -4,22 +4,34 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
+  VclTee.TeeGDIPlus, VCLTee.TeEngine, VCLTee.TeeProcs, VCLTee.Chart,
+  VCLTee.TeeChartLayout, VCLTee.Series;
 
 type
   TfrmProfile = class(TForm)
     btnBack: TButton;
-    Image1: TImage;
+    imgProfilePic: TImage;
     lblUsername: TLabel;
     btnSalesCategory: TButton;
     btnCFCategory: TButton;
     btnWUCategory: TButton;
     flpnlCategories: TFlowPanel;
     btnEUcategory: TButton;
-    flpnlInfo: TFlowPanel;
     btnBalanceCategory: TButton;
     btnSpendCategory: TButton;
     btnViewProducts: TButton;
+    lblBalance: TLabel;
+    lblRevenueTotal: TLabel;
+    lblSales: TLabel;
+    lblSpendingTotal: TLabel;
+    lblTotalCF: TLabel;
+    lblTotalWU: TLabel;
+    lblTotalEU: TLabel;
+    pnlInfo: TPanel;
+    Chart1: TChart;
+    ChartLayout1: TChartLayout;
+    Series1: TBarSeries;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnViewProductsClick(Sender: TObject);
     procedure btnBackClick(Sender: TObject);
