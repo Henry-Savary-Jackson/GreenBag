@@ -139,6 +139,7 @@
         <DCCReference Include="ProductItem_u.pas"/>
         <DCCReference Include="BrowseItemContainer_u.pas"/>
         <DCCReference Include="ItemContainer_u.pas"/>
+        <DCCReference Include="SCrypt.pas"/>
         <None Include="ModelSupport_GreenBag\default.txaPackage"/>
         <None Include="ModelSupport_GreenBag\default.txvpck"/>
         <None Include="ModelSupport_GreenBag\BrowseItems_u\default.txvpck"/>

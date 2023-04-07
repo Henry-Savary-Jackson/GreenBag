@@ -71,8 +71,8 @@ object frmAddItem: TfrmAddItem
     Caption = 'Name:'
   end
   object lblSeller: TLabel
-    Left = 95
-    Top = 201
+    Left = 137
+    Top = 209
     Width = 30
     Height = 13
     Caption = 'Seller:'
@@ -114,40 +114,33 @@ object frmAddItem: TfrmAddItem
     Height = 21
     TabOrder = 2
   end
-  object edtSeller: TEdit
-    Left = 157
-    Top = 198
-    Width = 121
-    Height = 21
-    TabOrder = 3
-  end
   object edtPrice: TEdit
     Left = 157
     Top = 241
     Width = 121
     Height = 21
-    TabOrder = 4
+    TabOrder = 3
   end
   object edtCF: TEdit
     Left = 157
     Top = 284
     Width = 121
     Height = 21
-    TabOrder = 5
+    TabOrder = 4
   end
   object edtEU: TEdit
     Left = 157
     Top = 326
     Width = 121
     Height = 21
-    TabOrder = 6
+    TabOrder = 5
   end
   object edtWU: TEdit
     Left = 157
     Top = 370
     Width = 121
     Height = 21
-    TabOrder = 7
+    TabOrder = 6
   end
   object btnSaveChanges: TButton
     Left = 157
@@ -155,7 +148,7 @@ object frmAddItem: TfrmAddItem
     Width = 94
     Height = 25
     Caption = 'Save Changes'
-    TabOrder = 8
+    TabOrder = 7
     OnClick = btnSaveChangesClick
   end
   object cmbCategory: TComboBox
@@ -163,6 +156,6 @@ object frmAddItem: TfrmAddItem
     Top = 412
     Width = 121
     Height = 21
-    TabOrder = 9
+    TabOrder = 8
   end
 end

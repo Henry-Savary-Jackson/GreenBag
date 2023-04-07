@@ -20,7 +20,6 @@ type
     btnBack: TButton;
     redDesc: TRichEdit;
     edtName: TEdit;
-    edtSeller: TEdit;
     edtPrice: TEdit;
     edtCF: TEdit;
     edtEU: TEdit;

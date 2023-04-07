@@ -14,7 +14,8 @@ uses
   CartItem_u in 'CartItem_u.pas',
   ProductItem_u in 'ProductItem_u.pas',
   BrowseItemContainer_u in 'BrowseItemContainer_u.pas',
-  ItemContainer_u in 'ItemContainer_u.pas';
+  ItemContainer_u in 'ItemContainer_u.pas',
+  SCrypt in 'SCrypt.pas';
 
 {$R *.res}
 
