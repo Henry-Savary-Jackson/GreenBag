@@ -40,7 +40,7 @@ uses
 
 procedure TfrmLogin.btnSignInClick(Sender: TObject);
 var
-  userName, password: string;
+  userName, userID, password: string;
 begin
 
   userName := edtUsername.Text;
@@ -57,15 +57,17 @@ begin
     Exit;
   end;
 
-  with dataModule do
+  UserID :=DataModule1.Login(username, password);
+
+  if copy(userid,1,5) = 'Error' then
   begin
-    UserTB['UserID'] := 'frick';
-    UserTB.Post;
-    UserTB.Refresh;
+    showMessage('There was an error whilst accessing database');
+    Exit;
   end;
+
   //
   frmLogin.Hide;
-
+  frmBrowse.userID := userId;
   frmBrowse.Show;
 end;
 

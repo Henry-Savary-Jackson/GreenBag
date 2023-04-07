@@ -73,7 +73,7 @@ object frmSignUp: TfrmSignUp
     Width = 121
     Height = 21
     TabOrder = 1
-    Text = 'password'
+    Text = 'password1+'
   end
   object edtUsername: TEdit
     Left = 191
