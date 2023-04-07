@@ -26,6 +26,7 @@ type
     procedure btnSignUpClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure rgpUserClick(Sender: TObject);
+    function securePassword(password: string): integer;
   private
     { Private declarations }
   public
@@ -34,7 +35,12 @@ type
 
 var
   frmSignUp: TfrmSignUp;
-  DataModule: TDataModule1;
+
+const
+  success = 1;
+  tooShort = 4;
+  noSpecial = 2;
+  noNums = 3;
 
 implementation
 
@@ -52,7 +58,9 @@ end;
 
 procedure TfrmSignUp.btnSignUpClick(Sender: TObject);
 var
-  UserId, userName, password, homeaddress, userType, certificationCode: string;
+  UserId, userName, password, homeaddress, userType,
+    certificationCode: string;
+
 begin
 
   userName := edtUsername.Text;
@@ -73,6 +81,27 @@ begin
   begin
     showMessage('Please enter a password.');
     Exit;
+  end;
+
+  case securePassword(password) of
+    noSpecial:
+      begin
+        showMessage('Your password must have atleast one special character.');
+        Exit;
+
+      end;
+    noNums:
+      begin
+        showMessage('Your password must have atleast one number.');
+        Exit;
+
+      end;
+    tooShort:
+      begin
+        showMessage('Your password must have be atleast 8 characters long.');
+        Exit;
+
+      end;
   end;
 
   homeaddress := redHomeAddress.Text;
@@ -114,13 +143,13 @@ begin
 
   end;
 
-  UserId := DataModule.SignUp(userName, password, userType, homeaddress,
+  UserId := DataModule1.SignUp(userName, password, userType, homeaddress,
     certificationCode);
 
   if Copy(UserId, 1, 5) = 'Error' then
   begin
     MessageDlg('There was an error accessing the database', mtConfirmation,
-      [mbOK], 0, mbOK)
+      [mbOK], 0, mbOK);
   end;
 
   frmBrowse.UserId := UserId;
@@ -137,6 +166,49 @@ end;
 procedure TfrmSignUp.rgpUserClick(Sender: TObject);
 begin
   edtCertification.Enabled := rgpUser.ItemIndex = 0
+end;
+
+function TfrmSignUp.securePassword(password: string): integer;
+var
+  i: integer;
+const
+  nums = '0123456789';
+  special = '!@#$%^&*()-+=.,<>?\/|';
+
+begin
+
+  if length(password) < 8 then
+  begin
+    Result := tooShort;
+    Exit;
+  end;
+
+  Result := noNums;
+
+  for i := 1 to length(password) do
+  begin
+    if not(pos(password[i], nums) = 0) then
+    begin
+      Result := success
+    end;
+
+  end;
+
+  if Result = noNums then
+  begin
+    Exit;
+  end;
+
+  Result := noSpecial;
+
+  for i := 1 to length(password) do
+  begin
+    if not(pos(password[i], special) = 0) then
+    begin
+      Result := success
+    end;
+
+  end;
 end;
 
 end.

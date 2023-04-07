@@ -28,7 +28,7 @@ type
     sCrypt: tScrypt;
   public
     { Public declarations }
-    function runSQL(sql: string; params: TDictionary<string, Variant>)
+    function runSQL(sql: string; params: TDictionary<string, Variant> = nil)
       : tADODataSet;
     function Login(Username, password: string): string;
     function SignUp(Username, password, usertype, homeAddress, certificationcode
@@ -55,7 +55,6 @@ var
 
 implementation
 
-{%CLASSGROUP 'Vcl.Controls.TControl'}
 {$R *.dfm}
 
 procedure TDataModule1.DataModuleCreate(Sender: TObject);
@@ -99,14 +98,13 @@ begin
   dsStatsTB.DataSet := StatsTB;
 
   Query.Connection := Connection;
-  showMessage('Fcuk');
-
 end;
 
 procedure TDataModule1.deleteItem(itemID: string);
 begin
-  with DataModule1.ItemTB do
+  with DataModule1 do
   begin
+    ItemTB.Open;
     ItemTB.First;
 
     while not ItemTB.Eof do
@@ -125,6 +123,10 @@ end;
 
 function TDataModule1.getProducts(UserId: string): tADODataSet;
 begin
+
+  // Result := TADODataSet.Create(nil);
+
+  // Result.FieldDefs.Add('ItemID', ftString, 10);
 
 end;
 
@@ -191,32 +193,30 @@ begin
 
 end;
 
-function TDataModule1.runSQL(sql: string; params: TDictionary<string, Variant>)
-  : tADODataSet;
+function TDataModule1.runSQL(sql: string;
+  params: TDictionary<string, Variant> = nil): tADODataSet;
 var
   dsOutput: tADODataSet;
   Item: TPair<string, Variant>;
 begin
-  ItemTb.First;
-  showMessage('12');
+  Query.Close;
+  Query.sql.Clear;
   Query.sql.Add(sql);
-  showMessage('13');
 
   // assign parameters to query
-  if params <> nil then
+  if assigned(params) then
   begin
     for Item in params do
     begin
-      Query.parameters.FindParam(Item.Key).Value := Item.Value;
-    end;
-  end;
 
-  showMessage('2');
+      Query.parameters.ParamByName(Item.Key).Value := Item.Value;
+    end;
+
+  end;
   // create output dataset
   dsOutput := tADODataSet.Create(Nil);
   dsOutput.FieldDefs.Add('Status', ftString, 100);
   dsOutput.CreateDataSet;
-  showMessage('3');
   try
     try
       begin
@@ -230,7 +230,6 @@ begin
         end
         else
         begin
-          showMessage('4');
           Query.ExecSQL;
           dsOutput.InsertRecord(['Success']);
           showMessage('5');
@@ -246,7 +245,6 @@ begin
     end;
   finally
     Result := dsOutput;
-    Query.close;
   end;
 
 end;
@@ -278,7 +276,7 @@ begin
       1:
         salt := salt + chr(ord('A') + random(26));
       2:
-        salt := salt + chr(ord('0') + random(10));
+        salt := salt + intToStr(random(10));
 
     end;
 
@@ -287,7 +285,7 @@ begin
   hash := tScrypt.HashPassword(password + salt);
   // generate random userID
 
-  UserId := LowerCase(usertype[1] + Username[1]);
+  UserId := UpperCase(usertype[1] + Username[1]);
 
   for i := 1 to 8 do
   begin
@@ -295,7 +293,7 @@ begin
   end;
 
   // sql statement
-  sql := 'INSERT INTO UserTB (UserID, Username, Password, UserType, HomeAddress, Salt) VALUES = (:UserID, :Username, :Password, :UserType, :HomeAddress, :Salt)';
+  sql := 'INSERT INTO UserTB (UserID, Username, Password, UserType, HomeAddress, Salt) VALUES ( :UserID, :Username, :Password, :UserType, :HomeAddress, :Salt);';
 
   // input parameters
   params := TDictionary<string, Variant>.Create();
@@ -306,7 +304,6 @@ begin
   params.Add('UserType', usertype);
   params.Add('HomeAddress', homeAddress);
   params.Add('Salt', salt);
-  showMessage('yo');
 
   sqlResult := runSQL(sql, params);
 
@@ -320,18 +317,27 @@ begin
   // if user is a seller, set up SellerRecord
   if usertype = 'SELLER' then
   begin
+    try
 
-    with SellerTB do
-    begin
-      SellerTB.Insert;
+      with SellerTB do
+      begin
+        SellerTB.Open;
+        SellerTB.Insert;
 
-      SellerTB['UserID'] := UserId;
-      SellerTB['Revenue'] := 0.0;
-      SellerTB['CertificationCode'] := certificationcode;
+        SellerTB['UserID'] := UserId;
+        SellerTB['Revenue'] := 0.0;
+        SellerTB['CertificationCode'] := certificationcode;
 
-      SellerTB.Post;
-      SellerTB.Refresh;
-      SellerTB.First
+        SellerTB.Post;
+        SellerTB.Refresh;
+        SellerTB.First
+      end;
+
+    except
+      on e: EADOError do
+      begin
+        Result := 'Error: ' + e.Message;
+      end;
     end;
 
   end;
