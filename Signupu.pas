@@ -27,6 +27,7 @@ type
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure rgpUserClick(Sender: TObject);
     function securePassword(password: string): integer;
+    function verifyCertificationCode(code: string): integer;
   private
     { Private declarations }
   public
@@ -38,9 +39,17 @@ var
 
 const
   success = 1;
+  // const for passwords
+
   tooShort = 4;
   noSpecial = 2;
   noNums = 3;
+  // consts for cert code
+  invalidChar = 5;
+  notInFile = 6;
+
+  nums = '0123456789';
+  special = '!@#$%^&*()-+=.,<>?\/|';
 
 implementation
 
@@ -58,8 +67,7 @@ end;
 
 procedure TfrmSignUp.btnSignUpClick(Sender: TObject);
 var
-  UserId, userName, password, homeaddress, userType,
-    certificationCode: string;
+  UserId, userName, password, homeaddress, userType, certificationCode: string;
 
 begin
 
@@ -135,10 +143,23 @@ begin
       Exit;
     end;
 
-    if length(certificationCode) > 10 then
+    if not(length(certificationCode) = 10) then
     begin
       showMessage('Certificaiton Code must be less than 10 characters.');
       Exit;
+    end;
+
+    case verifyCertificationCode(certificationCode) of
+      notInFile:
+      begin
+         showMessage('Your certification code doesn''t exist. Please correctly enter your code. If that doesn''t work, please ensure you have properly applied to be a seller.');
+         Exit;
+
+      end;
+      invalidChar:
+      begin
+        showMessage('Your certification code must only consist of numbers.');
+      end;
     end;
 
   end;
@@ -148,7 +169,7 @@ begin
 
   if Copy(UserId, 1, 5) = 'Error' then
   begin
-    MessageDlg('There was an error accessing the database', mtConfirmation,
+    MessageDlg('There was an error accessing the database :' + userId, mtConfirmation,
       [mbOK], 0, mbOK);
   end;
 
@@ -171,9 +192,6 @@ end;
 function TfrmSignUp.securePassword(password: string): integer;
 var
   i: integer;
-const
-  nums = '0123456789';
-  special = '!@#$%^&*()-+=.,<>?\/|';
 
 begin
 
@@ -209,6 +227,54 @@ begin
     end;
 
   end;
+end;
+
+function TfrmSignUp.verifyCertificationCode(code: string): integer;
+var
+  i: integer;
+  fFile: TextFile;
+  sLine: string;
+begin
+
+  for i := 1 to 10 do
+  begin
+    if pos(code[i], nums) = 0 then
+    begin
+      Result := invalidChar;
+      Exit;
+    end;
+  end;
+
+  Result := notInFile;
+
+  if fileExists('SellerCertificationCodes.txt') then
+  begin
+    AssignFile(fFile, 'SellerCertificationCodes.txt');
+    Reset(fFile);
+
+    while not eof(fFile) do
+    begin
+      readLn(fFile, sLine);
+      if sLine = code then
+      begin
+        Result := success;
+        CloseFIle(fFile);
+        Exit;
+      end;
+
+    end;
+
+    CloseFIle(fFile);
+
+  end
+  else
+  begin;
+    AssignFile(fFile, 'SellerCertificationCodes.txt');
+    ReWrite(fFile);
+    CloseFIle(fFile);
+
+  end;
+
 end;
 
 end.

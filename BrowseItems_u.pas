@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
-  Vcl.WinXCtrls, Vcl.Imaging.pngimage, BrowseItemContainer_u;
+  Vcl.WinXCtrls, Vcl.Imaging.pngimage, BrowseItemContainer_u,System.Generics.Collections;
 
 type
   TfrmBrowse = class(TForm)
@@ -36,6 +36,7 @@ type
     { Private declarations }
   public
     userID : string;
+    Cart : array of TPair<string,integer>;
     { Public declarations }
 
   end;

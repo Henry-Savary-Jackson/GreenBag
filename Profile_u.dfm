@@ -322,6 +322,7 @@ object frmProfile: TfrmProfile
     end
     object Series1: TBarSeries
       HoverElement = []
+      Marks.OnTop = True
       XValues.Name = 'X'
       XValues.Order = loAscending
       YValues.Name = 'Bar'

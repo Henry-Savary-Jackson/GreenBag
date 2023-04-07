@@ -39,6 +39,7 @@ type
     { Private declarations }
   public
     { Public declarations }
+    userID : string;
   end;
 
 var

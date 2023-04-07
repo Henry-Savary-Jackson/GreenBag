@@ -151,8 +151,7 @@ var
 begin
 
   sql := 'SELECT UserID, Password, Salt FROM UserTB WHERE Username = :Username';
-
-  parameters := parameters.Create();
+  parameters := TDictionary<string, Variant>.Create();
   parameters.Add('Username', Username);
 
   sqlResult := runSQL(sql, parameters);
@@ -162,6 +161,7 @@ begin
   if sqlResult.Fields.FindField('Status') <> nil then
   begin
     Result := 'Error: ' + sqlResult['Status'];
+    showMessage(Result);
     Exit;
   end;
 
@@ -176,7 +176,7 @@ begin
 
   // check password match
   b := FALSE;
-  if not tScrypt.CheckPassword(password + sqlResult['Salt'],
+  if not tScrypt.CheckPassword(UpperCase(username)+ password + sqlResult['Salt'],
     sqlResult['Password'], b) then
   begin
     Result := 'Error: Incorrect Password';
@@ -226,13 +226,11 @@ begin
           dsOutput.Free;
           dsOutput := tADODataSet.Create(Nil);
           dsOutput.Recordset := Query.Recordset.Clone(1);
-
         end
         else
         begin
           Query.ExecSQL;
           dsOutput.InsertRecord(['Success']);
-          showMessage('5');
         end;
 
       end;
@@ -266,7 +264,7 @@ begin
 
   // generate the random salt
   salt := '';
-  for i := 0 to 19 do
+  for i := 0 to 9 do
   begin
 
     case random(3) of
@@ -282,7 +280,9 @@ begin
 
   end;
 
-  hash := tScrypt.HashPassword(password + salt);
+  // salt the password, as well as add the uppercase username to act as a pepper for extra security
+  //this helps prevent dictionary attacks
+  hash := tScrypt.HashPassword(UpperCase(username)+ password + salt);
   // generate random userID
 
   UserId := UpperCase(usertype[1] + Username[1]);
@@ -293,7 +293,8 @@ begin
   end;
 
   // sql statement
-  sql := 'INSERT INTO UserTB (UserID, Username, Password, UserType, HomeAddress, Salt) VALUES ( :UserID, :Username, :Password, :UserType, :HomeAddress, :Salt);';
+  sql := 'INSERT INTO UserTB ([UserID], [Username], [Password], [UserType], [HomeAddress], [Salt]) VALUES'
+    + ' ( :UserID, :Username, :Password, :UserType, :HomeAddress, :Salt);';
 
   // input parameters
   params := TDictionary<string, Variant>.Create();

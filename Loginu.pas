@@ -61,7 +61,7 @@ begin
 
   if copy(userid,1,5) = 'Error' then
   begin
-    showMessage('There was an error whilst accessing database');
+    showMessage( userID);
     Exit;
   end;
 

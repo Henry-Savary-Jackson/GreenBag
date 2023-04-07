@@ -19,10 +19,12 @@ type
     procedure btnBackClick(Sender: TObject);
     procedure btnViewItemClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
+
   private
     { Private declarations }
   public
     { Public declarations }
+    userID : string;
   end;
 
 var

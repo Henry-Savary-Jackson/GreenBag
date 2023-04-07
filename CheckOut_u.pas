@@ -29,6 +29,7 @@ type
 
 var
   frmCheckout: TfrmCheckout;
+  userID : string;
 
 implementation
 uses
