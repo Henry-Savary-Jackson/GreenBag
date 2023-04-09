@@ -2,7 +2,7 @@ object frmViewItem: TfrmViewItem
   Left = 0
   Top = 0
   Caption = 'View Item'
-  ClientHeight = 611
+  ClientHeight = 716
   ClientWidth = 404
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -22,14 +22,14 @@ object frmViewItem: TfrmViewItem
   end
   object lblDesc: TLabel
     Left = 80
-    Top = 298
+    Top = 306
     Width = 57
     Height = 13
     Caption = 'Description:'
   end
   object lblCategory: TLabel
     Left = 93
-    Top = 256
+    Top = 264
     Width = 49
     Height = 13
     Caption = 'Category:'
@@ -78,21 +78,21 @@ object frmViewItem: TfrmViewItem
   end
   object lblQuantity: TLabel
     Left = 97
-    Top = 408
+    Top = 416
     Width = 46
     Height = 13
     Caption = 'Quantity:'
   end
   object lblRating: TLabel
     Left = 105
-    Top = 455
+    Top = 463
     Width = 38
     Height = 13
     Caption = 'Rating: '
   end
   object lblYourRating: TLabel
     Left = 101
-    Top = 488
+    Top = 496
     Width = 60
     Height = 13
     Caption = 'Your Rating:'
@@ -108,7 +108,7 @@ object frmViewItem: TfrmViewItem
   end
   object btnAddToCart: TButton
     Left = 136
-    Top = 574
+    Top = 582
     Width = 105
     Height = 35
     Caption = 'Add to Cart'
@@ -117,7 +117,7 @@ object frmViewItem: TfrmViewItem
   end
   object redDesc: TRichEdit
     Left = 152
-    Top = 295
+    Top = 303
     Width = 185
     Height = 89
     Font.Charset = ANSI_CHARSET
@@ -131,7 +131,7 @@ object frmViewItem: TfrmViewItem
   end
   object spnQuantity: TSpinEdit
     Left = 184
-    Top = 405
+    Top = 413
     Width = 49
     Height = 22
     MaxValue = 1000
@@ -141,7 +141,7 @@ object frmViewItem: TfrmViewItem
   end
   object trcRating: TTrackBar
     Left = 184
-    Top = 484
+    Top = 492
     Width = 105
     Height = 37
     Max = 5
@@ -149,7 +149,7 @@ object frmViewItem: TfrmViewItem
   end
   object btnSendRating: TButton
     Left = 150
-    Top = 527
+    Top = 535
     Width = 91
     Height = 25
     Caption = 'Send your Rating'

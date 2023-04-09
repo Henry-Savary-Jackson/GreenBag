@@ -3,9 +3,12 @@ unit YourProducts_u;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
-  System.ImageList, Vcl.ImgList, Vcl.Imaging.pngimage, ProductItem_u;
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Data.Win.ADODB,
+  Vcl.ExtCtrls,
+  System.ImageList, DMUnit_u, Vcl.ImgList, Vcl.Imaging.pngimage,
+  System.Generics.Collections, ProductItem_u;
 
 type
   TfrmYourProducts = class(TForm)
@@ -24,59 +27,77 @@ type
     { Private declarations }
   public
     { Public declarations }
-    userID : string;
+    userID: string;
+    items: array of ProductItem;
   end;
 
 var
   frmYourProducts: TfrmYourProducts;
 
 implementation
+
 uses
-Profile_u,
-Additem_u;
+  Profile_u,
+  Additem_u;
 
 {$R *.dfm}
 
 procedure TfrmYourProducts.btnAddItemClick(Sender: TObject);
 begin
-frmYourProducts.Hide;
-frmAddItem.Show;
+  frmYourProducts.Hide;
+  frmAddItem.userID := userID;
+  frmAddItem.Show;
 end;
 
 procedure TfrmYourProducts.btnBackClick(Sender: TObject);
 begin
-//
-frmYourProducts.Hide;
-frmProfile.Show;
+  //
+  frmYourProducts.Hide;
+  frmProfile.Show;
 end;
 
 procedure TfrmYourProducts.btnViewItemClick(Sender: TObject);
 begin
-frmYourProducts.Hide;
-frmAddItem.Show;
+  frmYourProducts.Hide;
+  frmAddItem.Show;
 end;
 
 procedure TfrmYourProducts.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-//
-Application.Terminate;
+  //
+  Application.Terminate;
 end;
 
 procedure TfrmYourProducts.FormShow(Sender: TObject);
 var
-products : array[1..8] of ProductItem;
-  i: Integer;
+  dsResult: tADODataSet;
+
 begin
-//
-for i := 1 to 8 do
-begin
-  products[i] := ProductItem.Create(self,flpnlProducts, 'Null');
-end;
+
+  dsResult := DataModule1.getProducts(userID);
+
+//  if dsResult.FieldDefs.('Status') <> nil then
+//  begin
+//    showMessage(dsResult['Status']);
+//    Exit;
+//  end;
+
+  dsResult.First;
+  setLength(items, dsResult.RecordCount);
+
+  while not dsResult.Eof do
+  begin
+    items := items + [ProductItem.Create(self, flpnlProducts, dsResult['ItemID'])];
+    dsResult.Next;
+  end;
+
+  dsResult.Free;
+
 end;
 
 procedure TfrmYourProducts.imgRemoveProductClick(Sender: TObject);
 begin
-//remove a product
+  // remove a product
 end;
 
 end.

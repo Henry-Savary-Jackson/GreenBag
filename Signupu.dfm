@@ -60,7 +60,7 @@ object frmSignUp: TfrmSignUp
     Top = 176
     Width = 185
     Height = 59
-    ItemIndex = 1
+    ItemIndex = 0
     Items.Strings = (
       'Seller'
       'Buyer')
@@ -90,6 +90,7 @@ object frmSignUp: TfrmSignUp
     Height = 21
     Enabled = False
     TabOrder = 3
+    Text = '1234567890'
   end
   object btnLoginScreen: TButton
     Left = 226

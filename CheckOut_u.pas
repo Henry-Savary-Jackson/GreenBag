@@ -25,11 +25,12 @@ type
     { Private declarations }
   public
     { Public declarations }
+     userID : string;
   end;
 
 var
   frmCheckout: TfrmCheckout;
-  userID : string;
+
 
 implementation
 uses

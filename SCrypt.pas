@@ -278,17 +278,17 @@ type
 		function ROMix(const B; BlockSize, CostFactor: Cardinal): TBytes;
 
 		function GenerateScryptSalt(const Passphrase: UnicodeString; const Salt: array of Byte; const CostFactor, BlockSizeFactor, ParallelizationFactor: Integer): TBytes;
-		function DeriveBytes(const Passphrase: UnicodeString; const Salt: array of Byte; const CostFactor, BlockSizeFactor, ParallelizationFactor: Integer; DesiredBytes: Integer): TBytes;
 
-		procedure GetDefaultParameters(out CostFactor, BlockSizeFactor, ParallelizationFactor: Cardinal);
+
+
 		function TryParseHashString(HashString: string; out CostFactor, BlockSizeFactor, ParallelizationFactor: Cardinal; out Salt: TBytes; out Data: TBytes): Boolean;
-		function FormatPasswordHash(const costFactor, blockSizeFactor, parallelizationFactor: Integer; const Salt, DerivedBytes: array of Byte): string;
 	public
 		constructor Create;
-
+    		function DeriveBytes(const Passphrase: UnicodeString; const Salt: array of Byte; const CostFactor, BlockSizeFactor, ParallelizationFactor: Integer; DesiredBytes: Integer): TBytes;
+    procedure GetDefaultParameters(out CostFactor, BlockSizeFactor, ParallelizationFactor: Cardinal);
 		//Get a number of bytes using the default Cost and Parallelization factors
 		class function GetBytes(const Passphrase: UnicodeString; const Salt: UnicodeString; nDesiredBytes: Integer): TBytes; overload;
-
+    function FormatPasswordHash(const costFactor, blockSizeFactor, parallelizationFactor: Integer; const Salt, DerivedBytes: array of Byte): string;
 		//Get a number of bytes, specifying the desired cost and parallelization factor
 		class function GetBytes(const Passphrase: UnicodeString; const Salt: UnicodeString; CostFactor, BlockSizeFactor, ParallelizationFactor: Cardinal; DesiredBytes: Integer): TBytes; overload;
 

@@ -4,7 +4,8 @@ interface
 
 uses
   System.SysUtils, System.Classes, Data.Win.ADODB, Data.DB,
-  sCrypt, System.Generics.Collections, Datasnap.Provider, Vcl.dialogs;
+  sCrypt, System.Generics.Collections, Datasnap.Provider, Vcl.dialogs,
+  Vcl.Graphics, System.Variants, PngImage;
 
 type
   TDataModule1 = class(TDataModule)
@@ -27,6 +28,7 @@ type
     { Private declarations }
     sCrypt: tScrypt;
   public
+
     { Public declarations }
     function runSQL(sql: string; params: TDictionary<string, Variant> = nil)
       : tADODataSet;
@@ -38,15 +40,22 @@ type
     function obtainStats(UserId, statType: string): tADODataSet;
 
     function viewItem(itemID: string): tADODataSet;
-    procedure insertItem(Name, SellerID, category, Desc: string;
-      Price, CF, EU, WU: double);
-    procedure updateItem(itemID: string; updatedFields: tADODataSet);
+    procedure insertItem(itemID, Name, SellerID, category, Desc: string;
+      Price, CF, EU, WU, CFProduce, EUProduce, WUProduce: double;
+      Image: tPngImage);
+
+    procedure updateItem(itemID, Name, SellerID, category, Desc: string;
+      Price, CF, EU, WU, CFProduce, EUProduce, WUProduce: double;
+      Image: tPngImage);
     procedure deleteItem(itemID: string);
+    function getCategories(): tADODataSet;
     procedure sendRating(itemID: string; rating: integer);
 
     function getProducts(UserId: string): tADODataSet;
 
     function getSearchResults(searchQuery, category: string): tADODataSet;
+
+    function isInTable(pkValue, pkName, tbName: string): boolean;
 
   end;
 
@@ -121,12 +130,27 @@ begin
   end;
 end;
 
-function TDataModule1.getProducts(UserId: string): tADODataSet;
+function TDataModule1.getCategories: tADODataSet;
 begin
+  //
+end;
 
-  // Result := TADODataSet.Create(nil);
+function TDataModule1.getProducts(UserId: string): tADODataSet;
+var
+sql :string;
+params : tDictionary<string,Variant> ;
+begin
+  sql := 'SELECT ItemID FROM ItemTB WHERE SellerID = :SellerID' ;
 
-  // Result.FieldDefs.Add('ItemID', ftString, 10);
+  params := tDictionary<string,Variant>.Create();
+  params.Add('SellerID', userID);
+
+  try
+     Result := runSQL(sql, params);
+  finally
+    params.Free;
+  end;
+
 
 end;
 
@@ -136,9 +160,85 @@ begin
 
 end;
 
-procedure TDataModule1.insertItem(Name, SellerID, category, Desc: string;
-  Price, CF, EU, WU: double);
+procedure TDataModule1.insertItem(itemID, Name, SellerID, category,
+  Desc: string; Price, CF, EU, WU, CFProduce, EUProduce, WUProduce: double;
+  Image: tPngImage);
+
+var
+  sql: string;
+  params: TDictionary<string, Variant>;
+  dsResult: tADODataSet;
+  imageBytes: tBytes;
+  memStream: TMemoryStream;
 begin
+
+  sql := 'INSERT INTO ItemTB (ItemID, ItemName, Cost, CarbonFootprintProduction, WaterUsageProduction, EnergyUsageProduction, CarbonFootprintUsage, WaterFootprintUsage, EnergyFootprintUsage, SellerID, Description, Category) '
+    + ' VALUES ( :ItemID, :ItemName, :Cost, :CarbonFootprintProduction, :WaterUsageProduction, :EnergyUsageProduction, :CarbonFootprintUsage, :WaterFootprintUsage, :EnergyFootprintUsage, :SellerID, :Description , :Category);';
+
+  params := TDictionary<string, Variant>.Create();
+  params.Add('ItemID', itemID);
+  params.Add('ItemName', name);
+  params.Add('Cost', Price);
+  params.Add('CarbonFootprintProduction', CFProduce);
+  params.Add('WaterUsageProduction', WUProduce);
+  params.Add('EnergyUsageProduction', EUProduce);
+  params.Add('CarbonFootprintUsage', CF);
+  params.Add('WaterFootprintUsage', WU);
+  params.Add('EnergyFootprintUsage', EU);
+  params.Add('SellerID', SellerID);
+  params.Add('Description', Desc);
+  params.Add('Category', category);
+
+  try
+  //TODO: adding image doesn't work yet
+//     memStream := TMemoryStream.Create();
+//     try
+//     // save the png image as an OLE object
+//     Image.SaveToStream(memStream);
+//     SetLength(imageBytes, memStream.Size);
+//     memStream.Position := 0;
+//     memStream.ReadBuffer(imageBytes[0], Length(imageBytes));
+//
+//
+//     // add to parameters
+//     params.Add('Image', imageBytes);
+//     finally
+//     memStream.Free;
+//     end;
+
+    dsResult := runSQL(sql, params);
+
+    if dsResult['Status'] <> 'Success' then
+    begin
+      showMessage(dsResult['Status']);
+    end;
+
+  finally
+    dsResult.Free;
+    params.Free;
+  end;
+end;
+
+function TDataModule1.isInTable(pkValue, pkName, tbName: string): boolean;
+var
+  sql: string;
+  dParams: TDictionary<String, Variant>;
+  dsResult: tADODataSet;
+begin
+  //
+  dParams := TDictionary<String, Variant>.Create();
+  dParams.Add('pkVal', pkValue);
+
+  sql := 'SELECT 1 FROM ' + tbName + ' WHERE ' + pkName + ' = :pkVal';
+
+  try
+    dsResult := runSQL(sql, dParams);
+    dParams.Free;
+
+    Result := not dsResult.IsEmpty;
+  finally
+    dsResult.Free;
+  end;
 
 end;
 
@@ -146,16 +246,16 @@ function TDataModule1.Login(Username, password: string): string;
 var
   sql: string;
   sqlResult: tADODataSet;
-  parameters: TDictionary<string, Variant>;
+  Parameters: TDictionary<string, Variant>;
   b: boolean;
 begin
 
   sql := 'SELECT UserID, Password, Salt FROM UserTB WHERE Username = :Username';
-  parameters := TDictionary<string, Variant>.Create();
-  parameters.Add('Username', Username);
+  Parameters := TDictionary<string, Variant>.Create();
+  Parameters.Add('Username', Username);
 
-  sqlResult := runSQL(sql, parameters);
-  parameters.Free;
+  sqlResult := runSQL(sql, Parameters);
+  Parameters.Free;
 
   // handle error occuring whilst trying to access database
   if sqlResult.Fields.FindField('Status') <> nil then
@@ -176,8 +276,8 @@ begin
 
   // check password match
   b := FALSE;
-  if not tScrypt.CheckPassword(UpperCase(username)+ password + sqlResult['Salt'],
-    sqlResult['Password'], b) then
+  if not tScrypt.CheckPassword(UpperCase(Username) + password +
+    sqlResult['Salt'], sqlResult['Password'], b) then
   begin
     Result := 'Error: Incorrect Password';
     Exit;
@@ -209,7 +309,7 @@ begin
     for Item in params do
     begin
 
-      Query.parameters.ParamByName(Item.Key).Value := Item.Value;
+      Query.Parameters.ParamByName(Item.Key).Value := Item.Value;
     end;
 
   end;
@@ -281,8 +381,8 @@ begin
   end;
 
   // salt the password, as well as add the uppercase username to act as a pepper for extra security
-  //this helps prevent dictionary attacks
-  hash := tScrypt.HashPassword(UpperCase(username)+ password + salt);
+  // this helps prevent dictionary attacks
+  hash := tScrypt.HashPassword(UpperCase(Username) + password + salt);
   // generate random userID
 
   UserId := UpperCase(usertype[1] + Username[1]);
@@ -347,8 +447,60 @@ begin
 
 end;
 
-procedure TDataModule1.updateItem(itemID: string; updatedFields: tADODataSet);
+procedure TDataModule1.updateItem(itemID, Name, SellerID, category,
+  Desc: string; Price, CF, EU, WU, CFProduce, EUProduce, WUProduce: double;
+  Image: tPngImage);
+var
+  sql: string;
+  params: TDictionary<string, Variant>;
+  dsResult: tADODataSet;
+  imageBytes: tBytes;
+  memStream: tStream;
 begin
+  sql := 'UPDATE ItemTB SET ItemName = :ItemName, Cost = :Cost,' +
+    ' CarbonFootprintProduction = :CarbonFootprintProduction, WaterUsageProduction = :WaterUsageProduction, EnergyUsageProduction = :EnergyUsageProduction, '
+    + 'CarbonFootprintUsage = :CarbonFootprintUsage, WaterFootprintUsage = :WaterFootprintUsage, EnergyFootprintUsage = :EnergyFootprintUsage,'
+    + ' SellerID = :SellerID , Description =  :Description, Image = :Image , Category = :Category '
+    + 'WHERE ItemID = :ItemID';
+
+  params.Create();
+  params.Add('ItemID', itemID);
+  params.Add('ItemName', name);
+  params.Add('Cost', Price);
+  params.Add('CarbonFootprintProduction', CFProduce);
+  params.Add('WaterUsageProduction', WUProduce);
+  params.Add('EnergyUsageProduction', EUProduce);
+  params.Add('CarbonFootprintUsage', CF);
+  params.Add('WaterFootprintUsage', WU);
+  params.Add('EnergyFootprintUsage', EU);
+  params.Add('SellerID', SellerID);
+  params.Add('Description', Desc);
+  params.Add('Category', category);
+
+  try
+    memStream := TMemoryStream.Create();
+    try
+      // save the png image as an OLE object
+      Image.SaveToStream(memStream);
+      SetLength(imageBytes, memStream.Size);
+      memStream.Position := 0;
+      memStream.Read(imageBytes, Length(imageBytes));
+      // add to parameters
+      params.Add('Image', imageBytes);
+    finally
+      memStream.Free;
+    end;
+
+    dsResult := runSQL(sql, params);
+
+    if dsResult['Status'] <> 'Success' then
+    begin
+      showMessage(dsResult['Status']);
+    end;
+  finally
+    dsResult.Free;
+    params.Free;
+  end;
 
 end;
 

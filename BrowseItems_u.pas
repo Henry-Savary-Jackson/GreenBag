@@ -64,12 +64,14 @@ end;
 
 procedure TfrmBrowse.btnProfileClick(Sender: TObject);
 begin
+frmProfile.userID:= userID;
 frmBrowse.Hide;
 frmProfile.Show;
 end;
 
 procedure TfrmBrowse.btnViewItemClick(Sender: TObject);
 begin
+frmViewItem.userID := userID;
 frmBrowse.Hide;
 
 frmViewItem.Show;
@@ -105,6 +107,7 @@ end;
 
 procedure TfrmBrowse.grpCheckoutClick(Sender: TObject);
 begin
+frmCheckout.userid := userID;
 frmBrowse.Hide;
 frmCheckout.Show;
 end;
@@ -112,6 +115,7 @@ end;
 procedure TfrmBrowse.imgProfileClick(Sender: TObject);
 begin
 //
+frmProfile.userID := userId;
 frmBrowse.Hide;
 frmProfile.Show;
 end;

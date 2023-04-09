@@ -54,6 +54,7 @@ BrowseItems_u, YourProducts_u;
 procedure TfrmProfile.btnBackClick(Sender: TObject);
 begin
 //
+frmBrowse.userID := userID;
 frmProfile.Hide;
 frmBrowse.Show;
 end;
@@ -61,6 +62,7 @@ end;
 procedure TfrmProfile.btnViewProductsClick(Sender: TObject);
 begin
 //
+frmYourProducts.userID := userID;
 frmProfile.Hide;
 frmYourProducts.Show;
 end;
