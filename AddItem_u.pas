@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls,
-  Vcl.ExtCtrls, DMUnit_u, Data.Win.ADODB, PngImage ;
+  Vcl.ExtCtrls, DMUnit_u, Data.Win.ADODB, PngImage;
 
 type
   TfrmAddItem = class(TForm)
@@ -40,6 +40,7 @@ type
     procedure btnBackClick(Sender: TObject);
     procedure btnSaveChangesClick(Sender: TObject);
     function getFloatFromStr(s, valName: string): double;
+    procedure FormShow(Sender: TObject);
   private
     { Private declarations }
   public
@@ -68,7 +69,7 @@ procedure TfrmAddItem.btnSaveChangesClick(Sender: TObject);
 var
   sName, sDesc, category: string;
   CF, WU, EU, CFProduce, WUProduce, EUProduce, Price: double;
-  pngImage: tPngImage;
+  PngImage: tPngImage;
   I: Integer;
 begin
 
@@ -77,10 +78,8 @@ begin
     showMessage('Please upload an image of your item.');
     Exit;
   end;
-  pngImage := TPngImage.Create();
-  pngImage.Assign(imgProduct.Picture.Graphic);
-
-
+  PngImage := tPngImage.Create();
+  PngImage.Assign(imgProduct.Picture.Graphic);
 
   sName := edtName.Text;
 
@@ -101,7 +100,6 @@ begin
   if Price = INFINITE then
     Exit;
 
-
   CF := getFloatFromStr(edtCF.Text, 'Carbon Footprint');
   if CF = INFINITE then
     Exit;
@@ -114,7 +112,8 @@ begin
   if WU = INFINITE then
     Exit;
 
-  CFProduce := getFloatFromStr(edtCFProduce.Text, 'Carbon footprint to produce');
+  CFProduce := getFloatFromStr(edtCFProduce.Text,
+    'Carbon footprint to produce');
   if CFProduce = INFINITE then
     Exit;
 
@@ -125,7 +124,6 @@ begin
   WUProduce := getFloatFromStr(edtWUProduce.Text, 'Water Usage to produce');
   if WUProduce = INFINITE then
     Exit;
-
 
   if cmbCategory.ItemIndex = -1 then
   begin
@@ -145,19 +143,19 @@ begin
     end;
 
     DataModule1.insertItem(itemID, sName, userID, category, sDesc, Price, CF,
-      EU, WU, CFProduce, EUProduce, WUProduce, pngImage);
+      EU, WU, CFProduce, EUProduce, WUProduce, PngImage);
 
   end
   else
   begin
     DataModule1.updateItem(itemID, sName, userID, category, sDesc, Price, CF,
-      EU, WU, CFProduce, EUProduce, WUProduce, pngImage);
+      EU, WU, CFProduce, EUProduce, WUProduce, PngImage);
 
   end;
 
   showMessage('Successfully saved changes');
-  //free var from heap
-  pngImage.Free;
+  // free var from heap
+  PngImage.Free;
 
   frmAddItem.Hide;
   frmYourProducts.Show;
@@ -166,6 +164,62 @@ end;
 procedure TfrmAddItem.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   Application.Terminate;
+end;
+
+procedure TfrmAddItem.FormShow(Sender: TObject);
+var
+  dsResult: tAdoDataset;
+  dsCategories : tAdoDataset;
+begin
+  //
+  if itemID = '' then
+    Exit;
+  dsResult := DataModule1.viewItem(self.itemID);
+
+  if dsResult.Fields.FindField('Status') <> nil then
+  begin
+    showMessage(dsResult['Status']);
+    Exit;
+  end;
+
+  edtName.Text := dsResult['ItemName'];
+
+  lblSeller.Caption :='Seller: ' + dsResult['Username'];
+  lblRating.Caption := 'Rating: ' + intToStr(dsResult['Rating']);
+
+  edtPrice.Text := floatTOStrf(dsResult['Cost'], ffFixed, 8, 2);
+
+  edtCF.Text := floatTOStrf(dsResult['CarbonFootprintUsage'], ffFixed, 8, 2);
+  edtEU.Text := floatTOStrf(dsResult['EnergyFootprintUsage'], ffFixed, 8, 2);
+  edtWU.Text := floatTOStrf(dsResult['WaterFootprintUsage'], ffFixed, 8, 2);
+
+  edtCFProduce.Text := floatTOStrf(dsResult['CarbonFootprintUsage'],
+    ffFixed, 8, 2);
+  edtEUProduce.Text := floatTOStrf(dsResult['CarbonFootprintUsage'],
+    ffFixed, 8, 2);
+  edtWUProduce.Text := floatTOStrf(dsResult['CarbonFootprintUsage'],
+    ffFixed, 8, 2);
+
+  redDesc.Text := dsResult['Description'];
+
+  cmbCategory.Items.Clear;
+
+  dsCategories := DataModule1.getCategories;
+
+  dsCategories.First;
+
+  while not dsCategories.Eof do
+  begin
+    cmbCategory.Items.Add(dsCategories['Category']);
+    dsCategories.Next;
+  end;
+
+  dsCategories.Free;
+
+  cmbCategory.ItemIndex := cmbCategory.Items.IndexOf(dsResult['Category']);
+
+  dsResult.Free;
+
 end;
 
 function TfrmAddItem.getFloatFromStr(s, valName: string): double;
@@ -177,7 +231,6 @@ begin
       Exit;
     end;
     Result := StrToFloat(s);
-    showMessage(floattoStr(result));
   Except
     on e: EConvertError do
     begin;

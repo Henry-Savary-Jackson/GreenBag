@@ -13,6 +13,7 @@ object frmAddItem: TfrmAddItem
   OldCreateOrder = False
   Position = poDesigned
   OnClose = FormClose
+  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object imgProduct: TImage
@@ -323,8 +324,10 @@ object frmAddItem: TfrmAddItem
     Height = 21
     ItemIndex = 0
     TabOrder = 8
-    Text = 'Lol'
+    Text = 'haha'
     Items.Strings = (
+      'haha'
+      'funny'
       'Lol')
   end
   object edtCFProduce: TEdit

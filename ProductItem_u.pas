@@ -17,7 +17,6 @@ type
     grpRemoveProduct: TGroupBox;
     btnViewItem: TButton;
     lblSales, lblName, lblRevenue: TLabel;
-
     revenue: double;
     Sales: integer;
     name: string;
@@ -27,6 +26,7 @@ type
     procedure createDesign(); override;
     procedure remove(Sender: TObject); override;
     procedure viewItem(Sender: TObject);
+
 
   end;
 
@@ -40,25 +40,24 @@ var
   dsResult: tADODataset;
 begin
   //
-  sql := 'SELECT Name, Sales, (Sales*Cost) AS Revenue FROM ItemTB WHERE ItemID = :ItemID';
+  sql := 'SELECT ItemName, Sales, (Sales*Cost) AS Revenue FROM ItemTB WHERE ItemID = :ItemID';
 
   params := tDictionary<string, Variant>.Create();
   params.Add('ItemID', ItemID);
-  showMessage('lol');
   dsResult := DataModule1.runSQL(sql, params);
-  showMessage('lol');
   params.Free;
 
-//  if dsResult.FieldDefs.Find('Status') <> nil then
-//  begin
-//    showMessage(dsResult['Status']);
-//    Exit;
-//  end;
+  if dsResult.Fields.FindField('Status') <> nil then
+  begin
+    showMessage(dsResult['Status']);
+    Exit;
+  end;
 
-  Name := dsResult['Name'];
+  Name := dsResult['ItemName'];
   Sales := dsResult['Sales'];
   revenue := dsResult['Revenue'];
 
+  dsResult.Free;
   Inherited Create(Owner, Parent, ItemID);
 
 end;
@@ -154,6 +153,9 @@ end;
 procedure ProductItem.remove(Sender: TObject);
 begin
   //
+  if MessageDlg('Are you sure you want to delete this item?', mtConfirmation, [mbYes, mbNo], 0, mbNo) = mryes then
+    DataModule1.deleteItem(itemID);
+
 end;
 
 procedure ProductItem.viewItem(Sender: TObject);
@@ -164,91 +166,5 @@ begin
   frmAddItem.Show;
 
 end;
-
-{
-  object grpProduct: TGroupBox
-  AlignWithMargins = True
-  Left = 11
-  Top = 11
-  Width = 392
-  Height = 104
-  Margins.Left = 10
-  Margins.Top = 10
-  Margins.Right = 10
-  Margins.Bottom = 10
-  Align = alTop
-  TabOrder = 0
-  object Image1: TImage
-  Left = 21
-  Top = 14
-  Width = 57
-  Height = 57
-  end
-  object lblName: TLabel
-  Left = 136
-  Top = 24
-  Width = 31
-  Height = 13
-  Caption = 'Name:'
-  end
-  object lblRevenue: TLabel
-  Left = 136
-  Top = 43
-  Width = 47
-  Height = 13
-  Caption = 'Revenue:'
-  end
-  object lblSales: TLabel
-  Left = 136
-  Top = 75
-  Width = 29
-  Height = 13
-  Caption = 'Sales:'
-  end
-  object btnViewItem: TButton
-  Left = 21
-  Top = 77
-  Width = 75
-  Height = 25
-  Caption = 'View Item'
-  TabOrder = 0
-  OnClick = btnViewItemClick
-  end
-  object grpRemoveProduct: TGroupBox
-  AlignWithMargins = True
-  Left = 313
-  Top = 25
-  Width = 57
-  Height = 57
-  Margins.Left = 20
-  Margins.Top = 10
-  Margins.Right = 20
-  Margins.Bottom = 20
-  Align = alRight
-  Color = clScrollBar
-  ParentBackground = False
-  ParentColor = False
-  TabOrder = 1
-  OnClick = imgRemoveProductClick
-  object imgRemoveProduct: TImage
-  AlignWithMargins = True
-  Left = 7
-  Top = 15
-  Width = 43
-  Height = 35
-  Margins.Left = 5
-  Margins.Top = 0
-  Margins.Right = 5
-  Margins.Bottom = 5
-  Align = alClient
-  Center = True
-  Picture.Data =
-  OnClick = imgRemoveProductClick
-  ExplicitLeft = 9
-  ExplicitTop = 17
-  end
-  end
-  end
-}
 
 end.

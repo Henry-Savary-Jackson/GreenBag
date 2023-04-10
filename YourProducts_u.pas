@@ -17,7 +17,6 @@ type
     scrbxProducts: TScrollBox;
     btnBack: TButton;
     procedure btnAddItemClick(Sender: TObject);
-    procedure imgRemoveProductClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnBackClick(Sender: TObject);
     procedure btnViewItemClick(Sender: TObject);
@@ -25,10 +24,12 @@ type
 
   private
     { Private declarations }
+
   public
     { Public declarations }
     userID: string;
-    items: array of ProductItem;
+    items: TObjectList<ProductItem>;
+    procedure updateItemsDisplay;
   end;
 
 var
@@ -69,35 +70,40 @@ begin
 end;
 
 procedure TfrmYourProducts.FormShow(Sender: TObject);
+begin
+  updateItemsDisplay;
+end;
+
+procedure TfrmYourProducts.updateItemsDisplay;
 var
   dsResult: tADODataSet;
-
 begin
+  if items <> nil then
+  begin
+    items.Free;
+  end;
+
+  items := TObjectList<ProductItem>.Create();
 
   dsResult := DataModule1.getProducts(userID);
 
-//  if dsResult.FieldDefs.('Status') <> nil then
-//  begin
-//    showMessage(dsResult['Status']);
-//    Exit;
-//  end;
+  if dsResult.Fields.FindField('Status') <> nil then
+  begin
+    showMessage(dsResult['Status']);
+    Exit;
+  end;
 
   dsResult.First;
-  setLength(items, dsResult.RecordCount);
 
   while not dsResult.Eof do
   begin
-    items := items + [ProductItem.Create(self, flpnlProducts, dsResult['ItemID'])];
+
+    items.Add(ProductItem.Create(self, flpnlProducts, dsResult['ItemID']));
     dsResult.Next;
   end;
 
   dsResult.Free;
 
-end;
-
-procedure TfrmYourProducts.imgRemoveProductClick(Sender: TObject);
-begin
-  // remove a product
 end;
 
 end.

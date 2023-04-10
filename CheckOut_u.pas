@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls, Vcl.ExtCtrls,
-  Vcl.Samples.Spin, Vcl.Imaging.pngimage, CartItem_u, ItemContainer_u;
+  Vcl.Samples.Spin, Vcl.Imaging.pngimage, CartItem_u, System.Generics.Collections,ItemContainer_u;
 
 type
   TfrmCheckout = class(TForm)
@@ -26,6 +26,7 @@ type
   public
     { Public declarations }
      userID : string;
+     Cart : TObjectList<tObject>;
   end;
 
 var
@@ -56,15 +57,8 @@ Application.Terminate;
 end;
 
 procedure TfrmCheckout.FormShow(Sender: TObject);
-var
-items: array[1..8] of CartItem;
-  i: Integer;
 begin
-for i := 1 to 8 do
-begin
-  items[i]:= CartItem.Create(self, flpnlItems, 'Lol', 22);
+//
 end;
-end;
-
 
 end.

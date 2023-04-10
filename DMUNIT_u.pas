@@ -116,14 +116,18 @@ begin
     ItemTB.Open;
     ItemTB.First;
 
+    ItemTB.Edit;
+
     while not ItemTB.Eof do
     begin
       if ItemTB['ItemID'] = itemID then
       begin
+        ItemTB.Edit;
         ItemTB['Deleted'] := True;
       end;
       ItemTB.Next;
     end;
+    ItemTB.Edit;
     ItemTB.Post;
     ItemTB.Refresh;
     ItemTB.First;
@@ -131,32 +135,45 @@ begin
 end;
 
 function TDataModule1.getCategories: tADODataSet;
+var
+  sql: string;
 begin
   //
+  sql := 'SELECT DISTINCT Category FROM ItemTB;';
+
+  Result := runSQL(sql, nil);
+
 end;
 
 function TDataModule1.getProducts(UserId: string): tADODataSet;
 var
-sql :string;
-params : tDictionary<string,Variant> ;
+  sql: string;
+  params: TDictionary<string, Variant>;
 begin
-  sql := 'SELECT ItemID FROM ItemTB WHERE SellerID = :SellerID' ;
+  sql := 'SELECT ItemID FROM ItemTB WHERE SellerID = :SellerID AND Deleted = False';
 
-  params := tDictionary<string,Variant>.Create();
-  params.Add('SellerID', userID);
+  params := TDictionary<string, Variant>.Create();
+  params.Add('SellerID', UserId);
 
   try
-     Result := runSQL(sql, params);
+    Result := runSQL(sql, params);
   finally
     params.Free;
   end;
-
 
 end;
 
 function TDataModule1.getSearchResults(searchQuery, category: string)
   : tADODataSet;
+var
+sql : string;
+params : TDictionary<string,variant>;
+// epic
+//lolol : array of array [1..2] of Variant;
+
 begin
+
+  sql := 'SELECT ItemID FROM ItemTB WHERE ItemName LIKE "%:SearchQuery%" AND Category = :Category';
 
 end;
 
@@ -190,21 +207,21 @@ begin
   params.Add('Category', category);
 
   try
-  //TODO: adding image doesn't work yet
-//     memStream := TMemoryStream.Create();
-//     try
-//     // save the png image as an OLE object
-//     Image.SaveToStream(memStream);
-//     SetLength(imageBytes, memStream.Size);
-//     memStream.Position := 0;
-//     memStream.ReadBuffer(imageBytes[0], Length(imageBytes));
-//
-//
-//     // add to parameters
-//     params.Add('Image', imageBytes);
-//     finally
-//     memStream.Free;
-//     end;
+    // TODO: adding image doesn't work yet
+    // memStream := TMemoryStream.Create();
+    // try
+    // // save the png image as an OLE object
+    // Image.SaveToStream(memStream);
+    // SetLength(imageBytes, memStream.Size);
+    // memStream.Position := 0;
+    // memStream.ReadBuffer(imageBytes[0], Length(imageBytes));
+    //
+    //
+    // // add to parameters
+    // params.Add('Image', imageBytes);
+    // finally
+    // memStream.Free;
+    // end;
 
     dsResult := runSQL(sql, params);
 
@@ -348,7 +365,43 @@ begin
 end;
 
 procedure TDataModule1.sendRating(itemID: string; rating: integer);
+var
+  numRatings: integer;
+  avgRatings: double;
+  sql: string;
+  params: TDictionary<string, Variant>;
+  dsResult: tADODataSet;
 begin
+  sql := 'SELECT (Rating * RatingsAmount) AS totalRating , RatingsAmount FROM ItemTB WHERE ItemID = :ItemID';
+  params := TDictionary<string, Variant>.Create();
+  params.Add('ItemID', itemID);
+
+  dsResult := runSQL(sql, params);
+
+  if dsResult.Fields.FindField('Status') <> nil then
+  begin
+    showMessage(dsResult['Status']);
+    dsResult.Free;
+    Exit;
+  end;
+
+  numRatings := dsResult['RatingsAmount'] +1 ;
+
+  avgRatings :=  (dsResult['totalRating'] + rating)/  numRatings;
+
+  sql := 'UPDATE ItemTB SET Rating = :Rating, RatingsAmount = :RatingsAmount WHERE ItemID = :ItemID ';
+
+  params.Add('Rating', avgRatings);
+  params.Add('RatingsAmount', numRatings);
+
+  dsResult := runSQL(sql, params);
+
+  if dsResult['Status'] <> 'Success' then
+  begin
+    showMessage(dsResult['Status']);
+  end;
+
+  dsResult.Free;
 
 end;
 
@@ -460,10 +513,10 @@ begin
   sql := 'UPDATE ItemTB SET ItemName = :ItemName, Cost = :Cost,' +
     ' CarbonFootprintProduction = :CarbonFootprintProduction, WaterUsageProduction = :WaterUsageProduction, EnergyUsageProduction = :EnergyUsageProduction, '
     + 'CarbonFootprintUsage = :CarbonFootprintUsage, WaterFootprintUsage = :WaterFootprintUsage, EnergyFootprintUsage = :EnergyFootprintUsage,'
-    + ' SellerID = :SellerID , Description =  :Description, Image = :Image , Category = :Category '
-    + 'WHERE ItemID = :ItemID';
+    + ' Description =  :Description , Category = :Category ' +
+    'WHERE ItemID = :ItemID';
 
-  params.Create();
+  params := TDictionary<string, Variant>.Create();
   params.Add('ItemID', itemID);
   params.Add('ItemName', name);
   params.Add('Cost', Price);
@@ -473,23 +526,22 @@ begin
   params.Add('CarbonFootprintUsage', CF);
   params.Add('WaterFootprintUsage', WU);
   params.Add('EnergyFootprintUsage', EU);
-  params.Add('SellerID', SellerID);
   params.Add('Description', Desc);
   params.Add('Category', category);
 
   try
-    memStream := TMemoryStream.Create();
-    try
-      // save the png image as an OLE object
-      Image.SaveToStream(memStream);
-      SetLength(imageBytes, memStream.Size);
-      memStream.Position := 0;
-      memStream.Read(imageBytes, Length(imageBytes));
-      // add to parameters
-      params.Add('Image', imageBytes);
-    finally
-      memStream.Free;
-    end;
+    // memStream := TMemoryStream.Create();
+    // try
+    // // save the png image as an OLE object
+    // Image.SaveToStream(memStream);
+    // SetLength(imageBytes, memStream.Size);
+    // memStream.Position := 0;
+    // memStream.Read(imageBytes, Length(imageBytes));
+    // // add to parameters
+    // params.Add('Image', imageBytes);
+    // finally
+    // memStream.Free;
+    // end;
 
     dsResult := runSQL(sql, params);
 
@@ -510,7 +562,27 @@ begin
 end;
 
 function TDataModule1.viewItem(itemID: string): tADODataSet;
+var
+  sql: string;
+  params: TDictionary<string, Variant>;
+  dsResult: tADODataSet;
 begin
+  sql := 'SELECT *, UserTB.Username AS SellerName FROM ItemTB ' +
+    'LEFT JOIN UserTB ON ItemTb.SellerID = UserTB.UserID' +
+    ' WHERE ItemID = :ItemID ';
+
+  params := TDictionary<string, Variant>.Create();
+  params.Add('ItemID', itemID);
+
+  dsResult := runSQL(sql, params);
+
+  if dsResult.IsEmpty then
+  begin
+    dsResult.FieldDefs.Add('Status', ftString);
+    dsResult['Status'] := 'Error: Item does not exist.'
+  end;
+
+  Result := dsResult;
 
 end;
 

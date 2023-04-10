@@ -34,7 +34,7 @@ object frmBrowse: TfrmBrowse
         131)
       object scrbxCategories: TScrollBox
         Left = 79
-        Top = 48
+        Top = 64
         Width = 368
         Height = 41
         HorzScrollBar.Tracking = True
@@ -42,40 +42,12 @@ object frmBrowse: TfrmBrowse
         object flpnlCategories: TFlowPanel
           Left = 0
           Top = 0
-          Width = 222
+          Width = 112
           Height = 37
           Align = alLeft
           AutoSize = True
           FlowStyle = fsBottomTopRightLeft
           TabOrder = 0
-          object buttonn: TButton
-            AlignWithMargins = True
-            Left = 116
-            Top = 4
-            Width = 100
-            Height = 27
-            Margins.Left = 5
-            Margins.Top = 5
-            Margins.Right = 5
-            Margins.Bottom = 5
-            Align = alLeft
-            Caption = 'LED lights'
-            TabOrder = 0
-          end
-          object Button3: TButton
-            AlignWithMargins = True
-            Left = 6
-            Top = 4
-            Width = 100
-            Height = 27
-            Margins.Left = 5
-            Margins.Top = 5
-            Margins.Right = 5
-            Margins.Bottom = 5
-            Align = alLeft
-            Caption = 'Eco-Friendly Food'
-            TabOrder = 1
-          end
         end
       end
       object srchSearchItems: TSearchBox
