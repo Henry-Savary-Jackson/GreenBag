@@ -7,7 +7,7 @@ uses
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
   Vcl.WinXCtrls, DMUnit_u, Data.win.ADODB, Vcl.Imaging.pngimage,
-  BrowseItemContainer_u, System.Generics.Collections;
+  BrowseItemContainer_u, System.Generics.Collections, Data.DB;
 
 type
   TfrmBrowse = class(TForm)
@@ -32,12 +32,16 @@ type
     procedure imgProfileClick(Sender: TObject);
     procedure grpCheckoutClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure OnClickCategory(Sender: tObject);
+    procedure OnClickCategory(Sender: TObject);
+    procedure SearchItems(Sender: TObject);
+    procedure ViewItem( sellerID, itemID:  string);
   private
     { Private declarations }
   public
     userID: string;
-    Cart: TObjectList<TObject>;
+    Cart: tObjectDictionary<string, integer>;
+    category: string;
+    items: TObjectList<BrowseItem>;
 
     { Public declarations }
 
@@ -45,12 +49,12 @@ type
 
 var
   frmBrowse: TfrmBrowse;
-  categories : TObjectList<tButton>;
+  categories: TObjectList<TButton>;
 
 implementation
 
 uses
-  Loginu, CheckOut_u, profile_u, ViewItem_u;
+  Loginu, CheckOut_u, profile_u, ViewItem_u, Additem_u;
 
 {$R *.dfm}
 
@@ -89,7 +93,7 @@ end;
 procedure TfrmBrowse.FormShow(Sender: TObject);
 var
   dsResult: TADODataSet;
-  currentButton : tButton;
+  currentButton: TButton;
 begin
 
   dsResult := DataModule1.getCategories;
@@ -105,15 +109,14 @@ begin
     if categories <> nil then
       categories.Free;
 
-    categories := TObjectList<Tbutton>.Create();
-
-
+    categories := TObjectList<TButton>.Create();
 
     while not dsResult.Eof do
     begin
       currentButton := TButton.Create(self);
-      currentButton.Parent := flpnlItems;
+      currentButton.Parent := flpnlCategories;
       currentButton.onClick := self.OnClickCategory;
+      currentButton.Caption := dsResult['Category'];
       categories.Add(currentButton);
 
       dsResult.Next;
@@ -121,14 +124,9 @@ begin
 
     dsResult.Free;
   end;
-  //
 
-  // for I := 1 to 5 do
-  // begin
-  // items[I] := BrowseItem.Create(self,flpnlItems, 'Null', userID);
-  // end;
-  //
-  // items[4].Free;
+  if Cart = nil then
+    Cart := tObjectDictionary<string, integer>.Create();
 
 end;
 
@@ -148,16 +146,86 @@ begin
   frmProfile.Show;
 end;
 
-procedure TfrmBrowse.OnClickCategory(Sender: tObject);
+procedure TfrmBrowse.OnClickCategory(Sender: TObject);
 var
-button : tButton;
+  button: TButton;
 begin
-//
+  //
   if Sender is TButton then
   begin
-    tButton := TButton(Sender);
-    //use the button's caption as category name
+    button := TButton(Sender);
+    category := button.Caption;
+    // use the button's caption as category name
+
   end;
+end;
+
+procedure TfrmBrowse.SearchItems(Sender: TObject);
+var
+  dsResult: TADODataSet;
+  searchQuery: string;
+
+begin
+
+  //
+  flpnlItems.Caption := '';
+
+  searchQuery := srchSearchItems.Text;
+
+  dsResult := DataModule1.getSearchResults(searchQuery, category);
+
+  if items <> nil then
+  begin
+    items.Free;
+  end;
+
+  items := TObjectList<BrowseItem>.Create();
+
+  if dsResult.Fields.FindField('Status') <> nil then
+  begin
+    showMessage(dsResult['Status']);
+    Exit;
+  end;
+
+  if dsResult.IsEmpty then
+  begin
+    showMessage('There are no items matching your search query.');
+    flpnlItems.Caption := 'There are no items matching your search query.';
+    Exit;
+  end;
+
+  dsResult.First;
+
+  while not dsResult.Eof do
+  begin
+    items.Add(BrowseItem.Create(self, flpnlItems, dsResult['ItemID'],
+      self.ViewItem));
+    dsResult.Next;
+  end;
+
+  dsResult.Free;
+
+end;
+
+procedure TfrmBrowse.ViewItem( sellerID, itemID: string);
+begin
+  if self.userID = sellerID then
+  begin
+    frmAddItem.userID := self.userID;
+    frmAddItem.itemID := itemID;
+    frmAddItem.Show;
+
+  end
+  else
+  begin
+    frmViewItem.userID := self.userID;
+    frmViewItem.itemID := itemID;
+    frmViewItem.Cart := self.Cart;
+    frmViewItem.Show;
+  end;
+
+  frmBrowse.Hide;
+
 end;
 
 end.

@@ -7,16 +7,18 @@ uses
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
   System.ImageList, Data.Win.ADODB, DMUnit_u, Vcl.ImgList,
-  System.Generics.Collections, Vcl.Imaging.pngimage, ItemContainer_u,
-  ViewItem_u, AddItem_u;
+  System.Generics.Collections, Vcl.Imaging.pngimage, ItemContainer_u;
+
+type
+  tViewProcedure = procedure(itemID, sellerID : string) of object;
 
 type
   BrowseItem = class(ItemContainer)
   public
     Constructor Create(Owner: tForm; Parent: TWinControl;
-      ItemID, UserID: string);
+      ItemID: string; viewProcedure : tViewProcedure);
     procedure createDesign(); override;
-    procedure viewItem(Sender: TObject);
+    procedure onViewItem(Sender: TObject);
   private
     lblPrice: TLabel;
     lblCF: TLabel;
@@ -25,29 +27,36 @@ type
     imgItem: TImage;
     btnViewItem: TButton;
 
+    // user ID of person querying this item
     UserID: string;
+    // user id of seller of this item
+    SellerId: string;
     itemName, itemSeller: string;
     itemPrice, itemCF, itemWU, itemEU: double;
+    viewProcedure : tViewProcedure;
 
   end;
 
 implementation
 
+uses
+  ViewItem_u, AddItem_u;
+
 Constructor BrowseItem.Create(Owner: tForm; Parent: TWinControl;
-  ItemID, UserID: string);
+  ItemID: string; viewProcedure : tViewProcedure );
 var
   sql: string;
-  params: TDictionary<string, Variant>;
+  params: TObjectDictionary<string, Variant>;
   dsResult: TADODataSet;
 begin;
   sql := 'SELECT ItemName, Cost, ' +
     ' (CarbonFootprintProduction + CarbonFootprintUsage) AS CF , ' +
     '(WaterUsageProduction + WaterFootprintUsage) AS WU, ' +
     '(EnergyUsageProduction + EnergyFootprintUsage) AS EU, ' +
-    'UserTB.Username AS SellerName ' +
+    'UserTB.Username AS SellerName , SellerID ' +
     'FROM ItemTB LEFT JOIN UserTB ON ItemTB.SellerID = UserTB.UserID WHERE ItemID = :ItemID ';
 
-  params := TDictionary<string, Variant>.Create();
+  params := TObjectDictionary<string, Variant>.Create();
   params.Add('ItemID', ItemID);
 
   dsResult := DataModule1.runSQL(sql, params);
@@ -64,8 +73,10 @@ begin;
   itemCF := dsResult['CF'];
   itemWU := dsResult['WU'];
   itemEU := dsResult['EU'];
+  SellerId := dsResult['SellerID'];
 
   self.UserID := UserID;
+  self.viewProcedure := viewProcedure;
   Inherited Create(Owner, Parent, ItemID);
 end;
 
@@ -146,18 +157,15 @@ begin
   btnViewItem.Height := 50;
   btnViewItem.Caption := 'View Item';
   btnViewItem.TabOrder := 0;
-  btnViewItem.OnClick := self.viewItem;
+  btnViewItem.OnClick := self.onViewItem;
 
 end;
 
-procedure BrowseItem.viewItem(Sender: TObject);
-
+procedure BrowseItem.onViewItem(Sender: TObject);
 begin
-  frmViewItem.UserID := self.UserID;
-  frmViewItem.ItemID := self.ItemID;
-  frmViewItem.Show;
 
-  self.Owner.Hide;
+
+  self.viewProcedure(self.sellerID, self.itemid);
 
 end;
 

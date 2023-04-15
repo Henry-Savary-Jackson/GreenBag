@@ -2,8 +2,8 @@ object frmLogin: TfrmLogin
   Left = 0
   Top = 0
   Caption = 'Login'
-  ClientHeight = 289
-  ClientWidth = 320
+  ClientHeight = 304
+  ClientWidth = 312
   Color = clBtnFace
   Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
@@ -79,7 +79,7 @@ object frmLogin: TfrmLogin
     Font.Style = []
     ParentFont = False
     TabOrder = 1
-    Text = 'User'
+    Text = 'User2'
   end
   object btnSignIn: TButton
     Left = 128

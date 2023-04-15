@@ -169,7 +169,7 @@ end;
 procedure TfrmAddItem.FormShow(Sender: TObject);
 var
   dsResult: tAdoDataset;
-  dsCategories : tAdoDataset;
+  dsCategories: tAdoDataset;
 begin
   //
   if itemID = '' then
@@ -184,7 +184,7 @@ begin
 
   edtName.Text := dsResult['ItemName'];
 
-  lblSeller.Caption :='Seller: ' + dsResult['Username'];
+  lblSeller.Caption := 'Seller: ' + dsResult['SellerName'];
   lblRating.Caption := 'Rating: ' + intToStr(dsResult['Rating']);
 
   edtPrice.Text := floatTOStrf(dsResult['Cost'], ffFixed, 8, 2);

@@ -13,8 +13,7 @@ type
     itemID : string;
     Owner : tForm;
     Constructor Create(Owner: tForm; Parent : TWinControl; ItemID: string); virtual ;
-    procedure createDesign(); virtual;
-    procedure remove(Sender: TObject); virtual;
+    procedure createDesign(); virtual; abstract;
 
   end;
 
@@ -28,14 +27,5 @@ begin
   self.itemID := ItemID;
 end;
 
-procedure ItemContainer.createDesign();
-begin
-  //
-end;
-
-procedure ItemContainer.remove(Sender: TObject);
-begin
-  //
-end;
 
 end.

@@ -5,7 +5,7 @@ interface
 uses
   System.SysUtils, System.Classes, Data.Win.ADODB, Data.DB,
   sCrypt, System.Generics.Collections, Datasnap.Provider, Vcl.dialogs,
-  Vcl.Graphics, System.Variants, PngImage;
+  Vcl.Graphics, System.Variants, PngImage, System.Win.ComObj;
 
 type
   TDataModule1 = class(TDataModule)
@@ -26,12 +26,11 @@ type
     procedure DataModuleCreate(Sender: TObject);
   private
     { Private declarations }
-    sCrypt: tScrypt;
   public
 
     { Public declarations }
-    function runSQL(sql: string; params: TDictionary<string, Variant> = nil)
-      : tADODataSet;
+    function runSQL(sql: string;
+      params: tObjectDictionary<string, Variant> = nil): tADODataSet;
     function Login(Username, password: string): string;
     function SignUp(Username, password, usertype, homeAddress, certificationcode
       : string): string;
@@ -148,11 +147,11 @@ end;
 function TDataModule1.getProducts(UserId: string): tADODataSet;
 var
   sql: string;
-  params: TDictionary<string, Variant>;
+  params: tObjectDictionary<string, Variant>;
 begin
   sql := 'SELECT ItemID FROM ItemTB WHERE SellerID = :SellerID AND Deleted = False';
 
-  params := TDictionary<string, Variant>.Create();
+  params := tObjectDictionary<string, Variant>.Create();
   params.Add('SellerID', UserId);
 
   try
@@ -166,14 +165,24 @@ end;
 function TDataModule1.getSearchResults(searchQuery, category: string)
   : tADODataSet;
 var
-sql : string;
-params : TDictionary<string,variant>;
-// epic
-//lolol : array of array [1..2] of Variant;
+  sql: string;
+  params: tObjectDictionary<string, Variant>;
 
 begin
 
-  sql := 'SELECT ItemID FROM ItemTB WHERE ItemName LIKE "%:SearchQuery%" AND Category = :Category';
+  sql := 'SELECT ItemID FROM ItemTB WHERE ItemName LIKE :SearchQuery AND Deleted = False ';
+
+  params := tObjectDictionary<string, Variant>.Create();;
+  params.Add('SearchQuery', '%' + searchQuery + '%');
+
+  if category <> '' then
+  begin
+    sql := sql + ' AND Category = :Category';
+    params.Add('Category', category);
+  end;
+
+  Result := runSQL(sql, params);
+  params.Free;
 
 end;
 
@@ -183,7 +192,7 @@ procedure TDataModule1.insertItem(itemID, Name, SellerID, category,
 
 var
   sql: string;
-  params: TDictionary<string, Variant>;
+  params: tObjectDictionary<string, Variant>;
   dsResult: tADODataSet;
   imageBytes: tBytes;
   memStream: TMemoryStream;
@@ -192,7 +201,7 @@ begin
   sql := 'INSERT INTO ItemTB (ItemID, ItemName, Cost, CarbonFootprintProduction, WaterUsageProduction, EnergyUsageProduction, CarbonFootprintUsage, WaterFootprintUsage, EnergyFootprintUsage, SellerID, Description, Category) '
     + ' VALUES ( :ItemID, :ItemName, :Cost, :CarbonFootprintProduction, :WaterUsageProduction, :EnergyUsageProduction, :CarbonFootprintUsage, :WaterFootprintUsage, :EnergyFootprintUsage, :SellerID, :Description , :Category);';
 
-  params := TDictionary<string, Variant>.Create();
+  params := tObjectDictionary<string, Variant>.Create();
   params.Add('ItemID', itemID);
   params.Add('ItemName', name);
   params.Add('Cost', Price);
@@ -239,11 +248,11 @@ end;
 function TDataModule1.isInTable(pkValue, pkName, tbName: string): boolean;
 var
   sql: string;
-  dParams: TDictionary<String, Variant>;
+  dParams: tObjectDictionary<String, Variant>;
   dsResult: tADODataSet;
 begin
   //
-  dParams := TDictionary<String, Variant>.Create();
+  dParams := tObjectDictionary<String, Variant>.Create();
   dParams.Add('pkVal', pkValue);
 
   sql := 'SELECT 1 FROM ' + tbName + ' WHERE ' + pkName + ' = :pkVal';
@@ -263,12 +272,12 @@ function TDataModule1.Login(Username, password: string): string;
 var
   sql: string;
   sqlResult: tADODataSet;
-  Parameters: TDictionary<string, Variant>;
+  Parameters: tObjectDictionary<string, Variant>;
   b: boolean;
 begin
 
   sql := 'SELECT UserID, Password, Salt FROM UserTB WHERE Username = :Username';
-  Parameters := TDictionary<string, Variant>.Create();
+  Parameters := tObjectDictionary<string, Variant>.Create();
   Parameters.Add('Username', Username);
 
   sqlResult := runSQL(sql, Parameters);
@@ -311,7 +320,7 @@ begin
 end;
 
 function TDataModule1.runSQL(sql: string;
-  params: TDictionary<string, Variant> = nil): tADODataSet;
+  params: tObjectDictionary<string, Variant> = nil): tADODataSet;
 var
   dsOutput: tADODataSet;
   Item: TPair<string, Variant>;
@@ -339,6 +348,7 @@ begin
       begin
         if UpperCase(copy(trim(sql), 1, 6)) = 'SELECT' then
         begin
+          // read
           Query.Open;
           dsOutput.Free;
           dsOutput := tADODataSet.Create(Nil);
@@ -346,16 +356,26 @@ begin
         end
         else
         begin
+          // Create update delete
           Query.ExecSQL;
           dsOutput.InsertRecord(['Success']);
         end;
 
       end;
     except
+      // catch any errors that occur
       on e: EADOError do
       begin
         dsOutput.InsertRecord([e.Message]);
 
+      end;
+      on e: EDatabaseError do
+      begin
+        dsOutput.InsertRecord([e.Message]);
+      end;
+      on e: EOleException do
+      begin
+        dsOutput.InsertRecord([e.Message]);
       end;
     end;
   finally
@@ -369,11 +389,11 @@ var
   numRatings: integer;
   avgRatings: double;
   sql: string;
-  params: TDictionary<string, Variant>;
+  params: tObjectDictionary<string, Variant>;
   dsResult: tADODataSet;
 begin
   sql := 'SELECT (Rating * RatingsAmount) AS totalRating , RatingsAmount FROM ItemTB WHERE ItemID = :ItemID';
-  params := TDictionary<string, Variant>.Create();
+  params := tObjectDictionary<string, Variant>.Create();
   params.Add('ItemID', itemID);
 
   dsResult := runSQL(sql, params);
@@ -385,9 +405,9 @@ begin
     Exit;
   end;
 
-  numRatings := dsResult['RatingsAmount'] +1 ;
+  numRatings := dsResult['RatingsAmount'] + 1;
 
-  avgRatings :=  (dsResult['totalRating'] + rating)/  numRatings;
+  avgRatings := (dsResult['totalRating'] + rating) / numRatings;
 
   sql := 'UPDATE ItemTB SET Rating = :Rating, RatingsAmount = :RatingsAmount WHERE ItemID = :ItemID ';
 
@@ -410,7 +430,7 @@ function TDataModule1.SignUp(Username, password, usertype, homeAddress,
 var
   hash, salt: string;
   UserId, sql: string;
-  params: TDictionary<String, Variant>;
+  params: tObjectDictionary<String, Variant>;
   i: integer;
   sqlResult: tADODataSet;
 begin
@@ -450,7 +470,7 @@ begin
     + ' ( :UserID, :Username, :Password, :UserType, :HomeAddress, :Salt);';
 
   // input parameters
-  params := TDictionary<string, Variant>.Create();
+  params := tObjectDictionary<string, Variant>.Create();
 
   params.Add('UserID', UserId);
   params.Add('Username', Username);
@@ -492,6 +512,7 @@ begin
       begin
         Result := 'Error: ' + e.Message;
       end;
+
     end;
 
   end;
@@ -505,7 +526,7 @@ procedure TDataModule1.updateItem(itemID, Name, SellerID, category,
   Image: tPngImage);
 var
   sql: string;
-  params: TDictionary<string, Variant>;
+  params: tObjectDictionary<string, Variant>;
   dsResult: tADODataSet;
   imageBytes: tBytes;
   memStream: tStream;
@@ -516,7 +537,7 @@ begin
     + ' Description =  :Description , Category = :Category ' +
     'WHERE ItemID = :ItemID';
 
-  params := TDictionary<string, Variant>.Create();
+  params := tObjectDictionary<string, Variant>.Create();
   params.Add('ItemID', itemID);
   params.Add('ItemName', name);
   params.Add('Cost', Price);
@@ -564,21 +585,30 @@ end;
 function TDataModule1.viewItem(itemID: string): tADODataSet;
 var
   sql: string;
-  params: TDictionary<string, Variant>;
+  params: tObjectDictionary<string, Variant>;
   dsResult: tADODataSet;
 begin
-  sql := 'SELECT *, UserTB.Username AS SellerName FROM ItemTB ' +
-    'LEFT JOIN UserTB ON ItemTb.SellerID = UserTB.UserID' +
+  sql := 'SELECT * , UserTB.Username AS SellerName FROM ItemTB ' +
+    'INNER JOIN UserTB ON ItemTb.SellerID = UserTB.UserID' +
     ' WHERE ItemID = :ItemID ';
 
-  params := TDictionary<string, Variant>.Create();
+  params := tObjectDictionary<string, Variant>.Create();
   params.Add('ItemID', itemID);
 
   dsResult := runSQL(sql, params);
 
+  if dsResult.Fields.FindField('Status') <> nil then
+  begin
+    showMessage(dsResult['Status']);
+    Exit;
+  end;
+
   if dsResult.IsEmpty then
   begin
-    dsResult.FieldDefs.Add('Status', ftString);
+    dsResult.Close;
+    dsResult.FieldDefs.Add('Status', ftString, 100);
+    dsResult.CreateDataSet;
+    dsResult.Insert;
     dsResult['Status'] := 'Error: Item does not exist.'
   end;
 

@@ -36,14 +36,14 @@ object frmBrowse: TfrmBrowse
         Left = 79
         Top = 64
         Width = 368
-        Height = 41
+        Height = 49
         HorzScrollBar.Tracking = True
         TabOrder = 0
         object flpnlCategories: TFlowPanel
           Left = 0
           Top = 0
           Width = 112
-          Height = 37
+          Height = 45
           Align = alLeft
           AutoSize = True
           FlowStyle = fsBottomTopRightLeft
@@ -52,11 +52,12 @@ object frmBrowse: TfrmBrowse
       end
       object srchSearchItems: TSearchBox
         Left = 79
-        Top = 29
+        Top = 39
         Width = 368
         Height = 21
         Anchors = []
         TabOrder = 1
+        OnInvokeSearch = SearchItems
       end
     end
     object scrbxItems: TScrollBox

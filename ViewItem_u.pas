@@ -43,7 +43,7 @@ type
     { Public declarations }
     userID: string;
     itemID: string;
-    Cart: TObjectList<TObject>;
+    Cart: tObjectDictionary<string, integer>;
   end;
 
 var
@@ -57,7 +57,26 @@ uses
 {$R *.dfm}
 
 procedure TfrmViewItem.btnAddToCartClick(Sender: TObject);
-begin
+var
+quantity : integer;
+cartQuantity : integer;
+begin;
+
+  quantity := spnQuantity.Value;
+
+  if cart = nil then
+    showMessage('NullPointerexception');
+
+
+  if not cart.ContainsKey(itemId) then
+  begin
+    Cart.Add(itemID, quantity);
+  end
+  else
+  begin
+    cart.TryGetValue(itemid, cartquantity);
+    cart.AddOrSetValue(itemid, cartQuantity + quantity );
+  end;
   frmViewItem.Hide;
   frmBrowse.Show;
 end;
@@ -97,7 +116,7 @@ begin
     Exit;
   end;
 
-  lblName.Caption := 'Name :' + dsResult['Name'];
+  lblName.Caption := 'Name :' + dsResult['ItemName'];
   lblSeller.Caption := 'Seller: ' + dsResult['SellerName'];
   lblPrice.Caption := 'Price: ' + floatToStrf(dsResult['Cost'],
     ffCurrency, 8, 2);
@@ -128,6 +147,8 @@ begin
 
   btnSendRating.Enabled := dsResult['SellerID'] <> userID;
   btnAddToCart.Enabled := dsResult['SellerID'] <>userID;
+
+  spnQuantity.Value := 1;
 
 
 end;

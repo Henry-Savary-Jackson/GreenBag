@@ -10,6 +10,9 @@ uses
   ItemContainer_u, addItem_u, System.Generics.Collections;
 
 type
+  tRemoveProcedure = procedure(itemID: string) of object;
+
+type
   ProductItem = class(ItemContainer)
 
   private
@@ -20,29 +23,34 @@ type
     revenue: double;
     Sales: integer;
     name: string;
+    // any code that needs to be executed by the parent screen
+    // when a delete button is clicked is linked to the varaible
+    removeProcedure: tRemoveProcedure;
 
   public
-    Constructor Create(Owner: tForm; Parent: TWinControl; ItemID: string);
+    Constructor Create(Owner: tForm; Parent: TWinControl; ItemID: string;
+      removeProcedure: tRemoveProcedure);
     procedure createDesign(); override;
-    procedure remove(Sender: TObject); override;
-    procedure viewItem(Sender: TObject);
-
+    procedure viewItem(Sender: tObject);
+    // event handling code for the remove button
+    procedure onRemoveClick(Sender: tObject);
 
   end;
 
 implementation
 
 Constructor ProductItem.Create(Owner: tForm; Parent: TWinControl;
-  ItemID: string);
+  ItemID: string; removeProcedure: tRemoveProcedure);
 var
   sql: string;
-  params: tDictionary<string, Variant>;
+  params: tObjectDictionary<string, Variant>;
   dsResult: tADODataset;
 begin
+  self.removeProcedure := removeProcedure;
   //
   sql := 'SELECT ItemName, Sales, (Sales*Cost) AS Revenue FROM ItemTB WHERE ItemID = :ItemID';
 
-  params := tDictionary<string, Variant>.Create();
+  params := tObjectDictionary<string, Variant>.Create();
   params.Add('ItemID', ItemID);
   dsResult := DataModule1.runSQL(sql, params);
   params.Free;
@@ -133,7 +141,7 @@ begin
   grpRemoveProduct.ParentBackground := False;
   grpRemoveProduct.ParentColor := False;
   grpRemoveProduct.TabOrder := 1;
-  grpRemoveProduct.OnClick := self.remove;
+  grpRemoveProduct.OnClick := self.onRemoveClick;
 
   imgRemoveProduct := TImage.Create(self.Owner);
   imgRemoveProduct.Parent := grpRemoveProduct;
@@ -146,23 +154,20 @@ begin
   imgRemoveProduct.Margins.Bottom := 5;
   imgRemoveProduct.Align := alClient;
   imgRemoveProduct.Center := True;
-  imgRemoveProduct.OnClick := self.remove;
+  imgRemoveProduct.OnClick := self.onRemoveClick;
 
 end;
 
-procedure ProductItem.remove(Sender: TObject);
+procedure ProductItem.onRemoveClick(Sender: tObject);
 begin
-  //
-  if MessageDlg('Are you sure you want to delete this item?', mtConfirmation, [mbYes, mbNo], 0, mbNo) = mryes then
-    DataModule1.deleteItem(itemID);
-
+  self.removeProcedure(self.itemID);
 end;
 
-procedure ProductItem.viewItem(Sender: TObject);
+procedure ProductItem.viewItem(Sender: tObject);
 begin
   //
   self.Owner.Hide;
-  frmAddItem.itemID := itemID;
+  frmAddItem.ItemID := ItemID;
   frmAddItem.Show;
 
 end;

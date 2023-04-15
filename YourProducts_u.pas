@@ -21,6 +21,7 @@ type
     procedure btnBackClick(Sender: TObject);
     procedure btnViewItemClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure removeProcedure(itemID: string);
 
   private
     { Private declarations }
@@ -74,6 +75,17 @@ begin
   updateItemsDisplay;
 end;
 
+procedure TfrmYourProducts.removeProcedure(itemID: string);
+begin
+  if MessageDlg('Are you sure you want to delete this item?', mtConfirmation,
+    [mbYes, mbNo], 0, mbNo) = mryes then
+  begin
+    DataModule1.deleteItem(itemID);
+    self.updateItemsDisplay;
+  end;
+
+end;
+
 procedure TfrmYourProducts.updateItemsDisplay;
 var
   dsResult: tADODataSet;
@@ -98,7 +110,8 @@ begin
   while not dsResult.Eof do
   begin
 
-    items.Add(ProductItem.Create(self, flpnlProducts, dsResult['ItemID']));
+    items.Add(ProductItem.Create(self, flpnlProducts, dsResult['ItemID'],
+      self.removeProcedure));
     dsResult.Next;
   end;
 
