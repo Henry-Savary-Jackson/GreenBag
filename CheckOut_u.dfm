@@ -24,7 +24,7 @@ object frmCheckout: TfrmCheckout
   end
   object lblTotalCF: TLabel
     Left = 136
-    Top = 353
+    Top = 342
     Width = 113
     Height = 13
     Caption = 'Total Carbon Footprint:'

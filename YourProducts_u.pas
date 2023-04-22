@@ -109,7 +109,6 @@ begin
 
   while not dsResult.Eof do
   begin
-
     items.Add(ProductItem.Create(self, flpnlProducts, dsResult['ItemID'],
       self.removeProcedure));
     dsResult.Next;

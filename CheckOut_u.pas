@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls,
-  Vcl.ExtCtrls,
+  Vcl.ExtCtrls, Data.win.ADODB,
   Vcl.Samples.Spin, Vcl.Imaging.pngimage, CartItem_u,
   System.Generics.Collections, ItemContainer_u;
 
@@ -31,6 +31,7 @@ type
     userID: string;
     Cart: tObjectDictionary<string, integer>;
     items: tObjectList<CartItem>;
+    PriceOrderTotal, CFOrderTotal ,  WUOrderTotal, EUOrderTotal : double;
     procedure removeItem(itemID: string);
     procedure updateItemQuantity(itemID : string; iQuantity: integer);
     procedure updateDisplay();
@@ -67,6 +68,8 @@ end;
 procedure TfrmCheckout.FormShow(Sender: TObject);
 begin
 updateDisplay;
+
+
 end;
 
 procedure TfrmCheckout.removeItem(itemID: string);
@@ -79,6 +82,7 @@ end;
 procedure TfrmCheckout.updateDisplay;
 var
   item: tPair<String, integer>;
+  currentItem : CartItem;
 begin
   //
   if Cart = nil then
@@ -91,10 +95,26 @@ begin
 
   items := tObjectList<CartItem>.create();
 
+  CFOrderTotal := 0;
+  WUOrderTotal := 0;
+  EUOrderTotal := 0;
+  PriceOrderTotal := 0;
+
   for item in Cart do
   begin
-    items.Add(CartItem.create(self, flpnlItems, item.Key, item.Value, self.removeItem, self.updateItemQuantity));
+    currentItem := CartItem.create(self, flpnlItems, item.Key, item.Value, self.removeItem, self.updateItemQuantity);
+    CFOrderTotal := CFOrderTotal + currentItem.itemTotalCF;
+    WUOrderTotal := WUOrderTotal + currentItem.itemTotalWU;
+    EUOrderTotal := EUOrderTotal + currentItem.itemTotalEU;
+    PriceOrderTotal := PriceOrderTotal + currentItem.itemTotalPrice;
+    items.Add(currentItem);
   end;
+
+  lblTotalCost.Caption:= 'Total Cost: '+ floatTOStrf(PriceOrderTotal, ffCurrency, 8,2);
+  lblTotalCF.Caption := 'Total Carbon Footprint: '+ floatTOStrf(CFOrderTotal, fffixed, 8,2);
+  lblTotalEU.Caption := 'Total Energy Usage: '+ floatTOStrf(EUOrderTotal, fffixed, 8,2);
+  lblTotalWU.Caption := 'Total Water Usage: '+ floatTOStrf(WUOrderTotal, fffixed, 8,2);
+
 end;
 
 procedure TfrmCheckout.updateItemQuantity(itemID: string; iQuantity: integer);

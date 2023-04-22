@@ -222,6 +222,7 @@ begin
     frmViewItem.itemID := itemID;
     frmViewItem.Cart := self.Cart;
     frmViewItem.Show;
+
   end;
 
   frmBrowse.Hide;

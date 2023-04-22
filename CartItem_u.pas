@@ -30,7 +30,7 @@ type
     SellerId: string;
     itemName, itemSeller: string;
     itemCFProduce, itemWUProduce, itemEUProduce, itemCF, itemWU, itemEU,
-      itemPrice, itemTotalPrice, itemTotalCF, itemTotalWU, itemTotalEU: double;
+      itemPrice: double;
     removeProcedure: tRemoveProcedure;
     updateQuantityProcedure: tUpdateQuantityProcedure;
 
@@ -43,6 +43,9 @@ type
     procedure onSpnQuantityChange(Sender: tObject);
     procedure updateInfo();
     procedure UpdateRedInfo();
+
+  public
+    itemTotalPrice, itemTotalCF, itemTotalWU, itemTotalEU: double;
 
   end;
 

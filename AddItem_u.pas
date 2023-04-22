@@ -35,6 +35,8 @@ type
     edtCFProduce: TEdit;
     edtEUProduce: TEdit;
     edtWUProduce: TEdit;
+    lblStock: TLabel;
+    edtStock: TEdit;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure imgProductClick(Sender: TObject);
     procedure btnBackClick(Sender: TObject);
@@ -68,7 +70,7 @@ end;
 procedure TfrmAddItem.btnSaveChangesClick(Sender: TObject);
 var
   sName, sDesc, category: string;
-  CF, WU, EU, CFProduce, WUProduce, EUProduce, Price: double;
+  CF, WU, EU, CFProduce, WUProduce, EUProduce, Price, stock: double;
   PngImage: tPngImage;
   I: Integer;
 begin
@@ -98,6 +100,10 @@ begin
   sDesc := redDesc.Text;
   Price := getFloatFromStr(edtPrice.Text, 'Price');
   if Price = INFINITE then
+    Exit;
+
+  stock := getFloatFromStr(edtStock.Text, 'Stock');
+  if stock = INFINITE then
     Exit;
 
   CF := getFloatFromStr(edtCF.Text, 'Carbon Footprint');
@@ -142,14 +148,14 @@ begin
       itemID := itemID + intToStr(random(10))
     end;
 
-    DataModule1.insertItem(itemID, sName, userID, category, sDesc, Price, CF,
-      EU, WU, CFProduce, EUProduce, WUProduce, PngImage);
+    DataModule1.insertItem(itemID, sName, userID, category, sDesc, Price, stock,
+      CF, EU, WU, CFProduce, EUProduce, WUProduce, PngImage);
 
   end
   else
   begin
-    DataModule1.updateItem(itemID, sName, userID, category, sDesc, Price, CF,
-      EU, WU, CFProduce, EUProduce, WUProduce, PngImage);
+    DataModule1.updateItem(itemID, sName, userID, category, sDesc, Price, stock,
+      CF, EU, WU, CFProduce, EUProduce, WUProduce, PngImage);
 
   end;
 
@@ -171,36 +177,6 @@ var
   dsResult: tAdoDataset;
   dsCategories: tAdoDataset;
 begin
-  //
-  if itemID = '' then
-    Exit;
-  dsResult := DataModule1.viewItem(self.itemID);
-
-  if dsResult.Fields.FindField('Status') <> nil then
-  begin
-    showMessage(dsResult['Status']);
-    Exit;
-  end;
-
-  edtName.Text := dsResult['ItemName'];
-
-  lblSeller.Caption := 'Seller: ' + dsResult['SellerName'];
-  lblRating.Caption := 'Rating: ' + intToStr(dsResult['Rating']);
-
-  edtPrice.Text := floatTOStrf(dsResult['Cost'], ffFixed, 8, 2);
-
-  edtCF.Text := floatTOStrf(dsResult['CarbonFootprintUsage'], ffFixed, 8, 2);
-  edtEU.Text := floatTOStrf(dsResult['EnergyFootprintUsage'], ffFixed, 8, 2);
-  edtWU.Text := floatTOStrf(dsResult['WaterFootprintUsage'], ffFixed, 8, 2);
-
-  edtCFProduce.Text := floatTOStrf(dsResult['CarbonFootprintUsage'],
-    ffFixed, 8, 2);
-  edtEUProduce.Text := floatTOStrf(dsResult['CarbonFootprintUsage'],
-    ffFixed, 8, 2);
-  edtWUProduce.Text := floatTOStrf(dsResult['CarbonFootprintUsage'],
-    ffFixed, 8, 2);
-
-  redDesc.Text := dsResult['Description'];
 
   cmbCategory.Items.Clear;
 
@@ -216,9 +192,43 @@ begin
 
   dsCategories.Free;
 
-  cmbCategory.ItemIndex := cmbCategory.Items.IndexOf(dsResult['Category']);
+  if itemID <> '' then
+  begin
+    dsResult := DataModule1.viewItem(self.itemID);
 
-  dsResult.Free;
+    if dsResult.Fields.FindField('Status') <> nil then
+    begin
+      showMessage(dsResult['Status']);
+      Exit;
+    end;
+
+    edtName.Text := dsResult['ItemName'];
+
+    lblSeller.Caption := 'Seller: ' + dsResult['SellerName'];
+    lblRating.Caption := 'Rating: ' + intToStr(dsResult['Rating']);
+
+    edtPrice.Text := floatTOStrf(dsResult['Cost'], ffFixed, 8, 2);
+
+    edtStock.Text := intToStr(dsResult['Stock']);
+
+    edtCF.Text := floatTOStrf(dsResult['CarbonFootprintUsage'], ffFixed, 8, 2);
+    edtEU.Text := floatTOStrf(dsResult['EnergyFootprintUsage'], ffFixed, 8, 2);
+    edtWU.Text := floatTOStrf(dsResult['WaterFootprintUsage'], ffFixed, 8, 2);
+
+    edtCFProduce.Text := floatTOStrf(dsResult['CarbonFootprintUsage'],
+      ffFixed, 8, 2);
+    edtEUProduce.Text := floatTOStrf(dsResult['EnergyFootprintUsage'],
+      ffFixed, 8, 2);
+    edtWUProduce.Text := floatTOStrf(dsResult['WaterFootprintUsage'],
+      ffFixed, 8, 2);
+
+    if dsResult['Description'] <> NUll then
+      redDesc.lines.Add(dsResult['Description']);
+
+    cmbCategory.ItemIndex := cmbCategory.Items.IndexOf(dsResult['Category']);
+
+    dsResult.Free;
+  end;
 
 end;
 

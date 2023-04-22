@@ -7,7 +7,8 @@ uses
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls,
   Vcl.ExtCtrls,
-  Vcl.Samples.Spin, DMUnit_u, System.Generics.Collections, Data.Win.ADODB;
+  Vcl.Samples.Spin, DMUnit_u, System.Generics.Collections, Data.Win.ADODB,
+  Vcl.Imaging.pngimage;
 
 type
   TfrmViewItem = class(TForm)
@@ -32,6 +33,7 @@ type
     lblCF: TLabel;
     lblEU: TLabel;
     lblWU: TLabel;
+    lblStock: TLabel;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnBackClick(Sender: TObject);
     procedure btnAddToCartClick(Sender: TObject);
@@ -44,6 +46,7 @@ type
     userID: string;
     itemID: string;
     Cart: tObjectDictionary<string, integer>;
+    stock : integer;
   end;
 
 var
@@ -66,6 +69,12 @@ begin;
 
   if cart = nil then
     showMessage('NullPointerexception');
+
+  if stock - quantity < 0 then
+  begin
+    showMessage('Not enough stock.');
+    Exit;
+  end;
 
 
   if not cart.ContainsKey(itemId) then
@@ -121,6 +130,8 @@ begin
   lblPrice.Caption := 'Price: ' + floatToStrf(dsResult['Cost'],
     ffCurrency, 8, 2);
 
+  lblStock.Caption := 'Stock: '+ inttostr(dsResult['Stock']);
+  stock := dsResult['Stock'];
   lblCF.Caption := 'Carbon footprint through usage: ' +
     floatToStrf(dsResult['CarbonFootprintUsage'] , fffixed, 8, 2);
 
@@ -143,7 +154,8 @@ begin
 
   lblCategory.Caption := 'Category: ' + dsResult['Category'];
 
-  redDesc.Text := dsResult['Description'];
+  if dsResult['Description'] <> NULl then
+    redDesc.Lines.Add(dsResult['Description']);
 
   btnSendRating.Enabled := dsResult['SellerID'] <> userID;
   btnAddToCart.Enabled := dsResult['SellerID'] <>userID;
