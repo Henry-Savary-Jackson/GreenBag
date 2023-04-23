@@ -3,10 +3,11 @@ unit Profile_u;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
-  VclTee.TeeGDIPlus, VCLTee.TeEngine, VCLTee.TeeProcs, VCLTee.Chart,
-  VCLTee.TeeChartLayout, VCLTee.Series;
+  VclTee.TeeGDIPlus, VclTee.TeEngine, VclTee.TeeProcs, VclTee.Chart,
+  VclTee.TeeChartLayout, VclTee.Series, DmUnit_u;
 
 type
   TfrmProfile = class(TForm)
@@ -39,37 +40,39 @@ type
     { Private declarations }
   public
     { Public declarations }
-    userID : string;
+    userID: string;
   end;
 
 var
   frmProfile: TfrmProfile;
 
 implementation
+
 uses
-BrowseItems_u, YourProducts_u;
+  BrowseItems_u, YourProducts_u;
 
 {$R *.dfm}
 
 procedure TfrmProfile.btnBackClick(Sender: TObject);
 begin
-//
-frmBrowse.userID := userID;
-frmProfile.Hide;
-frmBrowse.Show;
+  //
+  frmBrowse.userID := userID;
+  frmProfile.Hide;
+  frmBrowse.Show;
 end;
 
 procedure TfrmProfile.btnViewProductsClick(Sender: TObject);
 begin
-//
-frmYourProducts.userID := userID;
-frmProfile.Hide;
-frmYourProducts.Show;
+  //
+  frmYourProducts.userID := userID;
+  frmProfile.Hide;
+  frmYourProducts.Show;
 end;
 
 procedure TfrmProfile.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-Application.Terminate;
+  DataModule1.CancelCart(DataModule1.CartID);
+  Application.Terminate;
 end;
 
 end.

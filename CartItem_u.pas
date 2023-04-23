@@ -28,15 +28,16 @@ type
     iQuantity: integer;
 
     SellerId: string;
-    itemName, itemSeller: string;
+    shoppingCartItemID: string;
+    itemName, itemID, itemSeller: string;
     itemCFProduce, itemWUProduce, itemEUProduce, itemCF, itemWU, itemEU,
       itemPrice: double;
     removeProcedure: tRemoveProcedure;
     updateQuantityProcedure: tUpdateQuantityProcedure;
 
   public
-    Constructor Create(Owner: TForm; Parent: TWinControl; itemID: string;
-      iQuantity: integer; remove: tRemoveProcedure;
+    Constructor Create(Owner: TForm; Parent: TWinControl;
+      shoppingCartItemID: string; remove: tRemoveProcedure;
       updateQuantity: tUpdateQuantityProcedure);
     procedure createDesign(); override;
     procedure onRemoveClick(Sender: tObject);
@@ -51,8 +52,8 @@ type
 
 implementation
 
-Constructor CartItem.Create(Owner: TForm; Parent: TWinControl; itemID: string;
-  iQuantity: integer; remove: tRemoveProcedure;
+Constructor CartItem.Create(Owner: TForm; Parent: TWinControl;
+  shoppingCartItemID: string; remove: tRemoveProcedure;
   updateQuantity: tUpdateQuantityProcedure);
 var
   sql: string;
@@ -63,15 +64,17 @@ begin;
 
   self.removeProcedure := remove;
   self.updateQuantityProcedure := updateQuantity;
+  self.shoppingCartItemID := shoppingCartItemID;
 
-  sql := ' SELECT ItemName, Cost, ' +
-    ' CarbonFootprintProduction AS CFProduce, CarbonFootprintUsage AS CF , ' +
-    'WaterUsageProduction AS WUProduce , WaterFootprintUsage AS WU, ' +
-    'EnergyUsageProduction AS EUProduce , EnergyFootprintUsage AS EU' +
-    ' FROM ItemTB WHERE ItemID = :ItemID ;';
+  sql := 'SELECT ShoppingCartItemsTB.Quantity, ShoppingCartItemsTB.ItemID , ItemTB.ItemName , ItemTB.Cost, '
+    + ' ItemTB.CarbonFootprintProduction AS CFProduce , ItemTB.CarbonFootprintUsage AS CF , '
+    + '  ItemTB.WaterUsageProduction AS WUProduce , ItemTB.WaterFootprintUsage AS WU , '
+    + 'ItemTB.EnergyUsageProduction AS EUProduce , ItemTB.EnergyFootprintUsage AS EU '
+    + ' FROM ShoppingCartItemsTB INNER JOIN ItemTB ON ItemTB.ItemID = ShoppingCartItemsTB.ItemID '
+    + '  WHERE ShoppingCartItemID = :ShoppingCartItemID';
 
   params := TObjectDictionary<string, variant>.Create();
-  params.Add('ItemID', itemID);
+  params.Add('ShoppingCartItemID', self.shoppingCartItemID);
 
   dsResult := DataModule1.runSQL(sql, params);
   params.Free;
@@ -88,8 +91,8 @@ begin;
     Exit;
   end;
 
-  self.iQuantity := iQuantity;
-
+  self.iQuantity := dsResult['Quantity'];
+  self.itemID := dsResult['ItemID'];
   self.itemPrice := dsResult['Cost'];
   self.itemName := dsResult['ItemName'];
 
@@ -202,16 +205,19 @@ end;
 procedure CartItem.onRemoveClick(Sender: tObject);
 begin
   //
-  self.removeProcedure(itemID);
+  self.removeProcedure(self.shoppingCartItemID);
 end;
 
 procedure CartItem.onSpnQuantityChange(Sender: tObject);
+var
+  oldQuantity: integer;
 begin
   //
+  oldQuantity := self.iQuantity;
   self.iQuantity := spnQuantity.Value;
   self.updateInfo;
   self.UpdateRedInfo;
-  self.updateQuantityProcedure(itemID, spnQuantity.Value);
+  self.updateQuantityProcedure(itemID, self.iQuantity- oldQuantity);
 end;
 
 procedure CartItem.updateInfo;

@@ -39,9 +39,9 @@ type
     { Private declarations }
   public
     userID: string;
-    Cart: tObjectDictionary<string, integer>;
     category: string;
     items: TObjectList<BrowseItem>;
+    //id of current shopping cart of user , create for every sessio
 
     { Public declarations }
 
@@ -66,6 +66,7 @@ end;
 
 procedure TfrmBrowse.btnLogoutClick(Sender: TObject);
 begin
+  DataModule1.CancelCart(DataModule1.CartID);
   frmBrowse.Hide;
   frmLogin.Show;
 end;
@@ -87,6 +88,7 @@ end;
 
 procedure TfrmBrowse.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+  DataModule1.CancelCart(DataModule1.CartID);
   Application.Terminate;
 end;
 
@@ -125,15 +127,16 @@ begin
     dsResult.Free;
   end;
 
-  if Cart = nil then
-    Cart := tObjectDictionary<string, integer>.Create();
+  if DataModule1.CartID = '' then
+  begin
+    DataModule1.CartID := DataModule1.CreateUserCart(userID);
+  end;
 
 end;
 
 procedure TfrmBrowse.grpCheckoutClick(Sender: TObject);
 begin
   frmCheckout.userID := userID;
-  frmCheckout.Cart := self.Cart;
   frmBrowse.Hide;
   frmCheckout.Show;
 end;
@@ -220,7 +223,6 @@ begin
   begin
     frmViewItem.userID := self.userID;
     frmViewItem.itemID := itemID;
-    frmViewItem.Cart := self.Cart;
     frmViewItem.Show;
 
   end;

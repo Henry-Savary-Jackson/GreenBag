@@ -45,7 +45,6 @@ type
     { Public declarations }
     userID: string;
     itemID: string;
-    Cart: tObjectDictionary<string, integer>;
     stock : integer;
   end;
 
@@ -67,8 +66,6 @@ begin;
 
   quantity := spnQuantity.Value;
 
-  if cart = nil then
-    showMessage('NullPointerexception');
 
   if stock - quantity < 0 then
   begin
@@ -76,16 +73,7 @@ begin;
     Exit;
   end;
 
-
-  if not cart.ContainsKey(itemId) then
-  begin
-    Cart.Add(itemID, quantity);
-  end
-  else
-  begin
-    cart.TryGetValue(itemid, cartquantity);
-    cart.AddOrSetValue(itemid, cartQuantity + quantity );
-  end;
+  DataModule1.addToCart(DataModule1.CartID,itemID,quantity);
   frmViewItem.Hide;
   frmBrowse.Show;
 end;
@@ -108,6 +96,7 @@ end;
 
 procedure TfrmViewItem.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+  DataModule1.CancelCart(DataModule1.CartID);
   Application.Terminate;
 end;
 

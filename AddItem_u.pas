@@ -169,6 +169,7 @@ end;
 
 procedure TfrmAddItem.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
+  DataModule1.CancelCart(DataModule1.CartID);
   Application.Terminate;
 end;
 

@@ -281,7 +281,7 @@ object frmViewItem: TfrmViewItem
     OnClick = btnBackClick
   end
   object btnAddToCart: TButton
-    Left = 136
+    Left = 137
     Top = 662
     Width = 105
     Height = 35
