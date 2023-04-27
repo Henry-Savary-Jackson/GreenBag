@@ -173,7 +173,7 @@ begin
       [mbOK], 0, mbOK);
   end;
 
-  frmBrowse.UserId := UserId;
+  DataModule1.UserId := UserId;
   frmSignUp.Hide;
   frmBrowse.Show;
 

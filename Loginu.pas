@@ -67,7 +67,7 @@ begin
 
   //
   frmLogin.Hide;
-  frmBrowse.userID := userId;
+  DataModule1.userID := userId;
   frmBrowse.Show;
 end;
 

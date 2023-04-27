@@ -47,6 +47,7 @@ type
 
   public
     itemTotalPrice, itemTotalCF, itemTotalWU, itemTotalEU: double;
+    maxwithdraw : integer;
 
   end;
 
@@ -66,7 +67,7 @@ begin;
   self.updateQuantityProcedure := updateQuantity;
   self.shoppingCartItemID := shoppingCartItemID;
 
-  sql := 'SELECT ShoppingCartItemsTB.Quantity, ShoppingCartItemsTB.ItemID , ItemTB.ItemName , ItemTB.Cost, '
+  sql := 'SELECT ShoppingCartItemsTB.Quantity, ShoppingCartItemsTB.ItemID , ItemTB.ItemName , ItemTB.Cost, ItemTB.MaxWithdrawableStock as MaxStock, '
     + ' ItemTB.CarbonFootprintProduction AS CFProduce , ItemTB.CarbonFootprintUsage AS CF , '
     + '  ItemTB.WaterUsageProduction AS WUProduce , ItemTB.WaterFootprintUsage AS WU , '
     + 'ItemTB.EnergyUsageProduction AS EUProduce , ItemTB.EnergyFootprintUsage AS EU '
@@ -103,6 +104,8 @@ begin;
   self.itemCFProduce := dsResult['CFProduce'];
   self.itemWUProduce := dsResult['WUProduce'];
   self.itemEUProduce := dsResult['EUProduce'];
+
+  self.maxwithdraw := dsResult['MaxStock'];
 
   self.updateInfo;
 
@@ -194,8 +197,8 @@ begin
   spnQuantity.Top := 100;
   spnQuantity.Width := 80;
   spnQuantity.Height := 22;
-  spnQuantity.MaxValue := 1000;
-  spnQuantity.MinValue := 0;
+  spnQuantity.MaxValue := self.maxwithdraw;
+  spnQuantity.MinValue := 1;
   spnQuantity.TabOrder := 1;
   spnQuantity.Value := self.iQuantity;
   spnQuantity.OnChange := self.onSpnQuantityChange;

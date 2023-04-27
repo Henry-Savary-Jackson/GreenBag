@@ -40,7 +40,6 @@ type
     { Private declarations }
   public
     { Public declarations }
-    userID: string;
   end;
 
 var
@@ -56,7 +55,6 @@ uses
 procedure TfrmProfile.btnBackClick(Sender: TObject);
 begin
   //
-  frmBrowse.userID := userID;
   frmProfile.Hide;
   frmBrowse.Show;
 end;
@@ -64,15 +62,27 @@ end;
 procedure TfrmProfile.btnViewProductsClick(Sender: TObject);
 begin
   //
-  frmYourProducts.userID := userID;
   frmProfile.Hide;
   frmYourProducts.Show;
 end;
 
 procedure TfrmProfile.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  DataModule1.CancelCart(DataModule1.CartID);
-  Application.Terminate;
+  try
+    try
+      DataModule1.CancelCart(DataModule1.CartID);
+
+    except
+      on e: exception do
+      begin
+        showMessage(e.Message);
+      end;
+
+    end;
+
+  finally
+    Application.Terminate;
+  end;
 end;
 
 end.

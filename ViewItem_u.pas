@@ -34,6 +34,7 @@ type
     lblEU: TLabel;
     lblWU: TLabel;
     lblStock: TLabel;
+    lblMaxWithdraw: TLabel;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnBackClick(Sender: TObject);
     procedure btnAddToCartClick(Sender: TObject);
@@ -43,9 +44,8 @@ type
     { Private declarations }
   public
     { Public declarations }
-    userID: string;
     itemID: string;
-    stock : integer;
+    stock: integer;
   end;
 
 var
@@ -60,12 +60,11 @@ uses
 
 procedure TfrmViewItem.btnAddToCartClick(Sender: TObject);
 var
-quantity : integer;
-cartQuantity : integer;
+  quantity: integer;
+  cartQuantity: integer;
 begin;
 
   quantity := spnQuantity.Value;
-
 
   if stock - quantity < 0 then
   begin
@@ -73,9 +72,18 @@ begin;
     Exit;
   end;
 
-  DataModule1.addToCart(DataModule1.CartID,itemID,quantity);
-  frmViewItem.Hide;
-  frmBrowse.Show;
+  try
+    DataModule1.addToCart(DataModule1.CartID, itemID, quantity);
+    frmViewItem.Hide;
+    frmBrowse.Show;
+
+  except
+    on e: exception do
+    begin
+      showMessage(e.Message);
+    end;
+
+  end;
 end;
 
 procedure TfrmViewItem.btnBackClick(Sender: TObject);
@@ -96,8 +104,21 @@ end;
 
 procedure TfrmViewItem.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  DataModule1.CancelCart(DataModule1.CartID);
-  Application.Terminate;
+  try
+    try
+      DataModule1.CancelCart(DataModule1.CartID);
+
+    except
+      on e: exception do
+      begin
+        showMessage(e.Message);
+      end;
+
+    end;
+
+  finally
+    Application.Terminate;
+  end;
 end;
 
 procedure TfrmViewItem.FormShow(Sender: TObject);
@@ -109,7 +130,7 @@ begin
 
   if dsResult.Fields.FindField('Status') <> nil then
   begin
-    ShowMessage(dsResult['Status']);
+    showMessage(dsResult['Status']);
     dsResult.Free;
     Exit;
   end;
@@ -119,38 +140,39 @@ begin
   lblPrice.Caption := 'Price: ' + floatToStrf(dsResult['Cost'],
     ffCurrency, 8, 2);
 
-  lblStock.Caption := 'Stock: '+ inttostr(dsResult['Stock']);
+  lblStock.Caption := 'Stock: ' + inttostr(dsResult['Stock']);
   stock := dsResult['Stock'];
   lblCF.Caption := 'Carbon footprint through usage: ' +
-    floatToStrf(dsResult['CarbonFootprintUsage'] , fffixed, 8, 2);
+    floatToStrf(dsResult['CarbonFootprintUsage'], fffixed, 8, 2);
 
   lblEU.Caption := 'Energy consumption through usage: ' +
-    floatToStrf(dsResult['EnergyFootprintUsage'] ,fffixed, 8, 2);
+    floatToStrf(dsResult['EnergyFootprintUsage'], fffixed, 8, 2);
 
   lblWU.Caption := 'Water consumption through usage:' +
-    floatToStrf(dsResult['WaterFootprintUsage'] , fffixed, 8, 2);
+    floatToStrf(dsResult['WaterFootprintUsage'], fffixed, 8, 2);
 
   lblCFProduce.Caption := 'Carbon footprint for production: ' +
-    floatToStrf(dsResult['CarbonFootprintProduction'] , fffixed, 8, 2);
+    floatToStrf(dsResult['CarbonFootprintProduction'], fffixed, 8, 2);
 
   lblEUProduce.Caption := 'Energy usage for production: ' +
-    floatToStrf(dsResult['EnergyUsageProduction'] , fffixed, 8, 2);
+    floatToStrf(dsResult['EnergyUsageProduction'], fffixed, 8, 2);
 
   lblWUProduce.Caption := 'Water usage for production:' +
-    floatToStrf(dsResult['WaterUsageProduction'] , fffixed, 8, 2);
+    floatToStrf(dsResult['WaterUsageProduction'], fffixed, 8, 2);
 
-  lblRating.Caption := 'Rating: ' + inttosTR(dsResult['Rating']);
+  lblRating.Caption := 'Rating: ' + inttostr(dsResult['Rating']);
 
   lblCategory.Caption := 'Category: ' + dsResult['Category'];
+
+  lblMaxWithdraw.Caption := 'Maximum Stock you can withdraw at once: ' + intTostr(dsResult['MaxWithdrawableStock']);
 
   if dsResult['Description'] <> NULl then
     redDesc.Lines.Add(dsResult['Description']);
 
-  btnSendRating.Enabled := dsResult['SellerID'] <> userID;
-  btnAddToCart.Enabled := dsResult['SellerID'] <>userID;
+  btnSendRating.Enabled := dsResult['SellerID'] <> DataModule1.userID;
+  btnAddToCart.Enabled := dsResult['SellerID'] <> DataModule1.userID;
 
   spnQuantity.Value := 1;
-
 
 end;
 

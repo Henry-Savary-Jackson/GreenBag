@@ -37,6 +37,8 @@ type
     edtWUProduce: TEdit;
     lblStock: TLabel;
     edtStock: TEdit;
+    lblMaxWithdrawStock: TLabel;
+    edtMaxWithdrawStock: TEdit;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure imgProductClick(Sender: TObject);
     procedure btnBackClick(Sender: TObject);
@@ -47,7 +49,6 @@ type
     { Private declarations }
   public
     { Public declarations }
-    userID: string;
     itemID: string;
   end;
 
@@ -70,7 +71,8 @@ end;
 procedure TfrmAddItem.btnSaveChangesClick(Sender: TObject);
 var
   sName, sDesc, category: string;
-  CF, WU, EU, CFProduce, WUProduce, EUProduce, Price, stock: double;
+  CF, WU, EU, CFProduce, WUProduce, EUProduce, Price: double;
+  stock, maxWithdrawstock: double;
   PngImage: tPngImage;
   I: Integer;
 begin
@@ -103,6 +105,9 @@ begin
     Exit;
 
   stock := getFloatFromStr(edtStock.Text, 'Stock');
+
+  maxWithdrawstock := getFloatFromStr(edtMaxWithdrawStock.Text,' Max Withdrawable stock');
+
   if stock = INFINITE then
     Exit;
 
@@ -141,36 +146,50 @@ begin
 
   if itemID = '' then
   begin
-    itemID := UpperCase(userID[1] + sName[1]);
+    itemID := UpperCase(DataModule1.userID[1] + sName[1]);
 
     for I := 1 to 8 do
     begin
       itemID := itemID + intToStr(random(10))
     end;
 
-    DataModule1.insertItem(itemID, sName, userID, category, sDesc, Price, stock,
-      CF, EU, WU, CFProduce, EUProduce, WUProduce, PngImage);
+    DataModule1.insertItem(itemID, sName, DataModule1.userID, category, sDesc,
+      Price, stock, maxwithdrawstock, CF, EU, WU, CFProduce, EUProduce, WUProduce, PngImage);
 
   end
   else
   begin
-    DataModule1.updateItem(itemID, sName, userID, category, sDesc, Price, stock,
-      CF, EU, WU, CFProduce, EUProduce, WUProduce, PngImage);
+    DataModule1.updateItem(itemID, sName, DataModule1.userID, category, sDesc,
+      Price, stock,maxwithdrawstock, CF, EU, WU, CFProduce, EUProduce, WUProduce, PngImage);
 
   end;
 
   showMessage('Successfully saved changes');
-  // free var from heap
+  // free var from heap  memory
   PngImage.Free;
 
+  //naviguate back to your products
   frmAddItem.Hide;
   frmYourProducts.Show;
 end;
 
 procedure TfrmAddItem.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  DataModule1.CancelCart(DataModule1.CartID);
-  Application.Terminate;
+  try
+    try
+      DataModule1.CancelCart(DataModule1.CartID);
+
+    except
+      on e: exception do
+      begin
+        showMessage(e.Message);
+      end;
+
+    end;
+
+  finally
+    Application.Terminate;
+  end;
 end;
 
 procedure TfrmAddItem.FormShow(Sender: TObject);

@@ -28,7 +28,6 @@ type
 
   public
     { Public declarations }
-    userID: string;
     items: TObjectList<ProductItem>;
     procedure updateItemsDisplay;
   end;
@@ -47,7 +46,6 @@ uses
 procedure TfrmYourProducts.btnAddItemClick(Sender: TObject);
 begin
   frmYourProducts.Hide;
-  frmAddItem.userID := userID;
   frmAddItem.Show;
 end;
 
@@ -66,8 +64,21 @@ end;
 
 procedure TfrmYourProducts.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  DataModule1.CancelCart(DataModule1.CartID);
-  Application.Terminate;
+  try
+    try
+      DataModule1.CancelCart(DataModule1.CartID);
+
+    except
+      on e: exception do
+      begin
+        showMessage(e.Message);
+      end;
+
+    end;
+
+  finally
+    Application.Terminate;
+  end;
 end;
 
 procedure TfrmYourProducts.FormShow(Sender: TObject);
@@ -97,7 +108,7 @@ begin
 
   items := TObjectList<ProductItem>.Create();
 
-  dsResult := DataModule1.getProducts(userID);
+  dsResult := DataModule1.getProducts(DataModule1.userID);
 
   if dsResult.Fields.FindField('Status') <> nil then
   begin

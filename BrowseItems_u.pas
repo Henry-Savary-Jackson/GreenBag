@@ -34,14 +34,13 @@ type
     procedure FormShow(Sender: TObject);
     procedure OnClickCategory(Sender: TObject);
     procedure SearchItems(Sender: TObject);
-    procedure ViewItem( sellerID, itemID:  string);
+    procedure ViewItem(sellerID, itemID: string);
   private
     { Private declarations }
   public
-    userID: string;
     category: string;
     items: TObjectList<BrowseItem>;
-    //id of current shopping cart of user , create for every sessio
+    // id of current shopping cart of user , create for every sessio
 
     { Public declarations }
 
@@ -66,21 +65,28 @@ end;
 
 procedure TfrmBrowse.btnLogoutClick(Sender: TObject);
 begin
-  DataModule1.CancelCart(DataModule1.CartID);
-  frmBrowse.Hide;
-  frmLogin.Show;
+  try
+    DataModule1.CancelCart(DataModule1.CartID);
+    frmBrowse.Hide;
+    frmLogin.Show;
+
+  except
+    on e: exception do
+    begin
+      showMessage(e.Message);
+    end;
+
+  end;
 end;
 
 procedure TfrmBrowse.btnProfileClick(Sender: TObject);
 begin
-  frmProfile.userID := userID;
   frmBrowse.Hide;
   frmProfile.Show;
 end;
 
 procedure TfrmBrowse.btnViewItemClick(Sender: TObject);
 begin
-  frmViewItem.userID := userID;
   frmBrowse.Hide;
 
   frmViewItem.Show;
@@ -88,8 +94,21 @@ end;
 
 procedure TfrmBrowse.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  DataModule1.CancelCart(DataModule1.CartID);
-  Application.Terminate;
+  try
+    try
+      DataModule1.CancelCart(DataModule1.CartID);
+
+    except
+      on e: exception do
+      begin
+        showMessage(e.Message);
+      end;
+
+    end;
+
+  finally
+    Application.Terminate;
+  end;
 end;
 
 procedure TfrmBrowse.FormShow(Sender: TObject);
@@ -129,22 +148,19 @@ begin
 
   if DataModule1.CartID = '' then
   begin
-    DataModule1.CartID := DataModule1.CreateUserCart(userID);
+    DataModule1.CartID := DataModule1.CreateUserCart(DataModule1.userID);
   end;
 
 end;
 
 procedure TfrmBrowse.grpCheckoutClick(Sender: TObject);
 begin
-  frmCheckout.userID := userID;
   frmBrowse.Hide;
   frmCheckout.Show;
 end;
 
 procedure TfrmBrowse.imgProfileClick(Sender: TObject);
 begin
-  //
-  frmProfile.userID := userID;
   frmBrowse.Hide;
   frmProfile.Show;
 end;
@@ -210,18 +226,18 @@ begin
 
 end;
 
-procedure TfrmBrowse.ViewItem( sellerID, itemID: string);
+//procedure given to all browse item containers
+// if the user is the object's seller, rather show them the screen that allows them to edit
+procedure TfrmBrowse.ViewItem(sellerID, itemID: string);
 begin
-  if self.userID = sellerID then
+  if DataModule1.userID = sellerID then
   begin
-    frmAddItem.userID := self.userID;
     frmAddItem.itemID := itemID;
     frmAddItem.Show;
 
   end
   else
   begin
-    frmViewItem.userID := self.userID;
     frmViewItem.itemID := itemID;
     frmViewItem.Show;
 
