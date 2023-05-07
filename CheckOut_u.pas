@@ -55,10 +55,19 @@ end;
 procedure TfrmCheckout.btnCheckoutClick(Sender: TObject);
 begin
   try
-    DataModule1.completeTransactions(DataModule1.CartID);
-    DataModule1.CartID := DataModule1.CreateUserCart(DataModule1.userID);
-    frmCheckout.Hide;
-    frmBrowse.Show;
+    if items.Count <> 0 then
+    begin
+      DataModule1.CheckoutCart(DataModule1.CartID);
+      DataModule1.CartID := DataModule1.CreateUserCart(DataModule1.userID);
+      frmCheckout.Hide;
+      frmBrowse.Show;
+
+    end
+    else
+    begin
+      showMessage('Can''t checkout with an empty cart.');
+      Exit;
+    end;
   except
     on e: exception do
     begin

@@ -68,6 +68,7 @@ begin
   //
   frmLogin.Hide;
   DataModule1.userID := userId;
+  DataModule1.CartID := DataModule1.CreateUserCart(DataModule1.userID);
   frmBrowse.Show;
 end;
 

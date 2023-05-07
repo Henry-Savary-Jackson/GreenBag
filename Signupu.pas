@@ -174,6 +174,7 @@ begin
   end;
 
   DataModule1.UserId := UserId;
+  DataModule1.CartID := DataModule1.CreateUserCart(DataModule1.userID);
   frmSignUp.Hide;
   frmBrowse.Show;
 

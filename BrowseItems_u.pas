@@ -146,11 +146,6 @@ begin
     dsResult.Free;
   end;
 
-  if DataModule1.CartID = '' then
-  begin
-    DataModule1.CartID := DataModule1.CreateUserCart(DataModule1.userID);
-  end;
-
 end;
 
 procedure TfrmBrowse.grpCheckoutClick(Sender: TObject);

@@ -5,7 +5,8 @@ interface
 uses
   System.SysUtils, System.Classes, Data.Win.ADODB, Data.DB,
   sCrypt, System.Generics.Collections, Datasnap.Provider, Vcl.dialogs,
-  Vcl.Graphics, Vcl.ExtCtrls, System.Variants, PngImage, System.Win.ComObj;
+  Vcl.Graphics, Vcl.ExtCtrls, System.Variants, PngImage, System.Win.ComObj,
+  dateutils;
 
 type
   TDataModule1 = class(TDataModule)
@@ -36,12 +37,6 @@ type
     function runSQL(sql: string;
       params: tObjectDictionary<string, Variant> = nil): tADODataSet;
 
-    procedure CommitTransaction();
-
-    procedure RollBack();
-
-    procedure BeginTransaction();
-
     function Login(Username, password: string): string;
     function SignUp(Username, password, usertype, homeAddress, certificationcode
       : string): string;
@@ -65,14 +60,15 @@ type
 
     function getSearchResults(searchQuery, category: string): tADODataSet;
 
-    function isInTable(pkValue, pkName, tbName: string): boolean;
+    function isInTable(pkValue: array of Variant; pkName: array of string;
+      tbName: string): boolean;
 
     // methods relating to transaction management
     function CreateUserCart(userID: string): string;
 
     procedure CancelCart(ShoppingCartID: string);
 
-    procedure completeTransactions(ShoppingCartID: string);
+    procedure CheckoutCart(ShoppingCartID: string);
 
     function addToCart(ShoppingCartID, itemID: string;
       quantity: integer): string;
@@ -82,6 +78,16 @@ type
 
     function getItemInCart(itemID, ShoppingCartID: string): string;
 
+    procedure CommitTransaction();
+
+    procedure RollBack();
+
+    procedure BeginTransaction();
+
+    procedure updateStats(ShoppingCartID: string);
+
+    procedure insertStatData(userID: string; statDate: tDateTime;
+      statType: string; value: double);
   end;
 
 var
@@ -101,6 +107,7 @@ var
 begin
   BeginTransaction;
 
+  // get the ShoppingCartItemID of a particular item in the user's cart
   try
     ShoppingCartItemID := self.getItemInCart(itemID, ShoppingCartID);
 
@@ -118,7 +125,7 @@ begin
 
   if ShoppingCartItemID <> '' then
   begin
-    // update
+    // update if item is in user's cart
     params.Add('ShoppingCartItemID', ShoppingCartItemID);
     sql := 'UPDATE ShoppingCartItemsTB' +
       ' SET Quantity = Quantity + :Quantity WHERE ShoppingCartItemID = :ShoppingCartItemID  ';
@@ -126,7 +133,9 @@ begin
   end
   else
   begin
-    // insert
+    // insertitem into user's cart if doesn't exist
+
+    // generate new ShoppingCartitemID
     ShoppingCartItemID := ShoppingCartID[1] + itemID[2];
     for i := 1 to 8 do
     begin
@@ -152,17 +161,15 @@ begin
   end;
 
 
-
   // update stock
 
-  // check if enough stock
+  // check if  there is enough stock to withdraw that quantity
 
-  //DAFUCK IS UP WITH PARAMETERS NOT WORKING
+  // DAFUCK IS UP WITH PARAMETERS NOT WORKING
 
   sql := 'SELECT ItemTB.Stock, ItemTB.MaxWithdrawableStock, ShoppingCartItemsTB.Quantity '
-    + 'FROM ShoppingCartItemsTB, ItemTB' +
-    ' WHERE ItemTB.ItemID = :ItemID AND '+
-    ' ShoppingCartItemID = "' + ShoppingCartItemID + '"' ;
+    + 'FROM ShoppingCartItemsTB, ItemTB' + ' WHERE ItemTB.ItemID = :ItemID AND '
+    + ' ShoppingCartItemID = "' + ShoppingCartItemID + '"';
 
   params.clear;
   params.Add('ItemID', itemID);
@@ -177,7 +184,7 @@ begin
 
   if dsResult['Stock'] - quantity < 0 then
   begin
-    // not enough stock
+    // if not enough stock
     // rollback changes
     showMessage(dsResult['Stock']);
     RollBack;
@@ -185,15 +192,19 @@ begin
     dsResult.Free;
     raise Exception.Create('Not enough Stock for this item');
   end
+  // if the amount of stock the user wishes to get is over the limit
+  // set by the buyer, rollback transaction
   else if dsResult['MaxWithdrawableStock'] < dsResult['Quantity'] then
   begin
     RollBack;
     dsResult.Free;
-    raise Exception.Create('You are not permitted to withdraw more units at once.');
+    raise Exception.Create
+      ('You are not permitted to withdraw more units at once.');
   end;
 
+  // if all goes well, remove that withdrawn stock from the buyer
   sql := 'UPDATE ItemTB SET Stock = Stock - :Quantity WHERE ItemID = :ItemID';
-  params.Clear;
+  params.clear;
   params.Add('Quantity', quantity);
   params.Add('ItemID', itemID);
   dsResult := runSQL(sql, params);
@@ -207,6 +218,7 @@ begin
     raise Exception.Create(dsResult['Status']);
   end;
 
+  // commit changes to DB
   CommitTransaction;
   dsResult.Free;
 
@@ -214,11 +226,11 @@ end;
 
 procedure TDataModule1.BeginTransaction;
 begin
-  //
   if not Connection.InTransaction then
     Connection.BeginTrans;
 end;
 
+// removes the user's current cart from the database
 procedure TDataModule1.CancelCart(ShoppingCartID: string);
 var
   sql: string;
@@ -229,7 +241,7 @@ begin
   BeginTransaction;
   params := tObjectDictionary<string, Variant>.Create();
 
-  // put stock back again
+  // get the quantity of each iteam in the shopping cart
 
   sql := 'SELECT ItemID, Quantity FROM ShoppingCartItemsTB WHERE ShoppingCartID = :ShoppingCartID';
 
@@ -247,6 +259,7 @@ begin
 
   dsResult.First;
 
+  // for each item in shopping cart, return the withdrawn stock back to the buyer
   sql := 'UPDATE ItemTB SET Stock = Stock + :Quantity WHERE ItemID = :ItemID';
 
   while not dsResult.Eof do
@@ -259,19 +272,19 @@ begin
 
     if dsResultUpdateItem['Status'] <> 'Success' then
     begin
-      // deallocate memory for query result
       dsResult.Free;
-      // raise exception
       raise Exception.Create(dsResultUpdateItem['Status']);
     end;
     dsResult.Next;
 
   end;
 
+  // deallocate memory for query result
   dsResult.Free;
 
 
-  // delete temp record
+  // After you put back the stock, delete the records of
+  // the user's current shopping cart from the database
 
   sql := 'DELETE FROM ShoppingCartTB WHERE ShoppingCartID = :ShoppingCartID';
   params.clear;
@@ -286,6 +299,7 @@ begin
     exit;
   end;
 
+  // commit changes to db
   CommitTransaction;
   dsResult.Free;
 
@@ -298,7 +312,8 @@ begin
 
 end;
 
-procedure TDataModule1.completeTransactions(ShoppingCartID: string);
+// For when the users checks out the cart at the metaphorical "till"
+procedure TDataModule1.CheckoutCart(ShoppingCartID: string);
 var
   sql, sqlUpdateBuyer, sqlUpdateItem, sqlUpdateSeller: string;
   params: tObjectDictionary<string, Variant>;
@@ -306,11 +321,13 @@ var
     : tADODataSet;
   BuyerID: string;
   buyerBalance, itemPrice: double;
+  MyClass: TComponent;
 begin
 
   BeginTransaction;
 
-  // copy data into TransactionTB and TransactionItemTB
+  // copy data of user's shopping cart TransactionTB and TransactionItemTB for record-keeping
+  // first do it for TRANSACTIONTB
   sql := 'INSERT INTO TransactionTB (TransactionID, BuyerID) ' +
     'SELECT ShoppingCartID, BuyerID FROM ShoppingCartTB WHERE ShoppingCartID = :ShoppingCartID';
   params := tObjectDictionary<string, Variant>.Create();
@@ -324,6 +341,7 @@ begin
   end;
   dsResult.Free;
 
+  // Then for TransactionItemTB
   sql := 'INSERT INTO TransactionItemTB (CartItemID, ItemID, Quantity, TransactionID) '
     + 'SELECT ShoppingCartItemID, ItemID, Quantity, ShoppingCartID FROM ShoppingCartItemsTB WHERE ShoppingCartID  = :ShoppingCartID ';
 
@@ -336,7 +354,7 @@ begin
 
   dsResult.Free;
 
-  // Select user's balance and userID
+  // Next, select user's id and balance
 
   sql := 'SELECT BuyerID, UserTB.Balance FROM ShoppingCartTB' +
     ' INNER JOIN UserTB ON UserTB.UserID = ShoppingCartTB.BuyerID ' +
@@ -352,11 +370,12 @@ begin
   BuyerID := dsResult['BuyerID'];
   buyerBalance := dsResult['Balance'];
 
-  // Select all relevant data on the items, buyer and Seller for each item in user's cart
+  // Select all relevant data on the items and Seller for each item in user's cart
 
   sql := 'SELECT Quantity, ShoppingCartItemsTB.ItemID, ItemTB.Cost' +
-    ' , ItemTB.SellerID, BuyerID FROM ' + '(((ShoppingCartItemsTB ' +
-    ' INNER JOIN ShoppingCartTB ' +
+    ' , ItemTB.SellerID, BuyerID ' +
+
+    ' FROM (((ShoppingCartItemsTB ' + ' INNER JOIN ShoppingCartTB ' +
     'ON ShoppingCartItemsTB.ShoppingCartID = ShoppingCartTB.ShoppingCartID) ' +
     'INNER JOIN UserTB ' + 'ON ShoppingCartTB.BuyerID = UserTB.UserID )' +
     'INNER JOIN ItemTB ' + 'ON ItemTB.ItemID = ShoppingCartItemsTB.ItemID )' +
@@ -367,17 +386,22 @@ begin
   if dsResult.Fields.FindField('Status') <> nil then
   begin
     raise Exception.Create(dsResult['Status']);
-    exit;
   end;
 
   params.clear;
 
-  // update balance of seller and buyer accordingly
+  // Once you have all of the necessary data
+  // transfer money from buyer to sender
 
+  // update number of sales of each item
   sqlUpdateItem :=
     'UPDATE ItemTB SET Sales = Sales + :Sales WHERE ItemID = :ItemID';
+
+  // lower the user's balance
   sqlUpdateBuyer :=
     'UPDATE UserTB SET Balance = :Balance WHERE UserID = :UserID ';
+
+  // increase the seller's revenue
   sqlUpdateSeller :=
     'UPDATE SellerTB SET Revenue = Revenue + :Revenue WHERE UserID = :SellerID';
 
@@ -392,10 +416,12 @@ begin
 
     if buyerBalance < 0 then
     begin
-      // Rollback in case of insufficient funds
+      // Rollback in case of insufficient funds from user
       RollBack;
       raise Exception.Create('Out of balance');
     end;
+
+    // if sufficient funds add remove from user's account
     params.clear;
     params.Add('Balance', buyerBalance);
     params.Add('UserID', BuyerID);
@@ -409,7 +435,7 @@ begin
 
     dsResultUpdateBuyer.Free;
 
-    // update item
+    // update item's number of units sold
 
     params.clear;
 
@@ -425,7 +451,7 @@ begin
     dsResultUpdateItem.Free;
 
 
-    // update seller
+    // update seller's revenue amount
 
     params.clear;
     params.Add('Revenue', itemPrice);
@@ -435,6 +461,7 @@ begin
     if dsResultUpdateSeller['Status'] <> 'Success' then
     begin
       raise Exception.Create(dsResult['Status']);
+
     end;
 
     dsResultUpdateSeller.Free;
@@ -442,7 +469,20 @@ begin
     dsResult.Next;
   end;
 
-  // delete temp record
+  // update The user's  and buyers' statistics  based on these transactions
+
+  try
+    updateStats(ShoppingCartID);
+  except
+    on e: Exception do
+    begin
+      if Connection.InTransaction then
+        RollBack;
+      raise e;
+    end;
+  end;
+
+  // Now, Delete all temporary shopping cart records from the database
 
   sql := 'DELETE FROM ShoppingCartTB WHERE ShoppingCartID = :ShoppingCartID';
   params.clear;
@@ -458,16 +498,20 @@ begin
 
   dsResult.Free;
 
+  // commit transaction
+
   CommitTransaction;
 
 end;
 
+// once the user has checked out a cart or has logged in
+// generate a new shopping cart for the user
 function TDataModule1.CreateUserCart(userID: string): string;
 var
   sShoppingCartID, sql: string;
   i: integer;
   params: tObjectDictionary<string, Variant>;
-  currDate: tDateTIme;
+  currDate: tDateTime;
   dsResult: tADODataSet;
 begin
 
@@ -475,6 +519,7 @@ begin
 
   currDate := Date;
 
+  // generate a unique code for the shopping cart
   sShoppingCartID := userID[2];
 
   for i := 1 to 9 do
@@ -487,6 +532,7 @@ begin
   params.Add('Date', Date);
   params.Add('UserID', userID);
 
+  // insert user's shopping cart into database
   sql := 'INSERT INTO ShoppingCartTB (ShoppingCartID, BuyerID, DateCreated) VALUES (:ShoppingCartID, :UserID , :Date)';
 
   dsResult := runSQL(sql, params);
@@ -497,6 +543,7 @@ begin
   begin
     raise Exception.Create(dsResult['Status']);
   end;
+  // commit changes
   CommitTransaction;
 
   Result := sShoppingCartID;
@@ -504,7 +551,6 @@ end;
 
 procedure TDataModule1.DataModuleCreate(Sender: TObject);
 begin
-  //
   Connection.Close;
   // scroll to the right and add in your database name
   Connection.ConnectionString := 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source='
@@ -544,6 +590,9 @@ begin
   Query.Connection := Connection;
 end;
 
+// Mark an item as deleted
+// do not remove any actual records, we need to maintain referential integrity
+// between other tables
 procedure TDataModule1.deleteItem(itemID: string);
 begin
   with DataModule1 do
@@ -569,21 +618,24 @@ begin
   end;
 end;
 
+// get the list of items in a user's shopping cart
 function TDataModule1.getCartItems(ShoppingCartID: string): tADODataSet;
 var
   sql: string;
   params: tObjectDictionary<string, Variant>;
 
 begin
-  //
+  // params and sql setup
   params := tObjectDictionary<string, Variant>.Create();
 
   sql := 'SELECT ShoppingCartItemID FROM ShoppingCartItemsTB WHERE ShoppingCartID = :ShoppingCartID';
 
   params.Add('ShoppingCartID', ShoppingCartID);
 
+  // retur nsql result
   Result := runSQL(sql, params);
 
+  // handle db errors
   if Result.Fields.FindField('Status') <> nil then
   begin
     raise Exception.Create(Result['Status']);
@@ -591,17 +643,18 @@ begin
 
 end;
 
+// get all the categories of items that exist
 function TDataModule1.getCategories: tADODataSet;
 var
   sql: string;
 begin
-  //
   sql := 'SELECT DISTINCT Category FROM ItemTB;';
 
   Result := runSQL(sql, nil);
 
 end;
 
+// get the all the products made by a particular seller
 function TDataModule1.getProducts(userID: string): tADODataSet;
 var
   sql: string;
@@ -620,6 +673,7 @@ begin
 
 end;
 
+// Search for items with a specific string and category
 function TDataModule1.getSearchResults(searchQuery, category: string)
   : tADODataSet;
 var
@@ -628,36 +682,45 @@ var
 
 begin
 
+  // sql statement and params
+  // does not show deleted items
   sql := 'SELECT ItemID FROM ItemTB WHERE ItemName LIKE :SearchQuery AND Deleted = False ';
 
   params := tObjectDictionary<string, Variant>.Create();;
   params.Add('SearchQuery', '%' + searchQuery + '%');
 
+  // if the user has specifed a category, use that as a condition as well
   if category <> '' then
   begin
     sql := sql + ' AND Category = :Category';
     params.Add('Category', category);
   end;
 
+  // return the results
   Result := runSQL(sql, params);
   params.Free;
 
 end;
 
+// returns the shoppingcartItemID of a particular item in a user's cart
+// this is so that the program can properly update and read that record
+// in the shoppingcartItemTb
 function TDataModule1.getItemInCart(itemID, ShoppingCartID: string): STRING;
 var
   sql: string;
   params: tObjectDictionary<string, Variant>;
   dsResult: tADODataSet;
 begin
-  //
+  // sql statement and params setup
   sql := 'SELECT ShoppingCartItemID FROM ShoppingCartItemsTB WHERE ItemID = :ItemID AND ShoppingCartID = :ShoppingCartID';
   params := tObjectDictionary<string, Variant>.Create();
   params.Add('ItemID', itemID);
   params.Add('ShoppingCartID', ShoppingCartID);
 
+  // run sql
   dsResult := runSQL(sql, params);
 
+  // handle errors
   if dsResult.Fields.FindField('Status') <> nil then
   begin
     dsResult.Free;
@@ -666,11 +729,12 @@ begin
 
   if dsResult.IsEmpty then
   begin
-
+    // return emtpy string if the item is not in the cart
     Result := '';
   end
   else
   begin
+    // if the item is present in that cart, return its shoppingcartItemID
     Result := dsResult['ShoppingCartItemID'];
   end;
 
@@ -678,6 +742,7 @@ begin
 
 end;
 
+// procedure to insert a new item into the database
 procedure TDataModule1.insertItem(itemID, Name, SellerID, category,
   Desc: string; Price, stock, maxwithdrawstock, CF, EU, WU, CFProduce,
   EUProduce, WUProduce: double; Image: tPngImage);
@@ -693,6 +758,7 @@ begin
     + ' VALUES ' +
     '( :ItemID, :ItemName, :Cost, :Stock, :MaxWithdrawableStock, :CarbonFootprintProduction, :WaterUsageProduction, :EnergyUsageProduction, :CarbonFootprintUsage, :WaterFootprintUsage, :EnergyFootprintUsage, :SellerID, :Description , :Category, :Image);';
 
+  // get all relevant data regarding object
   params := tObjectDictionary<string, Variant>.Create();
   params.Add('ItemID', itemID);
   params.Add('ItemName', name);
@@ -730,20 +796,83 @@ begin
   end;
 end;
 
-function TDataModule1.isInTable(pkValue, pkName, tbName: string): boolean;
+procedure TDataModule1.insertStatData(userID: string; statDate: tDateTime;
+  statType: string; value: double);
+var
+  statid, sql: string;
+  params: tObjectDictionary<string, Variant>;
+  dsResult: tADODataSet;
+  i: integer;
+begin
+  // generate unqiue statId
+  statid := userID[2] + intToStr(DayOf(Date))[1];
+
+  for i := 1 to 12 do
+  begin
+    statid := statid + intToStr(random(10));
+  end;
+
+  sql := 'INSERT INTO StatsTB (StatID, UserID, statDate, Type, statValue)' +
+    ' VALUES (:statID, :UserID, :statDate, :statType, :statValue) ';
+
+  // get paramater for query
+
+  params := tObjectDictionary<string, Variant>.Create();
+
+  params.Add('statID', statid);
+  params.Add('UserID', userID);
+  params.Add('statDate', statDate);
+  params.Add('statType', statType);
+  params.Add('statValue', value);
+
+  // send sql insert statement
+  dsResult := runSQL(sql, params);
+
+  if dsResult['Status'] <> 'Success' then
+  begin
+    raise Exception.Create(dsResult['Status']);
+  end;
+
+end;
+
+// a function used to check for whether any records mtching certain conditions
+// in a specified table exists
+function TDataModule1.isInTable(pkValue: array of Variant;
+  pkName: array of string; tbName: string): boolean;
 var
   sql: string;
   dParams: tObjectDictionary<String, Variant>;
   dsResult: tADODataSet;
+  i: integer;
+  paramName: string;
 begin
   //
-  dParams := tObjectDictionary<String, Variant>.Create();
-  dParams.Add('pkVal', pkValue);
+  sql := 'SELECT 1 FROM ' + tbName + ' WHERE ';
 
-  sql := 'SELECT 1 FROM ' + tbName + ' WHERE ' + pkName + ' = :pkVal';
+  // generate all the parameters
+  dParams := tObjectDictionary<String, Variant>.Create();
+  for i := 1 to length(pkValue) do
+  begin
+    paramName := 'pkVal' + intToStr(i);
+    dParams.Add(paramName, pkValue[i]);
+    sql := sql + pkName[i] + ' = :' + paramName;
+    if not(i = length(pkName)) then
+    begin
+      sql := sql + ' AND ';
+    end;
+
+  end;
 
   try
+    // run sql
     dsResult := runSQL(sql, dParams);
+
+    // handle db errors
+    if dsResult.Fields.FindField('Status') <> nil then
+    begin
+      raise Exception.Create(dsResult['Status']);
+    end;
+
     dParams.Free;
 
     Result := not dsResult.IsEmpty;
@@ -753,6 +882,7 @@ begin
 
 end;
 
+// function used to check credentials entered and login a user if successful
 function TDataModule1.Login(Username, password: string): string;
 var
   sql: string;
@@ -794,6 +924,8 @@ begin
     exit;
   end;
 
+  // return the corresponding user id of the user that the program can use
+  // for functions
   Result := sqlResult['UserID'];
   sqlResult.Free;
 
@@ -804,6 +936,7 @@ begin
 
 end;
 
+// remove an item from a user's cart
 procedure TDataModule1.removeFromCart(ShoppingCartItemID: string);
 var
   sql: string;
@@ -813,6 +946,8 @@ var
   itemID: string;
 begin
 
+  // use transaction processing to ensure that if any problem occurs
+  // all transactions will be rolled back
   BeginTransaction;
 
   // get cart item's details
@@ -894,6 +1029,7 @@ begin
   Connection.RollbackTrans;
 end;
 
+// general function that is used to send any sql to the databse and return a result
 function TDataModule1.runSQL(sql: string;
   params: tObjectDictionary<string, Variant> = nil): tADODataSet;
 var
@@ -912,11 +1048,11 @@ begin
     for Item in params do
     begin
 
-      Query.Parameters.ParamByName(Item.Key).Value := Item.Value;
+      Query.Parameters.ParamByName(Item.Key).value := Item.value;
     end;
 
   end;
-  // create output dataset
+  // create output dataset to show result
   dsOutput := tADODataSet.Create(Nil);
   dsOutput.FieldDefs.Add('Status', ftString, 100);
   dsOutput.CreateDataSet;
@@ -925,6 +1061,7 @@ begin
       begin
         if UpperCase(copy(trim(sql), 1, 6)) = 'SELECT' then
         begin
+          // read
           // read data from sql into output dataset
           Query.Open;
           dsOutput.Free;
@@ -933,6 +1070,7 @@ begin
         end
         else
         begin
+          // Create update delete
           // Create update delete
           Query.Prepared := True;
           Query.ExecSQL;
@@ -945,6 +1083,8 @@ begin
       // catch any errors that occur
       on e: EADOError do
       begin
+        // if there query is in a group of transactions,
+        // rollback all other transactions in the case of an error
         if Connection.InTransaction then
           RollBack;
 
@@ -972,6 +1112,9 @@ begin
 
 end;
 
+// allows a user to send a rating from 1 to 5 on an item
+// todo : currently a user can send as many ratings as they want
+// pls fix this
 procedure TDataModule1.sendRating(itemID: string; rating: integer);
 var
   numRatings: integer;
@@ -980,6 +1123,7 @@ var
   params: tObjectDictionary<string, Variant>;
   dsResult: tADODataSet;
 begin
+
   sql := 'SELECT (Rating * RatingsAmount) AS totalRating , RatingsAmount FROM ItemTB WHERE ItemID = :ItemID';
   params := tObjectDictionary<string, Variant>.Create();
   params.Add('ItemID', itemID);
@@ -1013,6 +1157,7 @@ begin
 
 end;
 
+// a function used to create a new user in the database and return the new user's userid for use by the program
 function TDataModule1.SignUp(Username, password, usertype, homeAddress,
   certificationcode: string): string;
 var
@@ -1076,7 +1221,7 @@ begin
     exit;
   end;
 
-  // if user is a seller, set up SellerRecord
+  // if user is a seller, set up a corresponding record in seller tb as well
   if usertype = 'SELLER' then
   begin
     try
@@ -1121,6 +1266,8 @@ var
   params: tObjectDictionary<string, Variant>;
   dsResult: tADODataSet;
   imageBytes: tBytes;
+  Field: tBlobfield;
+  stream: tStream;
   memStream: TMemoryStream;
 begin
   sql := 'UPDATE ItemTB SET ItemName = :ItemName, Cost = :Cost, Stock = :Stock, MaxWithdrawableStock = :MaxWithdrawableStock,'
@@ -1146,10 +1293,15 @@ begin
 
   try
 
-    memStream := TMemoryStream.Create;
-    Image.SaveToStream(memStream);
-    Query.Parameters.AddParameter.Name := 'Image';
-    Query.Parameters.ParamByName('Image').LoadFromStream(memStream, ftblob);
+    Query.Insert;
+    Field := tBlobfield(Query.FieldByName('Image'));
+    stream := Query.CreateBlobStream(Field, bmWrite);
+
+    try
+      Image.SaveToStream(stream);
+    finally
+      Query.Post;
+    end;
 
     dsResult := runSQL(sql, params);
 
@@ -1158,18 +1310,208 @@ begin
       showMessage(dsResult['Status']);
     end;
   finally
-    memStream.Free;
+    stream.Free;
     dsResult.Free;
     params.Free;
   end;
 
 end;
 
-function TDataModule1.userInfo(userID: string): tADODataSet;
+// used every time a user checksout a shopping cart
+// updates the statistics of the user and the sellers involved in all
+// the transactions
+procedure TDataModule1.updateStats(ShoppingCartID: string);
+var
+  sql, BuyerID: string;
+  params: tObjectDictionary<string, Variant>;
+  dsResult, dsResultStats: tADODataSet;
+  SellerID: string;
+  CFItem, WUItem, EUItem, CostItem: double;
+  quantityItem: integer;
 begin
+
+  // get the buyer ID from this cart
+  sql := 'SELECT BuyerID FROM ShoppingCartTB WHERE ShoppingCartID = :ShoppingCartID';
+  params := tObjectDictionary<string, Variant>.Create();
+
+  params.Add('ShoppingCartID', ShoppingCartID);
+
+  dsResult := runSQL(sql, params);
+
+  BuyerID := dsResult['BuyerID'];
+
+  // for each item in this cart, select all relevant data
+  sql := 'SELECT ShoppingCartItemsTB.ItemID, Quantity, ItemTB.SellerID, ItemTB.Cost, '
+    + ' (CarbonFootprintProduction + CarbonFootprintUsage) AS CF , ' +
+    '(WaterUsageProduction + WaterFootprintUsage) AS WU, ' +
+    '(EnergyUsageProduction + EnergyFootprintUsage) AS EU ' +
+    'FROM  ShoppingCartItemsTB, ItemTB ' +
+    'WHERE ShoppingCartID = :ShoppingCartID AND ShoppingCartItemsTB.ItemID = ItemTB.ItemID ';
+
+  dsResult := runSQL(sql, params);
+
+  // handle database errors
+  if dsResult.Fields.FindField('Status') <> nil then
+  begin
+    raise Exception.Create(dsResult['Status']);
+  end;
+
+  dsResult.First;
+  // loop through all transactions and update stats accordingly
+  while not dsResult.Eof do
+  begin
+    // get data from one transaction
+    SellerID := dsResult['SellerID'];
+    CFItem := dsResult['CF'];
+    WUItem := dsResult['WU'];
+    EUItem := dsResult['EU'];
+    quantityItem := dsResult['Quantity'];
+    CostItem := dsResult['Cost'];
+    // insert records into statsTB
+    try
+      insertStatData(SellerID, Date, 'REV', CostItem * quantityItem);
+      insertStatData(SellerID, Date, 'SAL', quantityItem);
+      insertStatData(BuyerID, Date, 'SPE', CostItem * quantityItem);
+      insertStatData(BuyerID, Date, 'CF', CFItem * quantityItem);
+      insertStatData(BuyerID, Date, 'EU', EUItem * QuantityItem);
+      insertStatData(BuyerID, Date, 'WU', WUItem * quantityItem);
+
+    except
+      on e: Exception do
+      begin
+        raise e;
+      end;
+
+    end;
+
+    dsResult.Next;
+
+  end;
+
+  dsResult.Free;
+  params.Free;
+end;
+
+function TDataModule1.userInfo(userID: string): tADODataSet;
+var
+  sql: string;
+  params: tObjectDictionary<string, Variant>;
+  dsResult: tADODataSet;
+  dRevenue, dBalance, dTotalSpending, dTotalCF, dTotalEU, dTotalWU: double;
+  sUserType: string;
+begin
+
+  // select user's current balance and type of user
+  sql := 'SELECT Username, UserType, Balance FROM UserTB WHERE UserID = :UserID';
+
+  params := tObjectDictionary<string, Variant>.Create();
+
+  params.Add('UserID', userID);
+
+  dsResult := runSQL(sql, params);
+
+  if dsResult.Fields.FindField('Status') <> nil then
+  begin
+    showMessage(dsResult['Status']);
+    exit;
+  end;
+
+  if dsResult.IsEmpty then
+  begin
+    showMessage('No user with userID');
+    exit;
+  end;
+
+  Result := tADODataSet.Create(nil);
+  Result.FieldDefs.Add('Username', ftString, 100);
+  Result.FieldDefs.Add('UserType', ftString, 10);
+  Result.FieldDefs.Add('Balance', ftFloat);
+  Result.FieldDefs.Add('Revenue', ftFloat);
+  Result.FieldDefs.Add('TotalSales', ftInteger);
+  Result.FieldDefs.Add('TotalEU', ftFloat);
+  Result.FieldDefs.Add('TotalWU', ftFloat);
+  Result.FieldDefs.Add('TotalCF', ftFloat);
+  Result.FieldDefs.Add('TotalSpending', ftCurrency);
+  Result.CreateDataSet;
+
+  Result.Insert;
+  Result.Edit;
+  Result['UserType'] := dsResult['UserType'];
+  Result.Edit;
+  Result['Balance'] := dsResult['Balance'];
+  Result.Edit;
+  Result['Username'] := dsResult['Username'];
+
+  Result.First;
+
+  // if user is a seller, get sales and revenue
+  if dsResult['UserType'] = 'SELLER' then
+  begin
+
+    sql := 'SELECT Revenue FROM SellerTB WHERE UserID = :UserID';
+
+    dsResult := runSQL(sql, params);
+
+    if dsResult.Fields.FindField('Status') <> nil then
+    begin
+      showMessage(dsResult['Status']);
+      exit;
+    end;
+
+    if dsResult.IsEmpty then
+      showMessage('uh oh');
+
+    Result.Edit;
+    Result['Revenue'] := dsResult['Revenue'];
+
+    sql := 'SELECT Sum(Sales) AS TotalSales from ItemTB WHERE SellerID = :UserID';
+
+    dsResult := runSQL(sql, params);
+    Result.Edit;
+    Result['TotalSales'] := dsResult['TotalSales'];
+
+  end;
+
+  // select total spending
+
+  sql := 'SELECT Sum(statValue) AS total FROM StatsTB WHERE UserID = :UserID AND Type = :statType ';
+  params.Clear;
+  params.Add('UserID', userID);
+  params.Add('statType', 'SPE');
+
+  dsResult := runSQL(sql, params);
+  Result.Edit;
+  Result['TotalSpending'] := dsResult['total'];
+
+  // select total cf
+
+  params.AddOrSetValue('statType', 'CF');
+
+  dsResult := runSQL(sql, params);
+
+  Result.Edit;
+  Result['TotalCF'] := dsResult['total'];
+  // select total eu
+
+  params.AddOrSetValue('statType', 'EU');
+
+  dsResult := runSQL(sql, params);
+  Result.Edit;
+  Result['TotalEU'] := dsResult['total'];
+
+  // select total wu
+  params.AddOrSetValue('statType', 'WU');
+
+  dsResult := runSQL(sql, params);
+  Result.Edit;
+  Result['TotalWU'] := dsResult['total'];
+
+  params.Free;
 
 end;
 
+// function used to retrieve all important information on an item
+// so that is can be displayed on the VIEW ITEM screen and ADDitemScreen
 function TDataModule1.viewItem(itemID: string): tADODataSet;
 var
   sql: string;

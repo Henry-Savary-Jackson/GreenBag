@@ -12,6 +12,7 @@ object frmProfile: TfrmProfile
   Font.Style = []
   OldCreateOrder = False
   OnClose = FormClose
+  OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
   object imgProfilePic: TImage
@@ -145,23 +146,25 @@ object frmProfile: TfrmProfile
     object lblBalance: TLabel
       AlignWithMargins = True
       Left = 9
-      Top = 28
+      Top = 9
       Width = 192
       Height = 13
       Align = alTop
       Alignment = taCenter
       Caption = 'Total Balance:'
+      ExplicitTop = 28
       ExplicitWidth = 68
     end
     object lblRevenueTotal: TLabel
       AlignWithMargins = True
       Left = 9
-      Top = 47
+      Top = 28
       Width = 192
       Height = 13
       Align = alTop
       Alignment = taCenter
       Caption = 'Total Revenue:'
+      ExplicitTop = 47
       ExplicitWidth = 74
     end
     object lblSales: TLabel
@@ -189,15 +192,28 @@ object frmProfile: TfrmProfile
     object lblTotalCF: TLabel
       AlignWithMargins = True
       Left = 9
-      Top = 66
+      Top = 47
       Width = 192
       Height = 13
       Align = alTop
       Alignment = taCenter
       Caption = 'Total Carbon Footprint:'
+      ExplicitTop = 66
       ExplicitWidth = 113
     end
     object lblTotalEU: TLabel
+      AlignWithMargins = True
+      Left = 9
+      Top = 66
+      Width = 192
+      Height = 13
+      Align = alTop
+      Alignment = taCenter
+      Caption = 'Total Energy Usage:'
+      ExplicitTop = 85
+      ExplicitWidth = 98
+    end
+    object lblTotalWU: TLabel
       AlignWithMargins = True
       Left = 9
       Top = 85
@@ -205,19 +221,8 @@ object frmProfile: TfrmProfile
       Height = 13
       Align = alTop
       Alignment = taCenter
-      Caption = 'Total Energy Usage:'
-      ExplicitWidth = 98
-    end
-    object lblTotalWU: TLabel
-      AlignWithMargins = True
-      Left = 9
-      Top = 9
-      Width = 192
-      Height = 13
-      Align = alTop
-      Alignment = taCenter
       Caption = 'Total Water Usage:'
-      ExplicitWidth = 94
+      ExplicitTop = 104
     end
     object btnViewProducts: TButton
       AlignWithMargins = True
