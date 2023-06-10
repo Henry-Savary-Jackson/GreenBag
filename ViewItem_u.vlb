@@ -79,9 +79,6 @@ Coordinates=10,282,136,58
 [DataModule1.UserTB]
 Coordinates=187,78,138,58
 
-[Image1]
-Coordinates=338,214,57,58
-
 [DataModule1.SellerTB]
 Coordinates=425,78,144,58
 
@@ -103,4 +100,7 @@ Coordinates=73,10,53,58
 
 [lblCF]
 Coordinates=136,10,49,58
+
+[imgItem]
+Coordinates=338,214,57,58
 

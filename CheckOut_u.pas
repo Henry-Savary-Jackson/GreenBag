@@ -102,6 +102,7 @@ begin
 
   updateDisplay;
 
+
 end;
 
 procedure TfrmCheckout.removeItem(shoppingCartItemID: string);

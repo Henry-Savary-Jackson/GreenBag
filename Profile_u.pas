@@ -7,7 +7,8 @@ uses
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
   VclTee.TeeGDIPlus, VclTee.TeEngine, VclTee.TeeProcs, VclTee.Chart,
-  VclTee.TeeChartLayout, VclTee.Series, DmUnit_u, Data.Win.ADODB;
+  VclTee.TeeChartLayout, VclTee.Series, DmUnit_u, Data.Win.ADODB,
+  System.Generics.Collections, DateUtils;
 
 type
   TfrmProfile = class(TForm)
@@ -30,15 +31,21 @@ type
     lblTotalWU: TLabel;
     lblTotalEU: TLabel;
     pnlInfo: TPanel;
-    Chart1: TChart;
-    ChartLayout1: TChartLayout;
-    Series1: TBarSeries;
+    chrtStats: TChart;
+    chrtLayoutStats: TChartLayout;
+    srsStats: TBarSeries;
+    btnLeft: TButton;
+    btnRight: TButton;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnViewProductsClick(Sender: TObject);
     procedure btnBackClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure showTotals(UserType: string);
+    procedure categoryClickStats(Sender: TObject);
+    procedure NameTOCategString(sName: string);
   private
     { Private declarations }
+    NameToCateg: TObjectDictionary<string, string>;
   public
     { Public declarations }
   end;
@@ -67,6 +74,56 @@ begin
   frmYourProducts.Show;
 end;
 
+procedure TfrmProfile.categoryClickStats(Sender: TObject);
+var
+  sCategory: string;
+  dsResult: TADODataSet;
+  dateLowerLimit, datebegin, dateEnd: tDateTime;
+  i: integer;
+begin
+  if Sender is TButton then
+  begin
+    srsStats.Clear;
+
+    // get the code for this category
+    sCategory := NameToCateg.ExtractPair(TButton(Sender).Caption).Value;
+
+    chrtStats.Title.Caption := 'Your ' + TButton(Sender).Caption;
+
+    dateLowerLimit := date - (10 * 30);
+    datebegin := StrToDate(intTOstr(YearOf(dateLowerLimit)) + '/' +
+      intTOstr(MonthOf(dateLowerLimit)) + '/01');
+    dateEnd := StrToDate(intTOstr(YearOf(date)) + '/' +
+      intTOstr(MonthOf(date) + 1) + '/01');
+
+    dsResult := DataModule1.obtainStats(DataModule1.userID, sCategory,
+      datebegin, dateEnd);
+
+    dsResult.first;
+    for i := 1 to 10 do
+    begin
+
+      if (MonthOf(dateEnd - i * 30) = dsResult['m']) and (YearOf(dateEnd - i * 30)
+        = dsResult['y']) then
+      begin
+        srsStats.Add(dsResult['TotalMonth'], intTOstr(dsResult['m']) + '-' +
+          intTOstr(dsResult['y']), clTeeColor);
+          dsResult.Next;
+          showMessage('looping...');
+
+      end;
+
+       srsStats.Add(0, intTOstr(MonthOf(dateEnd - i * 30)) + '-' +
+      intTOstr(YearOf(dateEnd - i * 30)), clTeeColor);
+
+    end;
+
+  end;
+
+  dsResult.Free;
+
+end;
+
 procedure TfrmProfile.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   try
@@ -88,42 +145,82 @@ end;
 
 procedure TfrmProfile.FormShow(Sender: TObject);
 var
-  dsResult: tAdoDataset;
+  dsResult: TADODataSet;
 begin
   //
-  dsResult :=  DataModule1.userInfo(DataModule1.userID);
 
-  if dsResult['UserType'] = 'BUYER' then
-  begin
-    lblRevenueTotal.Hide;
-    lblSales.Hide;
-    btnViewProducts.Hide;
-  end
-  else
-  begin
-    //if user is a seller
+  NameToCateg := TObjectDictionary<string, string>.Create();
 
+  NameToCateg.Add('Sales', 'SAL');
+  NameToCateg.Add('Spending', 'SPE');
+  NameToCateg.Add('Carbon Footprint', 'CF');
+  NameToCateg.Add('Energy Usage', 'EU');
+  NameToCateg.Add('Water Usage', 'WU');
+  NameToCateg.Add('Balance', 'BAL');
+  NameToCateg.Add('Revenue', 'REV');
+
+  dsResult := DataModule1.userInfo(DataModule1.userID);
+
+  showTotals(dsResult['UserType']);
+
+  lblUsername.Caption := dsResult['Username'];
+
+  lblBalance.Caption := 'Current Balance: ' + floatToStrf(dsResult['Balance'],
+    ffCurrency, 8, 2);
+
+  lblSpendingTotal.Caption := 'Total Spending:' +
+    floatToStrf(dsResult['TotalSpending'], ffCurrency, 8, 2);
+
+  lblTotalCF.Caption := 'Total Carbon Footprint:' +
+    floatToStrf(dsResult['TotalCF'], ffFixed, 8, 2);
+
+  lblTotalEU.Caption := 'Total Energy Usage:' + floatToStrf(dsResult['TotalEU'],
+    ffFixed, 8, 2);
+
+  lblTotalWU.Caption := 'Total Water Usage:' + floatToStrf(dsResult['TotalWU'],
+    ffFixed, 8, 2);
+
+  if dsResult['UserType'] = 'SELLER' then
+  begin
+
+    lblRevenueTotal.Caption := 'Total Revenue: ' +
+      floatToStrf(dsResult['Revenue'], ffCurrency, 8, 2);
+
+    lblSales.Caption := 'Total Sales: ' + intTOstr(dsResult['TotalSales']);
+
+  end;
+
+end;
+
+// Takes the caption of the button and returns thestring value
+// that is used in the database to represent that category of stats
+procedure TfrmProfile.NameTOCategString(sName: string);
+begin
+
+  //
+end;
+
+procedure TfrmProfile.showTotals(UserType: string);
+begin
+  lblBalance.Show;
+  lblSpendingTotal.Show;
+  lblTotalCF.Show;
+  lblTotalEU.Show;
+  lblTotalWU.Show;
+
+  if UserType = 'SELLER' then
+  begin
     lblRevenueTotal.Show;
     lblSales.Show;
     btnViewProducts.Show;
 
-    lblRevenueTotal.Caption := 'Total Revenue: ' + floatToStrf(dsResult['Revenue'],ffCurrency, 8, 2);
-
-    lblSales.Caption := 'Total Sales: ' + intTostr(dsResult['TotalSales']);
-
+  end
+  else
+  begin
+    lblRevenueTotal.Hide;
+    lblSales.Hide;
+    btnViewProducts.Hide;
   end;
-
-  lblUsername.Caption := dsResult['Username'];
-
-  lblBalance.Caption := 'Current Balance: ' + floatTostrf(dsResult['Balance'],ffCurrency, 8, 2);
-
-  lblSpendingTotal.Caption := 'Total Spending:' +floatTostrf(dsResult['TotalSpending'],ffCurrency, 8, 2);
-
-  lblTotalCF.Caption := 'Total Carbon Footprint:' +floatTostrf(dsResult['TotalCF'],ffFixed,8,2);
-
-  lblTotalEU.Caption :='Total Energy Usage:' + floatTostrf(dsResult['TotalEU'],ffFixed,8,2);
-
-  lblTotalWU.Caption :=  'Total Water Usage:' + floatTostrf(dsResult['TotalWU'],ffFixed,8,2)
 
 end;
 

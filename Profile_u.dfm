@@ -2,8 +2,8 @@ object frmProfile: TfrmProfile
   Left = 0
   Top = 0
   Caption = 'Your Profile'
-  ClientHeight = 665
-  ClientWidth = 592
+  ClientHeight = 725
+  ClientWidth = 627
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -22,7 +22,7 @@ object frmProfile: TfrmProfile
     Height = 105
   end
   object lblUsername: TLabel
-    Left = 232
+    Left = 246
     Top = 136
     Width = 83
     Height = 20
@@ -63,6 +63,7 @@ object frmProfile: TfrmProfile
       Margins.Bottom = 8
       Caption = 'Balance'
       TabOrder = 0
+      OnClick = categoryClickStats
     end
     object btnCFCategory: TButton
       AlignWithMargins = True
@@ -76,6 +77,7 @@ object frmProfile: TfrmProfile
       Margins.Bottom = 8
       Caption = 'Carbon Footprint'
       TabOrder = 1
+      OnClick = categoryClickStats
     end
     object btnEUcategory: TButton
       AlignWithMargins = True
@@ -89,6 +91,7 @@ object frmProfile: TfrmProfile
       Margins.Bottom = 8
       Caption = 'Energy Usage'
       TabOrder = 2
+      OnClick = categoryClickStats
     end
     object btnSalesCategory: TButton
       AlignWithMargins = True
@@ -102,6 +105,7 @@ object frmProfile: TfrmProfile
       Margins.Bottom = 8
       Caption = 'Sales'
       TabOrder = 3
+      OnClick = categoryClickStats
     end
     object btnSpendCategory: TButton
       AlignWithMargins = True
@@ -115,6 +119,7 @@ object frmProfile: TfrmProfile
       Margins.Bottom = 8
       Caption = 'Spending'
       TabOrder = 4
+      OnClick = categoryClickStats
     end
     object btnWUCategory: TButton
       AlignWithMargins = True
@@ -128,6 +133,7 @@ object frmProfile: TfrmProfile
       Margins.Bottom = 8
       Caption = 'Water Usage'
       TabOrder = 5
+      OnClick = categoryClickStats
     end
   end
   object pnlInfo: TPanel
@@ -152,19 +158,17 @@ object frmProfile: TfrmProfile
       Align = alTop
       Alignment = taCenter
       Caption = 'Total Balance:'
-      ExplicitTop = 28
       ExplicitWidth = 68
     end
     object lblRevenueTotal: TLabel
       AlignWithMargins = True
       Left = 9
-      Top = 28
+      Top = 123
       Width = 192
       Height = 13
       Align = alTop
       Alignment = taCenter
       Caption = 'Total Revenue:'
-      ExplicitTop = 47
       ExplicitWidth = 74
     end
     object lblSales: TLabel
@@ -181,7 +185,7 @@ object frmProfile: TfrmProfile
     object lblSpendingTotal: TLabel
       AlignWithMargins = True
       Left = 9
-      Top = 123
+      Top = 28
       Width = 192
       Height = 13
       Align = alTop
@@ -198,7 +202,6 @@ object frmProfile: TfrmProfile
       Align = alTop
       Alignment = taCenter
       Caption = 'Total Carbon Footprint:'
-      ExplicitTop = 66
       ExplicitWidth = 113
     end
     object lblTotalEU: TLabel
@@ -210,7 +213,6 @@ object frmProfile: TfrmProfile
       Align = alTop
       Alignment = taCenter
       Caption = 'Total Energy Usage:'
-      ExplicitTop = 85
       ExplicitWidth = 98
     end
     object lblTotalWU: TLabel
@@ -222,7 +224,7 @@ object frmProfile: TfrmProfile
       Align = alTop
       Alignment = taCenter
       Caption = 'Total Water Usage:'
-      ExplicitTop = 104
+      ExplicitWidth = 94
     end
     object btnViewProducts: TButton
       AlignWithMargins = True
@@ -236,11 +238,11 @@ object frmProfile: TfrmProfile
       OnClick = btnViewProductsClick
     end
   end
-  object Chart1: TChart
-    Left = 99
-    Top = 432
-    Width = 373
-    Height = 225
+  object chrtStats: TChart
+    Left = 0
+    Top = 431
+    Width = 599
+    Height = 258
     Cursor = crArrow
     AllowPanning = pmHorizontal
     BackWall.Brush.Gradient.Direction = gdBottomTop
@@ -257,6 +259,7 @@ object frmProfile: TfrmProfile
     Gradient.Visible = True
     LeftWall.Color = 14745599
     Legend.Font.Name = 'Verdana'
+    Legend.ResizeChart = False
     Legend.Shadow.Transparency = 0
     Legend.Visible = False
     MarginTop = 3
@@ -284,6 +287,7 @@ object frmProfile: TfrmProfile
     LeftAxis.LabelsFormat.Font.Name = 'Verdana'
     LeftAxis.TickLength = 3
     LeftAxis.TicksInner.Color = 11119017
+    LeftAxis.TickOnLabelsOnly = False
     LeftAxis.Title.Font.Name = 'Verdana'
     RightAxis.Axis.Color = 4210752
     RightAxis.Grid.Color = 11119017
@@ -296,9 +300,17 @@ object frmProfile: TfrmProfile
     TopAxis.LabelsFormat.Font.Name = 'Verdana'
     TopAxis.TicksInner.Color = 11119017
     TopAxis.Title.Font.Name = 'Verdana'
+    View3DOptions.HorizOffset = -6
+    View3DOptions.Zoom = 80
+    Zoom.MouseButton = mbMiddle
     BevelOuter = bvNone
     TabOrder = 3
     DefaultCanvas = 'TGDIPlusCanvas'
+    PrintMargins = (
+      15
+      20
+      15
+      20)
     ColorPaletteIndex = -2
     ColorPalette = (
       7368816
@@ -313,9 +325,9 @@ object frmProfile: TfrmProfile
       10401629
       9300723
       11842740)
-    object ChartLayout1: TChartLayout
-      Left = 379
-      Top = 8
+    object chrtLayoutStats: TChartLayout
+      Left = 530
+      Top = -20
       Width = 245
       Height = 356
       HorzScrollBar.Smooth = True
@@ -323,19 +335,35 @@ object frmProfile: TfrmProfile
       VertScrollBar.Smooth = True
       VertScrollBar.Tracking = True
       TabOrder = 0
+      Visible = False
       Charts = <>
     end
-    object Series1: TBarSeries
+    object srsStats: TBarSeries
       HoverElement = []
+      Marks.DrawEvery = 5
       Marks.OnTop = True
       XValues.Name = 'X'
       XValues.Order = loAscending
       YValues.Name = 'Bar'
       YValues.Order = loNone
-      Data = {
-        04060000000000000000087B40FF01000000310000000000507E40FF00000000
-        0000000000E88240FF000000000000000000448640FF00000000000000000050
-        8440FF000000000000000000D08640FF00000000}
+      Data = {0000000000}
+      Detail = {0000000000}
     end
+  end
+  object btnLeft: TButton
+    Left = 184
+    Top = 695
+    Width = 75
+    Height = 25
+    Caption = '<'
+    TabOrder = 4
+  end
+  object btnRight: TButton
+    Left = 301
+    Top = 695
+    Width = 75
+    Height = 25
+    Caption = '>'
+    TabOrder = 5
   end
 end

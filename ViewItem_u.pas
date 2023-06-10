@@ -13,7 +13,7 @@ uses
 type
   TfrmViewItem = class(TForm)
     btnBack: TButton;
-    Image1: TImage;
+    imgItem: TImage;
     btnAddToCart: TButton;
     redDesc: TRichEdit;
     lblDesc: TLabel;
@@ -124,6 +124,7 @@ end;
 procedure TfrmViewItem.FormShow(Sender: TObject);
 var
   dsResult: TADODataSet;
+  gGraphic : tGraphic;
 begin
   //
   dsResult := DataModule1.viewItem(itemID);
@@ -168,6 +169,9 @@ begin
 
   if dsResult['Description'] <> NULl then
     redDesc.Lines.Add(dsResult['Description']);
+  gGraphic := TBitmap.Create;
+  gGraphic.Assign(dsResult.FieldByName('Image'));
+  imgItem.picTure.Assign(gGraphic);
 
   btnSendRating.Enabled := dsResult['SellerID'] <> DataModule1.userID;
   btnAddToCart.Enabled := dsResult['SellerID'] <> DataModule1.userID;

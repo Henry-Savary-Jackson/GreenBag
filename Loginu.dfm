@@ -83,7 +83,7 @@ object frmLogin: TfrmLogin
   end
   object btnSignIn: TButton
     Left = 128
-    Top = 152
+    Top = 160
     Width = 75
     Height = 25
     Caption = 'Sign In'

@@ -6,11 +6,11 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls,
-  Vcl.ExtCtrls, DMUnit_u, Data.Win.ADODB, PngImage;
+  Vcl.ExtCtrls, DMUnit_u, Data.Win.ADODB, PngImage,Vcl.Imaging.jpeg ;
 
 type
   TfrmAddItem = class(TForm)
-    imgProduct: TImage;
+    imgItem: TImage;
     lblDesc: TLabel;
     lblCategory: TLabel;
     lblCF: TLabel;
@@ -40,7 +40,7 @@ type
     lblMaxWithdrawStock: TLabel;
     edtMaxWithdrawStock: TEdit;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
-    procedure imgProductClick(Sender: TObject);
+    procedure imgItemClick(Sender: TObject);
     procedure btnBackClick(Sender: TObject);
     procedure btnSaveChangesClick(Sender: TObject);
     function getFloatFromStr(s, valName: string): double;
@@ -77,13 +77,13 @@ var
   I: Integer;
 begin
 
-  if imgProduct.Picture = nil then
+  if imgItem.Picture = nil then
   begin
     showMessage('Please upload an image of your item.');
     Exit;
   end;
   PngImage := tPngImage.Create();
-  PngImage.Assign(imgProduct.Picture.Graphic);
+  PngImage.Assign(imgItem.Picture.Graphic);
 
   sName := edtName.Text;
 
@@ -106,7 +106,8 @@ begin
 
   stock := getFloatFromStr(edtStock.Text, 'Stock');
 
-  maxWithdrawstock := getFloatFromStr(edtMaxWithdrawStock.Text,' Max Withdrawable stock');
+  maxWithdrawstock := getFloatFromStr(edtMaxWithdrawStock.Text,
+    ' Max Withdrawable stock');
 
   if stock = INFINITE then
     Exit;
@@ -144,33 +145,50 @@ begin
 
   category := cmbCategory.Items[cmbCategory.ItemIndex];
 
-  if itemID = '' then
-  begin
-    itemID := UpperCase(DataModule1.userID[1] + sName[1]);
+  try
 
-    for I := 1 to 8 do
-    begin
-      itemID := itemID + intToStr(random(10))
+    try
+
+      if itemID = '' then
+      begin
+        itemID := UpperCase(DataModule1.userID[1] + sName[1]);
+
+        for I := 1 to 8 do
+        begin
+          itemID := itemID + intToStr(random(10))
+        end;
+
+        DataModule1.insertItem(itemID, sName, DataModule1.userID, category,
+          sDesc, Price, stock, maxWithdrawstock, CF, EU, WU, CFProduce,
+          EUProduce, WUProduce, PngImage);
+
+      end
+      else
+      begin
+        DataModule1.updateItem(itemID, sName, DataModule1.userID, category,
+          sDesc, Price, stock, maxWithdrawstock, CF, EU, WU, CFProduce,
+          EUProduce, WUProduce, PngImage);
+
+      end;
+
+      showMessage('Successfully saved changes');
+      // free var from heap  memory
+
+      // naviguate back to your products
+      frmAddItem.Hide;
+      frmYourProducts.Show;
+
+    except
+      on e: exception do
+      begin
+        showMessage(e.Message);
+      end;
+
     end;
-
-    DataModule1.insertItem(itemID, sName, DataModule1.userID, category, sDesc,
-      Price, stock, maxwithdrawstock, CF, EU, WU, CFProduce, EUProduce, WUProduce, PngImage);
-
-  end
-  else
-  begin
-    DataModule1.updateItem(itemID, sName, DataModule1.userID, category, sDesc,
-      Price, stock,maxwithdrawstock, CF, EU, WU, CFProduce, EUProduce, WUProduce, PngImage);
-
+  finally
+    PngImage.Free;
   end;
 
-  showMessage('Successfully saved changes');
-  // free var from heap  memory
-  PngImage.Free;
-
-  //naviguate back to your products
-  frmAddItem.Hide;
-  frmYourProducts.Show;
 end;
 
 procedure TfrmAddItem.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -196,6 +214,7 @@ procedure TfrmAddItem.FormShow(Sender: TObject);
 var
   dsResult: tAdoDataset;
   dsCategories: tAdoDataset;
+  gGraphic : tGraphic;
 begin
 
   cmbCategory.Items.Clear;
@@ -247,6 +266,10 @@ begin
 
     cmbCategory.ItemIndex := cmbCategory.Items.IndexOf(dsResult['Category']);
 
+    gGraphic := TBitmap.Create;
+    gGraphic.Assign(dsResult.FieldByName('Image'));
+    imgItem.Picture.Assign(gGraphic);
+
     dsResult.Free;
   end;
 
@@ -272,7 +295,7 @@ begin
   end;
 end;
 
-procedure TfrmAddItem.imgProductClick(Sender: TObject);
+procedure TfrmAddItem.imgItemClick(Sender: TObject);
 var
   fileChooser: tOpenDialog;
   sImagePath: string;
@@ -286,7 +309,7 @@ begin
     if fileChooser.Execute(Handle) then
     begin
       sImagePath := fileChooser.FileName;
-      imgProduct.Picture.LoadFromFile(sImagePath);
+      imgItem.Picture.LoadFromFile(sImagePath);
     end
     else
     begin

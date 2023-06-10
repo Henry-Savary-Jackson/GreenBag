@@ -66,6 +66,8 @@ begin
   end;
 
   //
+
+  DataModule1.dDate := StrToDate(inputbox('', 'Date:', ''));
   frmLogin.Hide;
   DataModule1.userID := userId;
   DataModule1.CartID := DataModule1.CreateUserCart(DataModule1.userID);
