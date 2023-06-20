@@ -47,7 +47,7 @@ type
     function userInfo(userID: string): tADODataSet;
 
     function obtainStats(userID, statType: string;
-      DateEnd, DateBegin: tDateTime): tADODataSet;
+      DateBegin, DateEnd: tDateTime): tADODataSet;
 
     function viewItem(itemID: string): tADODataSet;
 
@@ -632,6 +632,7 @@ var
   bFound: boolean;
 begin
   bFound := False;
+  table.Open;
   table.First;
   while not table.Eof do
   begin
@@ -786,33 +787,20 @@ begin
   ItemTB.edit;
 
   ItemTB['ItemID'] := itemID;
-  ItemTB.edit;
   ItemTB['ItemName'] := name;
-  ItemTB.edit;
   ItemTB['Cost'] := Price;
-  ItemTB.edit;
   ItemTB['CarbonFootprintProduction'] := CFProduce;
-  ItemTB.edit;
   ItemTB['WaterUsageProduction'] := WUProduce;
-  ItemTB.edit;
+
   ItemTB['EnergyUsageProduction'] := EUProduce;
-  ItemTB.edit;
   ItemTB['CarbonFootprintUsage'] := CF;
-  ItemTB.edit;
   ItemTB['WaterFootprintUsage'] := WU;
-  ItemTB.edit;
   ItemTB['EnergyFootprintUsage'] := EU;
-  ItemTB.edit;
   ItemTB['SellerID'] := SellerID;
-  ItemTB.edit;
   ItemTB['Description'] := Desc;
-  ItemTB.edit;
   ItemTB['Category'] := category;
-  ItemTB.edit;
   ItemTB['Stock'] := stock;
-  ItemTB.edit;
   ItemTB['MaxWithdrawableStock'] := maxwithdrawstock;
-  ItemTB.edit;
   memStream := tMemoryStream.Create;
   try
     Image.SaveToStream(memStream);
@@ -964,18 +952,19 @@ begin
 end;
 
 function TDataModule1.obtainStats(userID, statType: string;
-  DateEnd, DateBegin: tDateTime): tADODataSet;
+   DateBegin, DateEnd: tDateTime): tADODataSet;
 var
   sql: string;
   params: tObjectDictionary<string, Variant>;
 begin;
   sql := 'SELECT YEAR(statDate) AS y, MONTH(statDate) as m , SUM(statValue) AS TotalMonth FROM StatsTB'
-    + ' WHERE UserID = :UserID AND Type = :Type AND statDate BETWEEN :MonthBegin AND :MonthEnd '
+    + ' WHERE statDate BETWEEN :MonthBegin AND :MonthEnd '
     + 'GROUP BY YEAR(statDate), MONTH(statDate) ORDER BY YEAR(statDate) ASC, MONTH(statDate) ASC';
   params := tObjectDictionary<string, Variant>.Create();
 
-  params.Add('UserID', userID);
-  params.Add('Type', statType);
+  //UserID = :UserID AND Type = :Type AND statDate
+ // params.Add('UserID', userID);
+ // params.Add('Type', statType);
   params.Add('MonthBegin', DateBegin);
   params.Add('MonthEnd', DateEnd);
 

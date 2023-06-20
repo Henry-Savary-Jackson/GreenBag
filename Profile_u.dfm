@@ -366,4 +366,16 @@ object frmProfile: TfrmProfile
     Caption = '>'
     TabOrder = 5
   end
+  object DBGrid1: TDBGrid
+    Left = 24
+    Top = 135
+    Width = 320
+    Height = 120
+    TabOrder = 6
+    TitleFont.Charset = DEFAULT_CHARSET
+    TitleFont.Color = clWindowText
+    TitleFont.Height = -11
+    TitleFont.Name = 'Tahoma'
+    TitleFont.Style = []
+  end
 end

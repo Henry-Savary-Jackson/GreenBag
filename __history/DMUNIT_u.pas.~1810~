@@ -47,7 +47,7 @@ type
     function userInfo(userID: string): tADODataSet;
 
     function obtainStats(userID, statType: string;
-      DateEnd, DateBegin: tDateTime): tADODataSet;
+      DateBegin, DateEnd: tDateTime): tADODataSet;
 
     function viewItem(itemID: string): tADODataSet;
 
@@ -632,6 +632,7 @@ var
   bFound: boolean;
 begin
   bFound := False;
+  table.Open;
   table.First;
   while not table.Eof do
   begin
@@ -783,12 +784,14 @@ var
 begin
 
   ItemTB.Insert;
+  ItemTB.edit;
 
   ItemTB['ItemID'] := itemID;
   ItemTB['ItemName'] := name;
   ItemTB['Cost'] := Price;
   ItemTB['CarbonFootprintProduction'] := CFProduce;
   ItemTB['WaterUsageProduction'] := WUProduce;
+
   ItemTB['EnergyUsageProduction'] := EUProduce;
   ItemTB['CarbonFootprintUsage'] := CF;
   ItemTB['WaterFootprintUsage'] := WU;
@@ -802,6 +805,7 @@ begin
   try
     Image.SaveToStream(memStream);
     memStream.Position := 0;
+    ItemTB.edit;
     TBlobField(ItemTB.FieldByName('Image')).LoadFromStream(memStream);
   finally
     memStream.Free;
@@ -948,7 +952,7 @@ begin
 end;
 
 function TDataModule1.obtainStats(userID, statType: string;
-  DateEnd, DateBegin: tDateTime): tADODataSet;
+   DateBegin, DateEnd: tDateTime): tADODataSet;
 var
   sql: string;
   params: tObjectDictionary<string, Variant>;

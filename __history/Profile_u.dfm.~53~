@@ -2,8 +2,8 @@ object frmProfile: TfrmProfile
   Left = 0
   Top = 0
   Caption = 'Your Profile'
-  ClientHeight = 665
-  ClientWidth = 592
+  ClientHeight = 725
+  ClientWidth = 627
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -239,10 +239,10 @@ object frmProfile: TfrmProfile
     end
   end
   object chrtStats: TChart
-    Left = 99
-    Top = 432
-    Width = 373
-    Height = 225
+    Left = 0
+    Top = 431
+    Width = 599
+    Height = 258
     Cursor = crArrow
     AllowPanning = pmHorizontal
     BackWall.Brush.Gradient.Direction = gdBottomTop
@@ -259,6 +259,7 @@ object frmProfile: TfrmProfile
     Gradient.Visible = True
     LeftWall.Color = 14745599
     Legend.Font.Name = 'Verdana'
+    Legend.ResizeChart = False
     Legend.Shadow.Transparency = 0
     Legend.Visible = False
     MarginTop = 3
@@ -286,6 +287,7 @@ object frmProfile: TfrmProfile
     LeftAxis.LabelsFormat.Font.Name = 'Verdana'
     LeftAxis.TickLength = 3
     LeftAxis.TicksInner.Color = 11119017
+    LeftAxis.TickOnLabelsOnly = False
     LeftAxis.Title.Font.Name = 'Verdana'
     RightAxis.Axis.Color = 4210752
     RightAxis.Grid.Color = 11119017
@@ -298,10 +300,17 @@ object frmProfile: TfrmProfile
     TopAxis.LabelsFormat.Font.Name = 'Verdana'
     TopAxis.TicksInner.Color = 11119017
     TopAxis.Title.Font.Name = 'Verdana'
+    View3DOptions.HorizOffset = -6
+    View3DOptions.Zoom = 80
     Zoom.MouseButton = mbMiddle
     BevelOuter = bvNone
     TabOrder = 3
     DefaultCanvas = 'TGDIPlusCanvas'
+    PrintMargins = (
+      15
+      20
+      15
+      20)
     ColorPaletteIndex = -2
     ColorPalette = (
       7368816
@@ -317,8 +326,8 @@ object frmProfile: TfrmProfile
       9300723
       11842740)
     object chrtLayoutStats: TChartLayout
-      Left = 379
-      Top = 8
+      Left = 530
+      Top = -20
       Width = 245
       Height = 356
       HorzScrollBar.Smooth = True
@@ -326,16 +335,47 @@ object frmProfile: TfrmProfile
       VertScrollBar.Smooth = True
       VertScrollBar.Tracking = True
       TabOrder = 0
+      Visible = False
       Charts = <>
     end
     object srsStats: TBarSeries
       HoverElement = []
+      Marks.DrawEvery = 5
       Marks.OnTop = True
       XValues.Name = 'X'
       XValues.Order = loAscending
       YValues.Name = 'Bar'
       YValues.Order = loNone
       Data = {0000000000}
+      Detail = {0000000000}
     end
+  end
+  object btnLeft: TButton
+    Left = 184
+    Top = 695
+    Width = 75
+    Height = 25
+    Caption = '<'
+    TabOrder = 4
+  end
+  object btnRight: TButton
+    Left = 301
+    Top = 695
+    Width = 75
+    Height = 25
+    Caption = '>'
+    TabOrder = 5
+  end
+  object DBGrid1: TDBGrid
+    Left = 24
+    Top = 135
+    Width = 320
+    Height = 120
+    TabOrder = 6
+    TitleFont.Charset = DEFAULT_CHARSET
+    TitleFont.Color = clWindowText
+    TitleFont.Height = -11
+    TitleFont.Name = 'Tahoma'
+    TitleFont.Style = []
   end
 end

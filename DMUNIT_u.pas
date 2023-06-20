@@ -29,6 +29,7 @@ type
     { Private declarations }
   public
 
+
     { Public declarations }
     // stores these global vairables for all screen
     userID: string;
@@ -47,7 +48,7 @@ type
     function userInfo(userID: string): tADODataSet;
 
     function obtainStats(userID, statType: string;
-      DateEnd, DateBegin: tDateTime): tADODataSet;
+      DateBegin, DateEnd: tDateTime): tADODataSet;
 
     function viewItem(itemID: string): tADODataSet;
 
@@ -952,22 +953,25 @@ begin
 end;
 
 function TDataModule1.obtainStats(userID, statType: string;
-  DateEnd, DateBegin: tDateTime): tADODataSet;
+   DateBegin, DateEnd: tDateTime): tADODataSet;
 var
   sql: string;
   params: tObjectDictionary<string, Variant>;
 begin;
   sql := 'SELECT YEAR(statDate) AS y, MONTH(statDate) as m , SUM(statValue) AS TotalMonth FROM StatsTB'
-    + ' WHERE UserID = :UserID AND Type = :Type AND statDate BETWEEN :MonthBegin AND :MonthEnd '
+    + ' WHERE UserID = :UserID AND Type = :Type '
     + 'GROUP BY YEAR(statDate), MONTH(statDate) ORDER BY YEAR(statDate) ASC, MONTH(statDate) ASC';
   params := tObjectDictionary<string, Variant>.Create();
-
+  //statDate BETWEEN :MonthBegin AND :MonthEnd
+  //UserID = :UserID AND Type = :Type AND statDate
   params.Add('UserID', userID);
   params.Add('Type', statType);
-  params.Add('MonthBegin', DateBegin);
-  params.Add('MonthEnd', DateEnd);
+ // params.Add('MonthBegin', DateBegin);
+  //params.Add('MonthEnd', DateEnd);
 
   Result := runSQL(sql, params);
+
+  sql := '';
 
 end;
 

@@ -8,7 +8,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
   VclTee.TeeGDIPlus, VclTee.TeEngine, VclTee.TeeProcs, VclTee.Chart,
   VclTee.TeeChartLayout, VclTee.Series, DmUnit_u, Data.Win.ADODB,
-  System.Generics.Collections, DateUtils;
+  System.Generics.Collections, DateUtils, Data.DB, Vcl.Grids, Vcl.DBGrids;
 
 type
   TfrmProfile = class(TForm)
@@ -36,6 +36,7 @@ type
     srsStats: TBarSeries;
     btnLeft: TButton;
     btnRight: TButton;
+    DBGrid1: TDBGrid;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnViewProductsClick(Sender: TObject);
     procedure btnBackClick(Sender: TObject);
@@ -80,6 +81,7 @@ var
   dsResult: TADODataSet;
   dateLowerLimit, datebegin, dateEnd: tDateTime;
   i: integer;
+  ds  : TDataSource;
 begin
   if Sender is TButton then
   begin
@@ -90,33 +92,59 @@ begin
 
     chrtStats.Title.Caption := 'Your ' + TButton(Sender).Caption;
 
-    dateLowerLimit := date - (10 * 30);
+    dateLowerLimit := date - (10 * 31);
+
     datebegin := StrToDate(intTOstr(YearOf(dateLowerLimit)) + '/' +
       intTOstr(MonthOf(dateLowerLimit)) + '/01');
+
     dateEnd := StrToDate(intTOstr(YearOf(date)) + '/' +
       intTOstr(MonthOf(date) + 1) + '/01');
 
-    dsResult := DataModule1.obtainStats(DataModule1.userID, sCategory,
+     DataModule1.obtainStats(DataModule1.userID, sCategory,
       datebegin, dateEnd);
 
-    dsResult.first;
-    for i := 1 to 10 do
+
+
+    with DataModule1 do
     begin
+    ds := TDataSource.Create(Self);
+    ds.DataSet :=  Query;
+    ds.Enabled := true;
 
-      if (MonthOf(dateEnd - i * 30) = dsResult['m']) and (YearOf(dateEnd - i * 30)
-        = dsResult['y']) then
-      begin
-        srsStats.Add(dsResult['TotalMonth'], intTOstr(dsResult['m']) + '-' +
-          intTOstr(dsResult['y']), clTeeColor);
-          dsResult.Next;
-          showMessage('looping...');
 
-      end;
 
-       srsStats.Add(0, intTOstr(MonthOf(dateEnd - i * 30)) + '-' +
-      intTOstr(YearOf(dateEnd - i * 30)), clTeeColor);
+
+    DBGrid1.DataSource := ds ;
+
+    DBGrid1.DataSource.DataSet.First;
+
+     while DBGrid1.DataSource.DataSet.Eof do
+    begin
+    srsStats.Add(DBGrid1.DataSource.DataSet['TotalMonth'], intTOstr(DBGrid1.DataSource.DataSet['m']) + '-' +
+          intTOstr(DBGrid1.DataSource.DataSet['y']), clTeeColor);
+      showMessage(FloatToStr(DBGrid1.DataSource.DataSet['TotalMonth']));
+      DBGrid1.DataSource.DataSet.Next;
+    end;
 
     end;
+
+
+
+//    for i := 1 to 10 do
+//    begin
+//
+//      if (MonthOf(dateEnd - i * 30) = dsResult['m']) and (YearOf(dateEnd - i * 30)
+//        = dsResult['y']) then
+//      begin
+//
+//          dsResult.Next;
+//
+//      end;
+//
+//       srsStats.Add(0, intTOstr(MonthOf(dateEnd - i * 30)) + '-' +
+//      intTOstr(YearOf(dateEnd - i * 30)), clTeeColor);
+//
+//    end;
 
   end;
 

@@ -787,33 +787,20 @@ begin
   ItemTB.edit;
 
   ItemTB['ItemID'] := itemID;
-  ItemTB.edit;
   ItemTB['ItemName'] := name;
-  ItemTB.edit;
   ItemTB['Cost'] := Price;
-  ItemTB.edit;
   ItemTB['CarbonFootprintProduction'] := CFProduce;
-  ItemTB.edit;
   ItemTB['WaterUsageProduction'] := WUProduce;
-  ItemTB.edit;
+
   ItemTB['EnergyUsageProduction'] := EUProduce;
-  ItemTB.edit;
   ItemTB['CarbonFootprintUsage'] := CF;
-  ItemTB.edit;
   ItemTB['WaterFootprintUsage'] := WU;
-  ItemTB.edit;
   ItemTB['EnergyFootprintUsage'] := EU;
-  ItemTB.edit;
   ItemTB['SellerID'] := SellerID;
-  ItemTB.edit;
   ItemTB['Description'] := Desc;
-  ItemTB.edit;
   ItemTB['Category'] := category;
-  ItemTB.edit;
   ItemTB['Stock'] := stock;
-  ItemTB.edit;
   ItemTB['MaxWithdrawableStock'] := maxwithdrawstock;
-  ItemTB.edit;
   memStream := tMemoryStream.Create;
   try
     Image.SaveToStream(memStream);
@@ -965,7 +952,7 @@ begin
 end;
 
 function TDataModule1.obtainStats(userID, statType: string;
-  DateEnd, DateBegin: tDateTime): tADODataSet;
+   DateBegin, DateEnd: tDateTime): tADODataSet;
 var
   sql: string;
   params: tObjectDictionary<string, Variant>;

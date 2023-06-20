@@ -29,13 +29,14 @@ type
     { Private declarations }
   public
 
+
     { Public declarations }
     // stores these global vairables for all screen
     userID: string;
     CartID: string;
-    dDate : tDate;
+    dDate: tDate;
 
-    procedure findInTable(table: tADoTable; pk: string; pkVal: string );
+    procedure findInTable(table: TADOTable; pk: string; pkVal: string);
 
     function runSQL(sql: string;
       params: tObjectDictionary<string, Variant> = nil): tADODataSet;
@@ -47,7 +48,7 @@ type
     function userInfo(userID: string): tADODataSet;
 
     function obtainStats(userID, statType: string;
-      DateEnd, DateBegin: tDateTime): tADODataSet;
+      DateBegin, DateEnd: tDateTime): tADODataSet;
 
     function viewItem(itemID: string): tADODataSet;
 
@@ -627,18 +628,18 @@ begin
   end;
 end;
 
-procedure TDataModule1.findInTable(table: tADoTable; pk, pkVal: string);
+procedure TDataModule1.findInTable(table: TADOTable; pk, pkVal: string);
 var
-bFound : boolean;
+  bFound: boolean;
 begin
-//
   bFound := False;
+  table.Open;
   table.First;
   while not table.Eof do
   begin
     if table[pk] = pkVal then
     begin
-      bFound := true;
+      bFound := True;
       break;
 
     end;
@@ -779,15 +780,19 @@ end;
 procedure TDataModule1.insertItem(itemID, Name, SellerID, category,
   Desc: string; Price, stock, maxwithdrawstock, CF, EU, WU, CFProduce,
   EUProduce, WUProduce: double; Image: tPngImage);
+var
+  memStream: tMemoryStream;
 begin
 
   ItemTB.Insert;
+  ItemTB.edit;
 
   ItemTB['ItemID'] := itemID;
   ItemTB['ItemName'] := name;
   ItemTB['Cost'] := Price;
   ItemTB['CarbonFootprintProduction'] := CFProduce;
   ItemTB['WaterUsageProduction'] := WUProduce;
+
   ItemTB['EnergyUsageProduction'] := EUProduce;
   ItemTB['CarbonFootprintUsage'] := CF;
   ItemTB['WaterFootprintUsage'] := WU;
@@ -797,7 +802,15 @@ begin
   ItemTB['Category'] := category;
   ItemTB['Stock'] := stock;
   ItemTB['MaxWithdrawableStock'] := maxwithdrawstock;
-  ItemTb['Image']:= Image;
+  memStream := tMemoryStream.Create;
+  try
+    Image.SaveToStream(memStream);
+    memStream.Position := 0;
+    ItemTB.edit;
+    TBlobField(ItemTB.FieldByName('Image')).LoadFromStream(memStream);
+  finally
+    memStream.Free;
+  end;
 
   ItemTB.Post;
   ItemTB.Refresh;
@@ -940,22 +953,21 @@ begin
 end;
 
 function TDataModule1.obtainStats(userID, statType: string;
-  DateEnd, DateBegin: tDateTime): tADODataSet;
+   DateBegin, DateEnd: tDateTime): tADODataSet;
 var
   sql: string;
   params: tObjectDictionary<string, Variant>;
 begin;
-  sql := 'SELECT YEAR(statDate) AS y, MONTH(statDate) as m , SUM(statValue) AS TotalMonth FROM StatsTB' +
-    ' WHERE UserID = :UserID AND Type = :Type AND statDate BETWEEN :MonthBegin AND :MonthEnd '+
-    'GROUP BY YEAR(statDate), MONTH(statDate) ORDER BY YEAR(statDate) ASC, MONTH(statDate) ASC';
+  sql := 'SELECT YEAR(statDate) AS y, MONTH(statDate) as m , SUM(statValue) AS TotalMonth FROM StatsTB'
+    + ' WHERE UserID = :UserID AND Type = :Type '
+    + 'GROUP BY YEAR(statDate), MONTH(statDate) ORDER BY YEAR(statDate) ASC, MONTH(statDate) ASC';
   params := tObjectDictionary<string, Variant>.Create();
-
-
-
+  //statDate BETWEEN :MonthBegin AND :MonthEnd
+  //UserID = :UserID AND Type = :Type AND statDate
   params.Add('UserID', userID);
   params.Add('Type', statType);
-  params.Add('MonthBegin', DateBegin);
-  params.Add('MonthEnd', DateEnd);
+ // params.Add('MonthBegin', DateBegin);
+  //params.Add('MonthEnd', DateEnd);
 
   Result := runSQL(sql, params);
 
@@ -1286,10 +1298,22 @@ end;
 procedure TDataModule1.updateItem(itemID, Name, SellerID, category,
   Desc: string; Price, stock, maxwithdrawstock, CF, EU, WU, CFProduce,
   EUProduce, WUProduce: double; Image: tPngImage);
-
+var
+  memStream: tMemoryStream;
 begin
 
+  try
+    findInTable(ItemTB, 'ItemID', itemID);
+
+  except
+    on e: Exception do
+    begin
+      raise e;
+    end;
+
+  end;
   ItemTB.Edit;
+
   ItemTB['ItemName'] := name;
   ItemTB['Cost'] := Price;
   ItemTB['CarbonFootprintProduction'] := CFProduce;
@@ -1303,7 +1327,15 @@ begin
   ItemTB['Category'] := category;
   ItemTB['Stock'] := stock;
   ItemTB['MaxWithdrawableStock'] := maxwithdrawstock;
-  ItemTb['Image']:= Image;
+
+  memStream := tMemoryStream.Create;
+  try
+    Image.SaveToStream(memStream);
+    memStream.Position := 0;
+    TBlobField(ItemTB.FieldByName('Image')).LoadFromStream(memStream);
+  finally
+    memStream.Free;
+  end;
 
   ItemTB.Post;
   ItemTB.Refresh;
