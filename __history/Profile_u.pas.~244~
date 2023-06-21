@@ -20,7 +20,6 @@ type
     btnWUCategory: TButton;
     flpnlCategories: TFlowPanel;
     btnEUcategory: TButton;
-    btnBalanceCategory: TButton;
     btnSpendCategory: TButton;
     btnViewProducts: TButton;
     lblBalance: TLabel;
@@ -53,6 +52,7 @@ type
 
 var
   frmProfile: TfrmProfile;
+  // DataModule1 : tDataModule1;
 
 implementation
 
@@ -81,18 +81,17 @@ var
   dsResult: TADODataSet;
   dateLowerLimit, datebegin, dateEnd: tDateTime;
   i: integer;
-  ds  : TDataSource;
+  ds: TDataSource;
 begin
   if Sender is TButton then
   begin
-    srsStats.Clear;
 
     // get the code for this category
     sCategory := NameToCateg.ExtractPair(TButton(Sender).Caption).Value;
 
     chrtStats.Title.Caption := 'Your ' + TButton(Sender).Caption;
 
-    dateLowerLimit := date - (10 * 31);
+    dateLowerLimit := date - (9 * 31);
 
     datebegin := StrToDate(intTOstr(YearOf(dateLowerLimit)) + '/' +
       intTOstr(MonthOf(dateLowerLimit)) + '/01');
@@ -100,53 +99,26 @@ begin
     dateEnd := StrToDate(intTOstr(YearOf(date)) + '/' +
       intTOstr(MonthOf(date) + 1) + '/01');
 
-     DataModule1.obtainStats(DataModule1.userID, sCategory,
+    dsResult := DataModule1.obtainStats(DataModule1.userID, sCategory,
       datebegin, dateEnd);
 
-
-
-    with DataModule1 do
-    begin
-    ds := TDataSource.Create(Self);
-    ds.DataSet :=  Query;
+    ds := TDataSource.Create(nil);
+    ds.DataSet := dsResult;
     ds.Enabled := true;
+    DBGrid1.DataSource := ds;
 
+    srsStats.Clear;
 
+    dsResult.First;
 
-
-    DBGrid1.DataSource := ds ;
-
-    ds.DataSet;
-
-    DBGrid1.DataSource.DataSet.First;
-
-     while DBGrid1.DataSource.DataSet.Eof do
+    while not dsResult.Eof do
     begin
-    srsStats.Add(DBGrid1.DataSource.DataSet['TotalMonth'], intTOstr(DBGrid1.DataSource.DataSet['m']) + '-' +
-          intTOstr(DBGrid1.DataSource.DataSett['y']), clTeeColor);
-      showMessage(FloatToStr(DBGrid1.DataSource.DataSet['TotalMonth']));
-      ds.DataSet.Next;
+      srsStats.Add(dsResult['TotalMonth'], intTOstr(dsResult['y']) + '-' +
+        intTOstr(dsResult['m']), clTeeColor);
+      dsResult.Next;
     end;
 
-    end;
-
-
-
-//    for i := 1 to 10 do
-//    begin
-//
-//      if (MonthOf(dateEnd - i * 30) = dsResult['m']) and (YearOf(dateEnd - i * 30)
-//        = dsResult['y']) then
-//      begin
-//
-//          dsResult.Next;
-//
-//      end;
-//
-//       srsStats.Add(0, intTOstr(MonthOf(dateEnd - i * 30)) + '-' +
-//      intTOstr(YearOf(dateEnd - i * 30)), clTeeColor);
-//
-//    end;
+    dsResult.First;
 
   end;
 

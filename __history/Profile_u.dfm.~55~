@@ -2,8 +2,8 @@ object frmProfile: TfrmProfile
   Left = 0
   Top = 0
   Caption = 'Your Profile'
-  ClientHeight = 689
-  ClientWidth = 607
+  ClientHeight = 725
+  ClientWidth = 627
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -259,15 +259,19 @@ object frmProfile: TfrmProfile
     Gradient.Visible = True
     LeftWall.Color = 14745599
     Legend.Font.Name = 'Verdana'
+    Legend.ResizeChart = False
     Legend.Shadow.Transparency = 0
+    Legend.Visible = False
     MarginTop = 3
     RightWall.Color = 14745599
     Title.Font.Name = 'Verdana'
     Title.Text.Strings = (
       'Your Revenue')
     BottomAxis.Axis.Color = 4210752
+    BottomAxis.Axis.Style = psDash
     BottomAxis.Grid.Color = 11119017
     BottomAxis.LabelsFormat.Font.Name = 'Verdana'
+    BottomAxis.MinimumOffset = -22
     BottomAxis.TicksInner.Color = 11119017
     BottomAxis.Title.Font.Name = 'Verdana'
     DepthAxis.Axis.Color = 4210752
@@ -280,11 +284,18 @@ object frmProfile: TfrmProfile
     DepthTopAxis.LabelsFormat.Font.Name = 'Verdana'
     DepthTopAxis.TicksInner.Color = 11119017
     DepthTopAxis.Title.Font.Name = 'Verdana'
+    CustomAxes = <
+      item
+        Horizontal = False
+        OtherSide = False
+      end>
     LeftAxis.Axis.Color = 4210752
     LeftAxis.Grid.Color = 11119017
     LeftAxis.LabelsFormat.Font.Name = 'Verdana'
+    LeftAxis.LogarithmicBase = 2.718281828459050000
     LeftAxis.TickLength = 3
     LeftAxis.TicksInner.Color = 11119017
+    LeftAxis.TickOnLabelsOnly = False
     LeftAxis.Title.Font.Name = 'Verdana'
     RightAxis.Axis.Color = 4210752
     RightAxis.Grid.Color = 11119017
@@ -297,6 +308,8 @@ object frmProfile: TfrmProfile
     TopAxis.LabelsFormat.Font.Name = 'Verdana'
     TopAxis.TicksInner.Color = 11119017
     TopAxis.Title.Font.Name = 'Verdana'
+    View3DOptions.HorizOffset = -6
+    View3DOptions.Zoom = 80
     Zoom.MouseButton = mbMiddle
     BevelOuter = bvNone
     TabOrder = 3
@@ -321,8 +334,8 @@ object frmProfile: TfrmProfile
       9300723
       11842740)
     object chrtLayoutStats: TChartLayout
-      Left = 360
-      Top = -21
+      Left = 530
+      Top = -20
       Width = 245
       Height = 356
       HorzScrollBar.Smooth = True
@@ -344,5 +357,21 @@ object frmProfile: TfrmProfile
       Data = {0000000000}
       Detail = {0000000000}
     end
+  end
+  object btnLeft: TButton
+    Left = 184
+    Top = 695
+    Width = 75
+    Height = 25
+    Caption = '<'
+    TabOrder = 4
+  end
+  object btnRight: TButton
+    Left = 301
+    Top = 695
+    Width = 75
+    Height = 25
+    Caption = '>'
+    TabOrder = 5
   end
 end

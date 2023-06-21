@@ -20,7 +20,6 @@ type
     btnWUCategory: TButton;
     flpnlCategories: TFlowPanel;
     btnEUcategory: TButton;
-    btnBalanceCategory: TButton;
     btnSpendCategory: TButton;
     btnViewProducts: TButton;
     lblBalance: TLabel;
@@ -53,6 +52,7 @@ type
 
 var
   frmProfile: TfrmProfile;
+  //DataModule1 : tDataModule1;
 
 implementation
 
@@ -92,7 +92,7 @@ begin
 
     chrtStats.Title.Caption := 'Your ' + TButton(Sender).Caption;
 
-    dateLowerLimit := date - (10 * 31);
+    dateLowerLimit := date - (9 * 31);
 
     datebegin := StrToDate(intTOstr(YearOf(dateLowerLimit)) + '/' +
       intTOstr(MonthOf(dateLowerLimit)) + '/01');
@@ -103,42 +103,22 @@ begin
     dsResult := DataModule1.obtainStats(DataModule1.userID, sCategory,
       datebegin, dateEnd);
 
-    dsResult.first;
+    srsStats.Clear;
 
-    while dsResult.Eof do
+    dsResult.First;
+
+     while not dsResult.Eof do
     begin
-     // srsStats.Add(dsResult['TotalMonth'], intTOstr(dsResult['m']) + '-' +
-     // intTOstr(dsResult['y']), clTeeColor);
-      showMessage(FloatToStr(dsResult['TotalMonth']));
+      srsStats.Add(dsResult['TotalMonth'], inttostr(dsResult['y'])+'-'+inttostr(dsResult['m']), clTeeColor);
       dsResult.Next;
     end;
 
-//    for i := 1 to 10 do
-//    begin
-//
-//      if (MonthOf(dateEnd - i * 30) = dsResult['m']) and (YearOf(dateEnd - i * 30)
-//        = dsResult['y']) then
-//      begin
-//        srsStats.Add(dsResult['TotalMonth'], intTOstr(dsResult['m']) + '-' +
-//          intTOstr(dsResult['y']), clTeeColor);
-//          dsResult.Next;
-//
-//      end;
-//
-//       srsStats.Add(0, intTOstr(MonthOf(dateEnd - i * 30)) + '-' +
-//      intTOstr(YearOf(dateEnd - i * 30)), clTeeColor);
-//
-//    end;
-    with DataModule1 do
-    begin
-    ds := TDataSource.Create(Self);
-    ds.DataSet :=  Query;
-    ds.Enabled := true;
-    DBGrid1.DataSource := ds ;
-
-    end;
-
   end;
+
+  ds := TDataSource.Create(nil);
+  ds.DataSet := dsResult;
+  ds.Enabled := true ;
+  DBGrid1.DataSource := ds;
 
   dsResult.Free;
 

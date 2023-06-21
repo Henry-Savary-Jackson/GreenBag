@@ -29,7 +29,6 @@ type
     { Private declarations }
   public
 
-
     { Public declarations }
     // stores these global vairables for all screen
     userID: string;
@@ -785,7 +784,7 @@ var
 begin
 
   ItemTB.Insert;
-  ItemTB.edit;
+  ItemTB.Edit;
 
   ItemTB['ItemID'] := itemID;
   ItemTB['ItemName'] := name;
@@ -806,7 +805,7 @@ begin
   try
     Image.SaveToStream(memStream);
     memStream.Position := 0;
-    ItemTB.edit;
+    ItemTB.Edit;
     TBlobField(ItemTB.FieldByName('Image')).LoadFromStream(memStream);
   finally
     memStream.Free;
@@ -953,25 +952,24 @@ begin
 end;
 
 function TDataModule1.obtainStats(userID, statType: string;
-   DateBegin, DateEnd: tDateTime): tADODataSet;
+  DateBegin, DateEnd: tDateTime): tADODataSet;
 var
-  sql: string;
+
+  sql: string ;
   params: tObjectDictionary<string, Variant>;
+
 begin;
   sql := 'SELECT YEAR(statDate) AS y, MONTH(statDate) as m , SUM(statValue) AS TotalMonth FROM StatsTB'
-    + ' WHERE UserID = :UserID AND Type = :Type '
+    + ' WHERE UserID = :UserID AND Type = :Type AND statDate BETWEEN :MonthBegin AND :MonthEnd'
     + 'GROUP BY YEAR(statDate), MONTH(statDate) ORDER BY YEAR(statDate) ASC, MONTH(statDate) ASC';
   params := tObjectDictionary<string, Variant>.Create();
-  //statDate BETWEEN :MonthBegin AND :MonthEnd
-  //UserID = :UserID AND Type = :Type AND statDate
+
   params.Add('UserID', userID);
   params.Add('Type', statType);
- // params.Add('MonthBegin', DateBegin);
-  //params.Add('MonthEnd', DateEnd);
+  params.Add('MonthBegin', DateBegin);
+  params.Add('MonthEnd', DateEnd);
 
   Result := runSQL(sql, params);
-
-  abs(9);
 
 end;
 
