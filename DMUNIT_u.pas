@@ -955,7 +955,7 @@ function TDataModule1.obtainStats(userID, statType: string;
   DateBegin, DateEnd: tDateTime): tADODataSet;
 var
 
-  sql: string ;
+  sql: string;
   params: tObjectDictionary<string, Variant>;
 
 begin;

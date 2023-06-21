@@ -44,30 +44,16 @@ object frmProfile: TfrmProfile
     OnClick = btnBackClick
   end
   object flpnlCategories: TFlowPanel
-    Left = 24
+    Left = 64
     Top = 366
-    Width = 528
+    Width = 443
     Height = 43
     AutoSize = True
     AutoWrap = False
     TabOrder = 1
-    object btnBalanceCategory: TButton
-      AlignWithMargins = True
-      Left = 6
-      Top = 9
-      Width = 75
-      Height = 25
-      Margins.Left = 5
-      Margins.Top = 8
-      Margins.Right = 5
-      Margins.Bottom = 8
-      Caption = 'Balance'
-      TabOrder = 0
-      OnClick = categoryClickStats
-    end
     object btnCFCategory: TButton
       AlignWithMargins = True
-      Left = 91
+      Left = 6
       Top = 9
       Width = 91
       Height = 25
@@ -76,10 +62,24 @@ object frmProfile: TfrmProfile
       Margins.Right = 5
       Margins.Bottom = 8
       Caption = 'Carbon Footprint'
-      TabOrder = 1
+      TabOrder = 0
       OnClick = categoryClickStats
     end
     object btnEUcategory: TButton
+      AlignWithMargins = True
+      Left = 107
+      Top = 9
+      Width = 75
+      Height = 25
+      Margins.Left = 5
+      Margins.Top = 8
+      Margins.Right = 5
+      Margins.Bottom = 8
+      Caption = 'Energy Usage'
+      TabOrder = 1
+      OnClick = categoryClickStats
+    end
+    object btnSalesCategory: TButton
       AlignWithMargins = True
       Left = 192
       Top = 9
@@ -89,11 +89,11 @@ object frmProfile: TfrmProfile
       Margins.Top = 8
       Margins.Right = 5
       Margins.Bottom = 8
-      Caption = 'Energy Usage'
+      Caption = 'Sales'
       TabOrder = 2
       OnClick = categoryClickStats
     end
-    object btnSalesCategory: TButton
+    object btnSpendCategory: TButton
       AlignWithMargins = True
       Left = 277
       Top = 9
@@ -103,11 +103,11 @@ object frmProfile: TfrmProfile
       Margins.Top = 8
       Margins.Right = 5
       Margins.Bottom = 8
-      Caption = 'Sales'
+      Caption = 'Spending'
       TabOrder = 3
       OnClick = categoryClickStats
     end
-    object btnSpendCategory: TButton
+    object btnWUCategory: TButton
       AlignWithMargins = True
       Left = 362
       Top = 9
@@ -117,22 +117,8 @@ object frmProfile: TfrmProfile
       Margins.Top = 8
       Margins.Right = 5
       Margins.Bottom = 8
-      Caption = 'Spending'
-      TabOrder = 4
-      OnClick = categoryClickStats
-    end
-    object btnWUCategory: TButton
-      AlignWithMargins = True
-      Left = 447
-      Top = 9
-      Width = 75
-      Height = 25
-      Margins.Left = 5
-      Margins.Top = 8
-      Margins.Right = 5
-      Margins.Bottom = 8
       Caption = 'Water Usage'
-      TabOrder = 5
+      TabOrder = 4
       OnClick = categoryClickStats
     end
   end
@@ -239,9 +225,9 @@ object frmProfile: TfrmProfile
     end
   end
   object chrtStats: TChart
-    Left = 0
+    Left = 8
     Top = 431
-    Width = 599
+    Width = 625
     Height = 258
     Cursor = crArrow
     AllowPanning = pmHorizontal
@@ -252,6 +238,7 @@ object frmProfile: TfrmProfile
     BackWall.Transparent = False
     Foot.Font.Color = clBlue
     Foot.Font.Name = 'Verdana'
+    Foot.Visible = False
     Gradient.Direction = gdBottomTop
     Gradient.EndColor = clWhite
     Gradient.MidColor = 15395562
@@ -261,15 +248,23 @@ object frmProfile: TfrmProfile
     Legend.Font.Name = 'Verdana'
     Legend.ResizeChart = False
     Legend.Shadow.Transparency = 0
+    Legend.Symbol.Visible = False
+    Legend.Title.Font.Height = -1
+    Legend.Title.Font.Shadow.Visible = False
+    Legend.Title.Visible = False
     Legend.Visible = False
     MarginTop = 3
     RightWall.Color = 14745599
+    SubFoot.Visible = False
+    SubTitle.Visible = False
     Title.Font.Name = 'Verdana'
     Title.Text.Strings = (
       'Your Revenue')
     BottomAxis.Axis.Color = 4210752
+    BottomAxis.Axis.Style = psDash
     BottomAxis.Grid.Color = 11119017
     BottomAxis.LabelsFormat.Font.Name = 'Verdana'
+    BottomAxis.MinimumOffset = -22
     BottomAxis.TicksInner.Color = 11119017
     BottomAxis.Title.Font.Name = 'Verdana'
     DepthAxis.Axis.Color = 4210752
@@ -282,13 +277,20 @@ object frmProfile: TfrmProfile
     DepthTopAxis.LabelsFormat.Font.Name = 'Verdana'
     DepthTopAxis.TicksInner.Color = 11119017
     DepthTopAxis.Title.Font.Name = 'Verdana'
+    CustomAxes = <
+      item
+        Horizontal = False
+        OtherSide = False
+      end>
     LeftAxis.Axis.Color = 4210752
     LeftAxis.Grid.Color = 11119017
     LeftAxis.LabelsFormat.Font.Name = 'Verdana'
+    LeftAxis.LogarithmicBase = 2.718281828459050000
     LeftAxis.TickLength = 3
     LeftAxis.TicksInner.Color = 11119017
     LeftAxis.TickOnLabelsOnly = False
     LeftAxis.Title.Font.Name = 'Verdana'
+    Panning.MouseWheel = pmwNone
     RightAxis.Axis.Color = 4210752
     RightAxis.Grid.Color = 11119017
     RightAxis.LabelsFormat.Font.Name = 'Verdana'
@@ -300,6 +302,7 @@ object frmProfile: TfrmProfile
     TopAxis.LabelsFormat.Font.Name = 'Verdana'
     TopAxis.TicksInner.Color = 11119017
     TopAxis.Title.Font.Name = 'Verdana'
+    View3D = False
     View3DOptions.HorizOffset = -6
     View3DOptions.Zoom = 80
     Zoom.MouseButton = mbMiddle
@@ -326,8 +329,8 @@ object frmProfile: TfrmProfile
       9300723
       11842740)
     object chrtLayoutStats: TChartLayout
-      Left = 530
-      Top = -20
+      Left = 545
+      Top = -66
       Width = 245
       Height = 356
       HorzScrollBar.Smooth = True
@@ -340,6 +343,9 @@ object frmProfile: TfrmProfile
     end
     object srsStats: TBarSeries
       HoverElement = []
+      Marks.Font.OutLine.Visible = True
+      Marks.Font.Shadow.Visible = False
+      Marks.Visible = False
       Marks.DrawEvery = 5
       Marks.OnTop = True
       XValues.Name = 'X'
@@ -351,31 +357,21 @@ object frmProfile: TfrmProfile
     end
   end
   object btnLeft: TButton
-    Left = 184
-    Top = 695
+    Left = 246
+    Top = 679
     Width = 75
     Height = 25
     Caption = '<'
     TabOrder = 4
+    OnClick = btnLeftClick
   end
   object btnRight: TButton
-    Left = 301
-    Top = 695
+    Left = 327
+    Top = 679
     Width = 75
     Height = 25
     Caption = '>'
     TabOrder = 5
-  end
-  object DBGrid1: TDBGrid
-    Left = 24
-    Top = 135
-    Width = 320
-    Height = 120
-    TabOrder = 6
-    TitleFont.Charset = DEFAULT_CHARSET
-    TitleFont.Color = clWindowText
-    TitleFont.Height = -11
-    TitleFont.Name = 'Tahoma'
-    TitleFont.Style = []
+    OnClick = btnRightClick
   end
 end

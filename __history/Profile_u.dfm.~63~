@@ -247,6 +247,8 @@ object frmProfile: TfrmProfile
     Legend.Font.Name = 'Verdana'
     Legend.ResizeChart = False
     Legend.Shadow.Transparency = 0
+    Legend.Title.Font.Height = -1
+    Legend.Title.Font.Shadow.Visible = False
     Legend.Visible = False
     MarginTop = 3
     RightWall.Color = 14745599
@@ -334,6 +336,8 @@ object frmProfile: TfrmProfile
     end
     object srsStats: TBarSeries
       HoverElement = []
+      Marks.Font.OutLine.Visible = True
+      Marks.Font.Shadow.Visible = False
       Marks.DrawEvery = 5
       Marks.OnTop = True
       XValues.Name = 'X'
@@ -351,6 +355,7 @@ object frmProfile: TfrmProfile
     Height = 25
     Caption = '<'
     TabOrder = 4
+    OnClick = btnLeftClick
   end
   object btnRight: TButton
     Left = 301
@@ -359,5 +364,18 @@ object frmProfile: TfrmProfile
     Height = 25
     Caption = '>'
     TabOrder = 5
+    OnClick = btnRightClick
+  end
+  object DBGrid1: TDBGrid
+    Left = 115
+    Top = 135
+    Width = 320
+    Height = 120
+    TabOrder = 6
+    TitleFont.Charset = DEFAULT_CHARSET
+    TitleFont.Color = clWindowText
+    TitleFont.Height = -11
+    TitleFont.Name = 'Tahoma'
+    TitleFont.Style = []
   end
 end

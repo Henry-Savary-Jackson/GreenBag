@@ -225,9 +225,9 @@ object frmProfile: TfrmProfile
     end
   end
   object chrtStats: TChart
-    Left = 0
+    Left = 8
     Top = 431
-    Width = 599
+    Width = 625
     Height = 258
     Cursor = crArrow
     AllowPanning = pmHorizontal
@@ -238,6 +238,7 @@ object frmProfile: TfrmProfile
     BackWall.Transparent = False
     Foot.Font.Color = clBlue
     Foot.Font.Name = 'Verdana'
+    Foot.Visible = False
     Gradient.Direction = gdBottomTop
     Gradient.EndColor = clWhite
     Gradient.MidColor = 15395562
@@ -247,9 +248,15 @@ object frmProfile: TfrmProfile
     Legend.Font.Name = 'Verdana'
     Legend.ResizeChart = False
     Legend.Shadow.Transparency = 0
+    Legend.Symbol.Visible = False
+    Legend.Title.Font.Height = -1
+    Legend.Title.Font.Shadow.Visible = False
+    Legend.Title.Visible = False
     Legend.Visible = False
     MarginTop = 3
     RightWall.Color = 14745599
+    SubFoot.Visible = False
+    SubTitle.Visible = False
     Title.Font.Name = 'Verdana'
     Title.Text.Strings = (
       'Your Revenue')
@@ -283,6 +290,7 @@ object frmProfile: TfrmProfile
     LeftAxis.TicksInner.Color = 11119017
     LeftAxis.TickOnLabelsOnly = False
     LeftAxis.Title.Font.Name = 'Verdana'
+    Panning.MouseWheel = pmwNone
     RightAxis.Axis.Color = 4210752
     RightAxis.Grid.Color = 11119017
     RightAxis.LabelsFormat.Font.Name = 'Verdana'
@@ -294,6 +302,7 @@ object frmProfile: TfrmProfile
     TopAxis.LabelsFormat.Font.Name = 'Verdana'
     TopAxis.TicksInner.Color = 11119017
     TopAxis.Title.Font.Name = 'Verdana'
+    View3D = False
     View3DOptions.HorizOffset = -6
     View3DOptions.Zoom = 80
     Zoom.MouseButton = mbMiddle
@@ -320,8 +329,8 @@ object frmProfile: TfrmProfile
       9300723
       11842740)
     object chrtLayoutStats: TChartLayout
-      Left = 530
-      Top = -20
+      Left = 593
+      Top = 14
       Width = 245
       Height = 356
       HorzScrollBar.Smooth = True
@@ -334,6 +343,9 @@ object frmProfile: TfrmProfile
     end
     object srsStats: TBarSeries
       HoverElement = []
+      Marks.Font.OutLine.Visible = True
+      Marks.Font.Shadow.Visible = False
+      Marks.Visible = False
       Marks.DrawEvery = 5
       Marks.OnTop = True
       XValues.Name = 'X'
@@ -345,31 +357,21 @@ object frmProfile: TfrmProfile
     end
   end
   object btnLeft: TButton
-    Left = 184
-    Top = 695
+    Left = 246
+    Top = 679
     Width = 75
     Height = 25
     Caption = '<'
     TabOrder = 4
+    OnClick = btnLeftClick
   end
   object btnRight: TButton
-    Left = 301
-    Top = 695
+    Left = 327
+    Top = 679
     Width = 75
     Height = 25
     Caption = '>'
     TabOrder = 5
-  end
-  object DBGrid1: TDBGrid
-    Left = 115
-    Top = 135
-    Width = 320
-    Height = 120
-    TabOrder = 6
-    TitleFont.Charset = DEFAULT_CHARSET
-    TitleFont.Color = clWindowText
-    TitleFont.Height = -11
-    TitleFont.Name = 'Tahoma'
-    TitleFont.Style = []
+    OnClick = btnRightClick
   end
 end

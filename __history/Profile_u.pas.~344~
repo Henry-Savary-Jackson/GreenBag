@@ -35,7 +35,6 @@ type
     srsStats: TBarSeries;
     btnLeft: TButton;
     btnRight: TButton;
-    DBGrid1: TDBGrid;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnViewProductsClick(Sender: TObject);
     procedure btnBackClick(Sender: TObject);
@@ -43,6 +42,10 @@ type
     procedure showTotals(UserType: string);
     procedure categoryClickStats(Sender: TObject);
     procedure NameTOCategString(sName: string);
+    procedure UpdateChart();
+    procedure btnLeftClick(Sender: TObject);
+    procedure changeChartDateRange(direction: integer);
+    procedure btnRightClick(Sender: TObject);
   private
     { Private declarations }
     NameToCateg: TObjectDictionary<string, string>;
@@ -52,7 +55,8 @@ type
 
 var
   frmProfile: TfrmProfile;
-  //DataModule1 : tDataModule1;
+  dateRangeBegin, dateRangeEnd: tDateTime;
+  sType: string;
 
 implementation
 
@@ -68,9 +72,21 @@ begin
   frmBrowse.Show;
 end;
 
+procedure TfrmProfile.btnLeftClick(Sender: TObject);
+
+begin
+  changeChartDateRange(1);
+  UpdateChart;
+end;
+
+procedure TfrmProfile.btnRightClick(Sender: TObject);
+begin
+  changeChartDateRange(-1);
+  UpdateChart;
+end;
+
 procedure TfrmProfile.btnViewProductsClick(Sender: TObject);
 begin
-  //
   frmProfile.Hide;
   frmYourProducts.Show;
 end;
@@ -79,51 +95,28 @@ procedure TfrmProfile.categoryClickStats(Sender: TObject);
 var
   sCategory: string;
   dsResult: TADODataSet;
-  dateLowerLimit, datebegin, dateEnd: tDateTime;
   i: integer;
-  ds  : TDataSource;
+  ds: TDataSource;
 begin
   if Sender is TButton then
   begin
-    srsStats.Clear;
 
     // get the code for this category
-    sCategory := NameToCateg.ExtractPair(TButton(Sender).Caption).Value;
+    sType := NameToCateg.ExtractPair(TButton(Sender).Caption).Value;
 
     chrtStats.Title.Caption := 'Your ' + TButton(Sender).Caption;
 
-    dateLowerLimit := date - (9 * 31);
-
-    datebegin := StrToDate(intTOstr(YearOf(dateLowerLimit)) + '/' +
-      intTOstr(MonthOf(dateLowerLimit)) + '/01');
-
-    dateEnd := StrToDate(intTOstr(YearOf(date)) + '/' +
-      intTOstr(MonthOf(date) + 1) + '/01');
-
-    dsResult := DataModule1.obtainStats(DataModule1.userID, sCategory,
-      datebegin, dateEnd);
-
-    srsStats.Clear;
-
-
-
-    dsResult.First;
-
-     while not dsResult.Eof do
-    begin
-      srsStats.Add(dsResult['TotalMonth'], inttostr(dsResult['y'])+'-'+inttostr(dsResult['m']), clTeeColor);
-      dsResult.Next;
-    end;
+    UpdateChart;
 
   end;
 
-  ds := TDataSource.Create(nil);
-    ds.DataSet := dsResult;
-    ds.Enabled := true ;
-    DBGrid1.DataSource := ds;
+end;
 
-  dsResult.Free;
+procedure TfrmProfile.changeChartDateRange(direction: integer);
+begin
 
+  dateRangeBegin := IncMonth(dateRangeBegin, direction);
+  dateRangeEnd :=IncMonth(dateRangeEnd, direction);
 end;
 
 procedure TfrmProfile.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -148,6 +141,7 @@ end;
 procedure TfrmProfile.FormShow(Sender: TObject);
 var
   dsResult: TADODataSet;
+  dateLowerLimit: tDateTime;
 begin
   //
 
@@ -192,6 +186,13 @@ begin
 
   end;
 
+  dateLowerLimit := date - (9 * 31);
+
+  dateRangeEnd := StrToDate(intTOstr(YearOf(date)) + '/' +
+    intTOstr(MonthOf(date) + 1) + '/01');
+  dateRangeBegin := StrToDate(intTOstr(YearOf(dateLowerLimit)) + '/' +
+    intTOstr(MonthOf(dateLowerLimit)) + '/01');;
+
 end;
 
 // Takes the caption of the button and returns thestring value
@@ -224,6 +225,42 @@ begin
     btnViewProducts.Hide;
   end;
 
+end;
+
+procedure TfrmProfile.UpdateChart;
+var
+  dsResult: TADODataSet;
+  i: integer;
+  dValue: double;
+  currentDate: tDateTime;
+  ds: TDataSource;
+begin
+
+
+  dsResult := DataModule1.obtainStats(DataModule1.userID, sType, dateRangeBegin,
+    dateRangeEnd);
+
+  srsStats.Clear;
+
+  dsResult.First;
+  currentDate := dateRangeEnd;
+  for i := 0 to 9 do
+  begin
+    currentDate := IncMonth(currentDate, -1);
+    if (YearOf(currentDate) = dsResult['y']) and
+      (MonthOf(currentDate) = dsResult['m']) then
+    begin
+      srsStats.Add(dsResult['TotalMonth'], intTOstr(dsResult['y']) + '-' +
+        intTOstr(dsResult['m']), clTeeColor);
+      dsResult.Next;
+    end
+    else
+    begin
+      srsStats.Add(0, intTOstr(YearOf(currentDate)) + '-' +
+        intTOstr(MonthOf(currentDate)), clTeeColor);
+    end;
+
+  end;
 end;
 
 end.
