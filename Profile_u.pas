@@ -46,6 +46,7 @@ type
     procedure btnLeftClick(Sender: TObject);
     procedure changeChartDateRange(direction: integer);
     procedure btnRightClick(Sender: TObject);
+    procedure imgProfilePicClick(Sender: TObject);
   private
     { Private declarations }
     NameToCateg: TObjectDictionary<string, string>;
@@ -116,7 +117,7 @@ procedure TfrmProfile.changeChartDateRange(direction: integer);
 begin
 
   dateRangeBegin := IncMonth(dateRangeBegin, direction);
-  dateRangeEnd :=IncMonth(dateRangeEnd, direction);
+  dateRangeEnd := IncMonth(dateRangeEnd, direction);
 end;
 
 procedure TfrmProfile.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -142,6 +143,7 @@ procedure TfrmProfile.FormShow(Sender: TObject);
 var
   dsResult: TADODataSet;
   dateLowerLimit: tDateTime;
+  imageStream: tStream;
 begin
   //
 
@@ -186,14 +188,45 @@ begin
 
   end;
 
-  dateLowerLimit := IncMonth(date, -9);
+  dateLowerLimit := IncMonth(DataModule1.dDate, -9);
 
-  dateRangeEnd := StrToDate(intTOstr(YearOf(date)) + '/' +
-    intTOstr(MonthOf(date) + 1) + '/01');
+  dateRangeEnd := StrToDate(intTOstr(YearOf(DataModule1.dDate)) + '/' +
+    intTOstr(MonthOf(DataModule1.dDate) + 1) + '/01');
   dateRangeBegin := StrToDate(intTOstr(YearOf(dateLowerLimit)) + '/' +
     intTOstr(MonthOf(dateLowerLimit)) + '/01');
 
   srsStats.Marks.Visible := False;
+
+  imageStream := dsResult.CreateBlobStream
+    (dsResult.FieldByName('ProfileImage'), bmRead);
+  try
+    imgProfilePic.Picture.LoadFromStream(imageStream);
+
+  finally
+    imageStream.Free;
+
+  end;
+
+end;
+
+procedure TfrmProfile.imgProfilePicClick(Sender: TObject);
+var
+  fileChooser: tOpenDialog;
+  sImagePath: string;
+begin
+  // open filchooser
+  DataModule1.loadImageFromFile(imgProfilePic, self);
+
+  try
+    DataModule1.setProfilePicture(DataModule1.userID, imgProfilePic);
+
+  except
+    on e: exception do
+    begin
+      showMessage(e.Message);
+    end;
+
+  end;
 
 end;
 
@@ -237,7 +270,6 @@ var
   currentDate: tDateTime;
   ds: TDataSource;
 begin
-
 
   dsResult := DataModule1.obtainStats(DataModule1.userID, sType, dateRangeBegin,
     dateRangeEnd);

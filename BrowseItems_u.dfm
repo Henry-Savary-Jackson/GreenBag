@@ -57,6 +57,7 @@ object frmBrowse: TfrmBrowse
         Height = 21
         Anchors = []
         TabOrder = 1
+        OnChange = srchSearchItemsChange
         OnInvokeSearch = SearchItems
       end
     end
@@ -236,6 +237,7 @@ object frmBrowse: TfrmBrowse
         06A404203020250081012901080C48094060404A00020352021018901280C080
         94000406A404203020250081012901080C48094060404A00020352021018FF0F
         B0D6A53846F497540000000049454E44AE426082}
+      Stretch = True
       OnClick = imgProfileClick
     end
     object btnLogout: TButton

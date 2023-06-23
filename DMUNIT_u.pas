@@ -3,9 +3,11 @@ unit DMUNIT_u;
 interface
 
 uses
-  System.SysUtils, System.Classes, Data.Win.ADODB, Data.DB,
+  System.SysUtils, System.Classes, System.Variants, Data.Win.ADODB, Data.DB,
   sCrypt, System.Generics.Collections, Datasnap.Provider, Vcl.dialogs,
-  Vcl.Graphics, Vcl.ExtCtrls, System.Variants, PngImage, System.Win.ComObj,
+  Vcl.ComCtrls,
+  Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.ExtCtrls, PngImage,
+  System.Win.ComObj,
   dateutils;
 
 type
@@ -42,7 +44,11 @@ type
 
     function Login(Username, password: string): string;
     function SignUp(Username, password, usertype, homeAddress, certificationcode
-      : string): string;
+      : string; imgPfp: tImage): string;
+
+    procedure loadProfilePicture(userID: string; Image: tImage);
+
+    procedure setProfilePicture(userID: string; imgPfp: tImage);
 
     function userInfo(userID: string): tADODataSet;
 
@@ -53,11 +59,11 @@ type
 
     procedure insertItem(itemID, Name, SellerID, category, Desc: string;
       Price, stock, maxwithdrawstock, CF, EU, WU, CFProduce, EUProduce,
-      WUProduce: double; Image: tPngImage);
+      WUProduce: double; Image: tImage);
 
     procedure updateItem(itemID, Name, SellerID, category, Desc: string;
       Price, stock, maxwithdrawstock, CF, EU, WU, CFProduce, EUProduce,
-      WUProduce: double; Image: tPngImage);
+      WUProduce: double; Image: tImage);
 
     procedure deleteItem(itemID: string);
 
@@ -97,6 +103,10 @@ type
 
     procedure insertStatData(userID: string; statDate: tDateTime;
       statType: string; value: double);
+
+    procedure loadImageFromFile(img: tImage; window: TForm);
+
+    function ImageToVariant(Image: tImage): Variant;
   end;
 
 var
@@ -644,7 +654,6 @@ begin
     end;
     table.Next;
   end;
-  table.First;
   if not bFound then
   begin
     raise Exception.Create('Could not find record');
@@ -706,6 +715,41 @@ begin
 
 end;
 
+procedure TDataModule1.loadProfilePicture(userID: string; Image: tImage);
+var
+  sql: string;
+  params: tObjectDictionary<string, Variant>;
+  dsResult: tADODataSet;
+  imageStream: tStream;
+begin
+
+  sql := 'SELECT ProfileImage FROM UserTB WHERE UserID = :UserID';
+
+  params := tObjectDictionary<string, Variant>.Create();
+  params.Add('UserID', userID);
+
+  dsResult := runSQL(sql, params);
+
+  if dsResult.Fields.FindField('Status') <> nil then
+  begin
+    raise Exception.Create(dsResult['Status']);
+  end;
+
+  imageStream := dsResult.CreateBlobStream
+    (dsResult.FieldByName('ProfileImage'), bmRead);
+  try
+    try
+      Image.Picture.LoadFromStream(imageStream);
+    finally
+      imageStream.Free;
+    end;
+
+  except
+    raise Exception.Create('Failed to load profile Image');
+  end;
+
+end;
+
 // Search for items with a specific string and category
 function TDataModule1.getSearchResults(searchQuery, category: string)
   : tADODataSet;
@@ -732,6 +776,24 @@ begin
   // return the results
   Result := runSQL(sql, params);
   params.Free;
+
+end;
+
+function TDataModule1.ImageToVariant(Image: tImage): Variant;
+var
+  imageStream: TBytesStream;
+  streamSize : integer;
+  
+begin
+
+  imageStream := TBytesStream.Create;
+  try
+    Image.Picture.SaveToStream(imageStream);
+    Result := imageStream.Bytes;
+
+  finally
+    imageStream.Free;
+  end;
 
 end;
 
@@ -778,9 +840,9 @@ end;
 // procedure to insert a new item into the database
 procedure TDataModule1.insertItem(itemID, Name, SellerID, category,
   Desc: string; Price, stock, maxwithdrawstock, CF, EU, WU, CFProduce,
-  EUProduce, WUProduce: double; Image: tPngImage);
+  EUProduce, WUProduce: double; Image: tImage);
 var
-  memStream: tMemoryStream;
+  memStream: TMemoryStream;
 begin
 
   ItemTB.Insert;
@@ -801,13 +863,15 @@ begin
   ItemTB['Category'] := category;
   ItemTB['Stock'] := stock;
   ItemTB['MaxWithdrawableStock'] := maxwithdrawstock;
-  memStream := tMemoryStream.Create;
+  ItemTB['Deleted'] := False;
+  memStream := TMemoryStream.Create;
   try
-    Image.SaveToStream(memStream);
+    Image.Picture.Graphic.SaveToStream(memStream);
     memStream.Position := 0;
     ItemTB.Edit;
     TBlobField(ItemTB.FieldByName('Image')).LoadFromStream(memStream);
   finally
+
     memStream.Free;
   end;
 
@@ -898,6 +962,32 @@ begin
     Result := not dsResult.IsEmpty;
   finally
     dsResult.Free;
+  end;
+
+end;
+
+procedure TDataModule1.loadImageFromFile(img: tImage; window: TForm);
+var
+  fileChooser: tOpenDialog;
+  sImagePath: string;
+begin
+  // open filchooser
+  fileChooser := tOpenDialog.Create(window);
+  try
+    fileChooser.Filter := 'jpg Files|*.jpg|png files|*png';
+    fileChooser.InitialDir := 'C:\';
+
+    if fileChooser.Execute then
+    begin
+      sImagePath := fileChooser.FileName;
+      img.Picture.LoadFromFile(sImagePath);
+    end
+    else
+    begin
+      showMessage('Please choose a file');
+    end;
+  finally
+    fileChooser.Free;
   end;
 
 end;
@@ -1072,6 +1162,8 @@ function TDataModule1.runSQL(sql: string;
 var
   dsOutput: tADODataSet;
   Item: TPair<string, Variant>;
+  imageStream: tStream;
+  Image: tImage;
 begin
 
   // close previous query
@@ -1084,7 +1176,6 @@ begin
   begin
     for Item in params do
     begin
-
       Query.Parameters.ParamByName(Item.Key).value := Item.value;
     end;
 
@@ -1194,9 +1285,31 @@ begin
 
 end;
 
+procedure TDataModule1.setProfilePicture(userID: string; imgPfp: tImage);
+var
+  sql: string;
+  params: tObjectDictionary<String, Variant>;
+  dsResult : tAdoDataset;
+begin
+  sql := 'UPDATE UserTB SET ProfileImage = :ProfileImage WHERE UserID = :UserID';
+
+  params := tObjectDictionary<string, Variant>.Create();
+
+  params.Add('UserID', userID);
+  params.Add('ProfileImage', ImageToVariant(imgPfp));
+
+  dsResult :=  runSQL(sql, params);
+
+  if dsResult['status'] <> 'Success' then
+  begin
+    raise Exception.Create(dsResult['status']);
+  end;
+  
+end;
+
 // a function used to create a new user in the database and return the new user's userid for use by the program
 function TDataModule1.SignUp(Username, password, usertype, homeAddress,
-  certificationcode: string): string;
+  certificationcode: string; imgPfp: tImage): string;
 var
   hash, salt: string;
   userID, sql: string;
@@ -1236,8 +1349,8 @@ begin
   end;
 
   // sql statement
-  sql := 'INSERT INTO UserTB ([UserID], [Username], [Password], [UserType], [HomeAddress], [Salt]) VALUES'
-    + ' ( :UserID, :Username, :Password, :UserType, :HomeAddress, :Salt);';
+  sql := 'INSERT INTO UserTB ([UserID], [Username], [Password], [UserType], [HomeAddress], [Salt], [ProfileImage]) VALUES'
+    + ' ( :UserID, :Username, :Password, :UserType, :HomeAddress, :Salt, :ProfileImage);';
 
   // input parameters
   params := tObjectDictionary<string, Variant>.Create();
@@ -1248,6 +1361,7 @@ begin
   params.Add('UserType', usertype);
   params.Add('HomeAddress', homeAddress);
   params.Add('Salt', salt);
+  params.Add('ProfileImage', ImageToVariant(imgPfp));
 
   sqlResult := runSQL(sql, params);
 
@@ -1297,9 +1411,9 @@ end;
 
 procedure TDataModule1.updateItem(itemID, Name, SellerID, category,
   Desc: string; Price, stock, maxwithdrawstock, CF, EU, WU, CFProduce,
-  EUProduce, WUProduce: double; Image: tPngImage);
+  EUProduce, WUProduce: double; Image: tImage);
 var
-  memStream: tMemoryStream;
+  memStream: TMemoryStream;
 begin
 
   try
@@ -1308,6 +1422,7 @@ begin
   except
     on e: Exception do
     begin
+      showMessage(e.Message);
       raise e;
     end;
 
@@ -1326,20 +1441,23 @@ begin
   ItemTB['Description'] := Desc;
   ItemTB['Category'] := category;
   ItemTB['Stock'] := stock;
+  ItemTB['Deleted'] := False;
   ItemTB['MaxWithdrawableStock'] := maxwithdrawstock;
 
-  memStream := tMemoryStream.Create;
+  memStream := TMemoryStream.Create;
   try
-    Image.SaveToStream(memStream);
+    Image.Picture.Graphic.SaveToStream(memStream);
     memStream.Position := 0;
+    ItemTB.Edit;
     TBlobField(ItemTB.FieldByName('Image')).LoadFromStream(memStream);
+
   finally
+
     memStream.Free;
   end;
 
   ItemTB.Post;
   ItemTB.Refresh;
-
 end;
 
 // used every time a user checksout a shopping cart
@@ -1427,7 +1545,7 @@ var
 begin
 
   // select user's current balance and type of user
-  sql := 'SELECT Username, UserType, Balance FROM UserTB WHERE UserID = :UserID';
+  sql := 'SELECT Username, UserType, Balance, ProfileImage FROM UserTB WHERE UserID = :UserID';
 
   params := tObjectDictionary<string, Variant>.Create();
 
@@ -1450,6 +1568,7 @@ begin
   Result := tADODataSet.Create(nil);
   Result.FieldDefs.Add('Username', ftString, 100);
   Result.FieldDefs.Add('UserType', ftString, 10);
+  Result.FieldDefs.Add('ProfileImage', ftBlob);
   Result.FieldDefs.Add('Balance', ftFloat);
   Result.FieldDefs.Add('Revenue', ftFloat);
   Result.FieldDefs.Add('TotalSales', ftInteger);
@@ -1459,6 +1578,7 @@ begin
   Result.FieldDefs.Add('TotalSpending', ftCurrency);
   Result.CreateDataSet;
 
+  // mf clean this shit up at some point
   Result.Insert;
   Result.Edit;
   Result['UserType'] := dsResult['UserType'];
@@ -1466,6 +1586,8 @@ begin
   Result['Balance'] := dsResult['Balance'];
   Result.Edit;
   Result['Username'] := dsResult['Username'];
+  Result.Edit;
+  Result['ProfileImage'] := dsResult['ProfileImage'];
 
   Result.First;
 
@@ -1484,7 +1606,7 @@ begin
     end;
 
     if dsResult.IsEmpty then
-      showMessage('uh oh');
+      showMessage('Empty sql result');
 
     Result.Edit;
     Result['Revenue'] := dsResult['Revenue'];
@@ -1499,13 +1621,14 @@ begin
 
   // select total spending
 
-  sql := 'SELECT Sum(statValue) AS total FROM StatsTB WHERE UserID = :UserID AND Type = :statType ';
+  sql := 'SELECT IIF(Sum(statValue) is Null ,0 ,Sum(statValue)) AS total FROM StatsTB WHERE UserID = :UserID AND Type = :statType ';
   params.clear;
   params.Add('UserID', userID);
   params.Add('statType', 'SPE');
 
   dsResult := runSQL(sql, params);
   Result.Edit;
+  
   Result['TotalSpending'] := dsResult['total'];
 
   // select total cf

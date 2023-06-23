@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics,
   Vcl.Controls, DMUnit_u, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
-  Vcl.ComCtrls;
+  Vcl.ComCtrls, Vcl.Imaging.pngimage;
 
 type
   TfrmSignUp = class(TForm)
@@ -22,12 +22,14 @@ type
     btnSignUp: TButton;
     lblHomeAddress: TLabel;
     redHomeAddress: TRichEdit;
+    imgPfp: TImage;
     procedure btnLoginScreenClick(Sender: TObject);
     procedure btnSignUpClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure rgpUserClick(Sender: TObject);
     function securePassword(password: string): integer;
     function verifyCertificationCode(code: string): integer;
+    procedure imgPfpClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -164,8 +166,14 @@ begin
 
   end;
 
+  if imgPfp.Picture.Graphic = Nil then
+  begin
+    showMessage('Please choose a profile picture');
+    Exit;
+  end;
+
   UserId := DataModule1.SignUp(userName, password, userType, homeaddress,
-    certificationCode);
+    certificationCode, imgPfp);
 
   if Copy(UserId, 1, 5) = 'Error' then
   begin
@@ -173,6 +181,7 @@ begin
       [mbOK], 0, mbOK);
   end;
 
+  DataModule1.dDate := StrToDate(inputbox('', 'Date:', ''));
   DataModule1.UserId := UserId;
   DataModule1.CartID := DataModule1.CreateUserCart(DataModule1.userID);
   frmSignUp.Hide;
@@ -183,6 +192,15 @@ end;
 procedure TfrmSignUp.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   Application.Terminate;
+end;
+
+procedure TfrmSignUp.imgPfpClick(Sender: TObject);
+var
+  fileChooser: tOpenDialog;
+  sImagePath: string;
+begin
+  DataModule1.loadImageFromFile(imgPfp, self);
+
 end;
 
 procedure TfrmSignUp.rgpUserClick(Sender: TObject);

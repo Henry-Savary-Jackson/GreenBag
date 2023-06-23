@@ -7,7 +7,7 @@ uses
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
   System.ImageList, DMunit_u, Data.Win.ADODB, Vcl.ImgList, Vcl.Imaging.pngimage,
-  ItemContainer_u, addItem_u, System.Generics.Collections;
+  ItemContainer_u, addItem_u, System.Generics.Collections, Data.DB;
 
 type
   tRemoveProcedure = procedure(itemID: string) of object;
@@ -26,6 +26,7 @@ type
     // any code that needs to be executed by the parent screen
     // when a delete button is clicked is linked to the varaible
     removeProcedure: tRemoveProcedure;
+    imageStream : TStream;
 
   public
     Constructor Create(Owner: tForm; Parent: TWinControl; ItemID: string;
@@ -48,7 +49,7 @@ var
 begin
   self.removeProcedure := removeProcedure;
   //
-  sql := 'SELECT ItemName, Sales, (Sales*Cost) AS Revenue FROM ItemTB WHERE ItemID = :ItemID';
+  sql := 'SELECT ItemName, Sales, (Sales*Cost) AS Revenue , Image FROM ItemTB WHERE ItemID = :ItemID';
 
   params := tObjectDictionary<string, Variant>.Create();
   params.Add('ItemID', ItemID);
@@ -64,6 +65,9 @@ begin
   Name := dsResult['ItemName'];
   Sales := dsResult['Sales'];
   revenue := dsResult['Revenue'];
+
+  imageStream := dsResult.CreateBlobStream
+    (dsResult.FieldByName('Image'), bmRead);
 
   dsResult.Free;
   Inherited Create(Owner, Parent, ItemID);
@@ -93,6 +97,14 @@ begin
   imgItem.Top := 20;
   imgItem.Width := 110;
   imgItem.Height := 110;
+  imgItem.Stretch := true;
+
+  try
+    imgItem.Picture.LoadFromStream(imageStream);
+
+  finally
+    imageStream.Free;
+  end;
 
   lblName := TLabel.Create(self.Owner);
   lblName.Parent := self;

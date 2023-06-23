@@ -17,7 +17,7 @@ object frmAddItem: TfrmAddItem
   PixelsPerInch = 96
   TextHeight = 13
   object imgItem: TImage
-    Left = 152
+    Left = 161
     Top = 24
     Width = 105
     Height = 105

@@ -20,6 +20,8 @@ object frmProfile: TfrmProfile
     Top = 8
     Width = 105
     Height = 105
+    Stretch = True
+    OnClick = imgProfilePicClick
   end
   object lblUsername: TLabel
     Left = 246

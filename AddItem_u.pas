@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls,
-  Vcl.ExtCtrls, DMUnit_u, Data.Win.ADODB, PngImage,Vcl.Imaging.jpeg ;
+  Vcl.ExtCtrls, DMUnit_u, Data.Win.ADODB, PngImage,Vcl.Imaging.jpeg, Data.DB ;
 
 type
   TfrmAddItem = class(TForm)
@@ -73,7 +73,6 @@ var
   sName, sDesc, category: string;
   CF, WU, EU, CFProduce, WUProduce, EUProduce, Price: double;
   stock, maxWithdrawstock: double;
-  PngImage: tPngImage;
   I: Integer;
 begin
 
@@ -82,8 +81,6 @@ begin
     showMessage('Please upload an image of your item.');
     Exit;
   end;
-  PngImage := tPngImage.Create();
-  PngImage.Assign(imgItem.Picture.Graphic);
 
   sName := edtName.Text;
 
@@ -145,6 +142,12 @@ begin
 
   category := cmbCategory.Items[cmbCategory.ItemIndex];
 
+  if imgItem.Picture.Graphic = NIL then
+  begin
+    showMessage('Please assign a picture to this item.');
+    Exit;
+  end;
+
   try
 
     try
@@ -160,14 +163,14 @@ begin
 
         DataModule1.insertItem(itemID, sName, DataModule1.userID, category,
           sDesc, Price, stock, maxWithdrawstock, CF, EU, WU, CFProduce,
-          EUProduce, WUProduce, PngImage);
+          EUProduce, WUProduce, imgItem);
 
       end
       else
       begin
         DataModule1.updateItem(itemID, sName, DataModule1.userID, category,
           sDesc, Price, stock, maxWithdrawstock, CF, EU, WU, CFProduce,
-          EUProduce, WUProduce, PngImage);
+          EUProduce, WUProduce, imgItem);
 
       end;
 
@@ -186,7 +189,6 @@ begin
 
     end;
   finally
-    PngImage.Free;
   end;
 
 end;
@@ -214,7 +216,7 @@ procedure TfrmAddItem.FormShow(Sender: TObject);
 var
   dsResult: tAdoDataset;
   dsCategories: tAdoDataset;
-  gGraphic : tGraphic;
+  imageStream : tStream;
 begin
 
   cmbCategory.Items.Clear;
@@ -266,9 +268,13 @@ begin
 
     cmbCategory.ItemIndex := cmbCategory.Items.IndexOf(dsResult['Category']);
 
-    gGraphic := TBitmap.Create;
-    gGraphic.Assign(dsResult.FieldByName('Image'));
-    imgItem.Picture.Assign(gGraphic);
+    imageStream :=   dsResult.CreateBlobStream( dsResult.FieldByName('Image'), bmRead);
+    try
+      imgItem.Picture.LoadFromStream(imageStream);
+
+    finally
+      imageStream.Free;
+    end;
 
     dsResult.Free;
   end;
@@ -303,7 +309,7 @@ begin
   // open filchooser
   fileChooser := tOpenDialog.Create(self);
   try
-    fileChooser.Filter := 'jpg Files|*.jpg|png files|*png';
+    fileChooser.Filter := 'jpg Files|*.jpg|png files|*.png';
     fileChooser.InitialDir := 'C:\';
 
     if fileChooser.Execute(Handle) then

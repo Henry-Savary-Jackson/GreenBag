@@ -7,7 +7,7 @@ uses
   Vcl.Controls, Vcl.ExtCtrls, Vcl.Graphics, Vcl.Forms, Vcl.Dialogs,
   Vcl.StdCtrls, Vcl.ComCtrls,
   Vcl.Samples.Spin, DMUnit_u, Data.win.adodb, Vcl.Imaging.pngimage,
-  ItemContainer_u, System.Generics.Collections;
+  ItemContainer_u, System.Generics.Collections,  Data.DB;
 
 type
   tRemoveProcedure = procedure(itemID: string) of object;
@@ -26,6 +26,7 @@ type
     redItemInfo: TRichEdit;
     spnQuantity: TSpinEdit;
     iQuantity: integer;
+    imageStream : TStream;
 
     SellerId: string;
     shoppingCartItemID: string;
@@ -109,6 +110,8 @@ begin;
 
   self.updateInfo;
 
+  dsResult.Free;
+
   Inherited Create(Owner, Parent, itemID);
 
 end;
@@ -190,6 +193,7 @@ begin
   imgRemoveItem.Center := True;
   imgRemoveItem.Picture.LoadFromFile('cross.png');
   imgRemoveItem.OnClick := self.onRemoveClick;
+
 
   spnQuantity := TSpinEdit.Create(self.Owner);
   spnQuantity.Parent := self;

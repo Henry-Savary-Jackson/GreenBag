@@ -8,7 +8,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls,
   Vcl.ExtCtrls,
   Vcl.Samples.Spin, DMUnit_u, System.Generics.Collections, Data.Win.ADODB,
-  Vcl.Imaging.pngimage;
+  Vcl.Imaging.pngimage, Data.DB;
 
 type
   TfrmViewItem = class(TForm)
@@ -124,7 +124,7 @@ end;
 procedure TfrmViewItem.FormShow(Sender: TObject);
 var
   dsResult: TADODataSet;
-  gGraphic : tGraphic;
+  imageStream: tStream;
 begin
   //
   dsResult := DataModule1.viewItem(itemID);
@@ -165,13 +165,21 @@ begin
 
   lblCategory.Caption := 'Category: ' + dsResult['Category'];
 
-  lblMaxWithdraw.Caption := 'Maximum Stock you can withdraw at once: ' + intTostr(dsResult['MaxWithdrawableStock']);
+  lblMaxWithdraw.Caption := 'Maximum Stock you can withdraw at once: ' +
+    inttostr(dsResult['MaxWithdrawableStock']);
 
   if dsResult['Description'] <> NULl then
     redDesc.Lines.Add(dsResult['Description']);
-  gGraphic := TBitmap.Create;
-  gGraphic.Assign(dsResult.FieldByName('Image'));
-  imgItem.picTure.Assign(gGraphic);
+
+  imageStream := dsResult.CreateBlobStream(dsResult.FieldByName('Image'),
+    bmRead);
+  try
+    imgItem.Picture.LoadFromStream(imageStream);
+
+  finally
+    imageStream.Free;
+
+  end;
 
   btnSendRating.Enabled := dsResult['SellerID'] <> DataModule1.userID;
   btnAddToCart.Enabled := dsResult['SellerID'] <> DataModule1.userID;

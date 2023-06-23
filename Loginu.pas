@@ -65,8 +65,6 @@ begin
     Exit;
   end;
 
-  //
-
   DataModule1.dDate := StrToDate(inputbox('', 'Date:', ''));
   frmLogin.Hide;
   DataModule1.userID := userId;
