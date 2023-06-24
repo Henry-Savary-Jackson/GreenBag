@@ -7,14 +7,14 @@ uses
   Vcl.Controls, Vcl.ExtCtrls, Vcl.Graphics, Vcl.Forms, Vcl.Dialogs,
   Vcl.StdCtrls, Vcl.ComCtrls,
   Vcl.Samples.Spin, DMUnit_u, Data.win.adodb, Vcl.Imaging.pngimage,
-  ItemContainer_u, System.Generics.Collections,  Data.DB;
+  ItemContainer_u, System.Generics.Collections, Data.DB;
 
 type
   tRemoveProcedure = procedure(itemID: string) of object;
 
 type
-  tUpdateQuantityProcedure = procedure(itemID: string; iQuantity: integer; Cost : double)
-    of object;
+  tUpdateQuantityProcedure = procedure(itemID: string; iQuantity: integer;
+    Cost: double) of object;
 
 type
   CartItem = class(ItemContainer)
@@ -26,7 +26,7 @@ type
     redItemInfo: TRichEdit;
     spnQuantity: TSpinEdit;
     iQuantity: integer;
-    imageStream : TStream;
+    imageStream: TStream;
 
     SellerId: string;
     shoppingCartItemID: string;
@@ -48,7 +48,7 @@ type
 
   public
     itemTotalPrice, itemTotalCF, itemTotalWU, itemTotalEU: double;
-    maxwithdraw : integer;
+    maxwithdraw: integer;
 
   end;
 
@@ -78,41 +78,44 @@ begin;
   params := TObjectDictionary<string, variant>.Create();
   params.Add('ShoppingCartItemID', self.shoppingCartItemID);
 
-  dsResult := DataModule1.runSQL(sql, params);
-  params.Free;
+  try
+    dsResult := DataModule1.runSQL(sql, params);
 
-  if dsResult.IsEmpty then
-  begin
-    showMessage('Error: Item does not exist.');
-    Exit;
+    if dsResult.IsEmpty then
+    begin
+      showMessage('Error: Item does not exist.');
+      Exit;
+    end;
+
+    if dsResult.Fields.FindField('Status') <> nil then
+    begin
+      showMessage(dsResult['Status']);
+      Exit;
+    end;
+
+    self.iQuantity := dsResult['Quantity'];
+    self.itemID := dsResult['ItemID'];
+    self.itemPrice := dsResult['Cost'];
+    self.itemName := dsResult['ItemName'];
+
+    self.itemCF := dsResult['CF'];
+    self.itemWU := dsResult['WU'];
+    self.itemEU := dsResult['EU'];
+
+    self.itemCFProduce := dsResult['CFProduce'];
+    self.itemWUProduce := dsResult['WUProduce'];
+    self.itemEUProduce := dsResult['EUProduce'];
+
+    self.maxwithdraw := dsResult['MaxStock'];
+
+    self.updateInfo;
+    Inherited Create(Owner, Parent, itemID);
+
+  finally
+    if Assigned(dsResult) then
+      dsResult.Free;
+    params.Free;
   end;
-
-  if dsResult.Fields.FindField('Status') <> nil then
-  begin
-    showMessage(dsResult['Status']);
-    Exit;
-  end;
-
-  self.iQuantity := dsResult['Quantity'];
-  self.itemID := dsResult['ItemID'];
-  self.itemPrice := dsResult['Cost'];
-  self.itemName := dsResult['ItemName'];
-
-  self.itemCF := dsResult['CF'];
-  self.itemWU := dsResult['WU'];
-  self.itemEU := dsResult['EU'];
-
-  self.itemCFProduce := dsResult['CFProduce'];
-  self.itemWUProduce := dsResult['WUProduce'];
-  self.itemEUProduce := dsResult['EUProduce'];
-
-  self.maxwithdraw := dsResult['MaxStock'];
-
-  self.updateInfo;
-
-  dsResult.Free;
-
-  Inherited Create(Owner, Parent, itemID);
 
 end;
 
@@ -194,7 +197,6 @@ begin
   imgRemoveItem.Picture.LoadFromFile('cross.png');
   imgRemoveItem.OnClick := self.onRemoveClick;
 
-
   spnQuantity := TSpinEdit.Create(self.Owner);
   spnQuantity.Parent := self;
   spnQuantity.Left := 680;
@@ -224,7 +226,7 @@ begin
   self.iQuantity := spnQuantity.Value;
   self.updateInfo;
   self.UpdateRedInfo;
-  self.updateQuantityProcedure(itemID, self.iQuantity- oldQuantity, itemPrice  );
+  self.updateQuantityProcedure(itemID, self.iQuantity - oldQuantity, itemPrice);
 end;
 
 procedure CartItem.updateInfo;

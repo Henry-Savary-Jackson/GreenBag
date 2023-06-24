@@ -26,10 +26,10 @@ type
     // any code that needs to be executed by the parent screen
     // when a delete button is clicked is linked to the varaible
     removeProcedure: tRemoveProcedure;
-    imageStream : TStream;
+    imageStream: TStream;
 
   public
-    Constructor Create(Owner: tForm; Parent: TWinControl; ItemID: string;
+    Constructor Create(Owner: tForm; Parent: TWinControl; itemID: string;
       removeProcedure: tRemoveProcedure);
     procedure createDesign(); override;
     procedure viewItem(Sender: tObject);
@@ -41,7 +41,7 @@ type
 implementation
 
 Constructor ProductItem.Create(Owner: tForm; Parent: TWinControl;
-  ItemID: string; removeProcedure: tRemoveProcedure);
+  itemID: string; removeProcedure: tRemoveProcedure);
 var
   sql: string;
   params: tObjectDictionary<string, Variant>;
@@ -52,41 +52,44 @@ begin
   sql := 'SELECT ItemName, Sales, Image FROM ItemTB WHERE ItemID = :ItemID';
 
   params := tObjectDictionary<string, Variant>.Create();
-  params.Add('ItemID', ItemID);
-  dsResult := DataModule1.runSQL(sql, params);
+  params.Add('ItemID', itemID);
+  try
+    dsResult := DataModule1.runSQL(sql, params);
 
-  if dsResult.Fields.FindField('Status') <> nil then
-  begin
-    showMessage(dsResult['Status']);
-    Exit;
+    if dsResult.Fields.FindField('Status') <> nil then
+    begin
+      showMessage(dsResult['Status']);
+      Exit;
+    end;
+
+    Name := dsResult['ItemName'];
+    Sales := dsResult['Sales'];
+    // calculate revenue
+
+    imageStream := dsResult.CreateBlobStream
+      (dsResult.FieldByName('Image'), bmRead);
+
+    dsResult.Free;
+
+    sql := 'SELECT IIF(SUM(Cost) IS NULL, 0, SUM(Cost)) AS ItemRevenue FROM TransactionItemTB WHERE ItemID = :ItemID';
+
+    dsResult := DataModule1.runSQL(sql, params);
+
+    if dsResult.Fields.FindField('Status') <> nil then
+    begin
+      showMessage(dsResult['Status']);
+      Exit;
+    end;
+
+    revenue := dsResult['ItemRevenue'];
+
+    Inherited Create(Owner, Parent, itemID);
+
+  finally
+    if Assigned(dsResult) then
+      dsResult.Free;
+    params.Free;
   end;
-
-  Name := dsResult['ItemName'];
-  Sales := dsResult['Sales'];
-  // calculate revenue
-
-  imageStream := dsResult.CreateBlobStream
-    (dsResult.FieldByName('Image'), bmRead);
-
-
-  dsResult.Free;
-
-  sql := 'SELECT IIF(SUM(Cost) IS NULL, 0, SUM(Cost)) AS ItemRevenue FROM TransactionItemTB WHERE ItemID = :ItemID';
-
-  dsResult := DataModule1.runSQL(sql, params);
-
-  if dsResult.Fields.FindField('Status') <> nil then
-  begin
-    showMessage(dsResult['Status']);
-    Exit;
-  end;
-
-  revenue := dsResult['ItemRevenue'];
-
-  dsResult.Free;
-  params.Free;
-
-  Inherited Create(Owner, Parent, ItemID);
 
 end;
 
@@ -113,7 +116,7 @@ begin
   imgItem.Top := 20;
   imgItem.Width := 110;
   imgItem.Height := 110;
-  imgItem.Stretch := true;
+  imgItem.Stretch := True;
 
   try
     imgItem.Picture.LoadFromStream(imageStream);
@@ -195,7 +198,8 @@ procedure ProductItem.viewItem(Sender: tObject);
 begin
   //
   self.Owner.Hide;
-  frmAddItem.ItemID := ItemID;
+  DataModule1.lastForm := self.Owner;
+  frmAddItem.itemID := itemID;
   frmAddItem.Show;
 
 end;

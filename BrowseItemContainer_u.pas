@@ -60,31 +60,36 @@ begin;
   params := TObjectDictionary<string, Variant>.Create();
   params.Add('ItemID', itemID);
 
-  dsResult := DataModule1.runSQL(sql, params);
+  try
+    dsResult := DataModule1.runSQL(sql, params);
 
-  if dsResult.Fields.FindField('Status') <> nil then
-  begin
-    showMessage(dsResult['Status']);
-    Exit;
+    if dsResult.Fields.FindField('Status') <> nil then
+    begin
+      showMessage(dsResult['Status']);
+      Exit;
+    end;
+
+    itemName := dsResult['ItemName'];
+    itemSeller := dsResult['SellerName'];
+    itemPrice := dsResult['Cost'];
+    itemCF := dsResult['CF'];
+    itemWU := dsResult['WU'];
+    itemEU := dsResult['EU'];
+    sellerID := dsResult['SellerID'];
+
+    self.UserID := UserID;
+    self.viewProcedure := viewProcedure;
+
+    imageStream := dsResult.CreateBlobStream
+      (dsResult.FieldByName('Image'), bmRead);
+
+    Inherited Create(Owner, Parent, itemID);
+
+  finally
+    if Assigned(dsResult) then
+      dsResult.Free;
+    params.Free;
   end;
-
-  itemName := dsResult['ItemName'];
-  itemSeller := dsResult['SellerName'];
-  itemPrice := dsResult['Cost'];
-  itemCF := dsResult['CF'];
-  itemWU := dsResult['WU'];
-  itemEU := dsResult['EU'];
-  sellerID := dsResult['SellerID'];
-
-  self.UserID := UserID;
-  self.viewProcedure := viewProcedure;
-
-  imageStream := dsResult.CreateBlobStream
-    (dsResult.FieldByName('Image'), bmRead);
-
-  dsResult.Free;
-
-  Inherited Create(Owner, Parent, itemID);
 end;
 
 procedure BrowseItem.createDesign();

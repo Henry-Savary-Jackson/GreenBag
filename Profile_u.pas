@@ -103,7 +103,7 @@ begin
   begin
 
     // get the code for this category
-    sType := NameToCateg.ExtractPair(TButton(Sender).Caption).Value;
+    NameToCateg.TryGetValue(TButton(Sender).Caption, sType);
 
     chrtStats.Title.Caption := 'Your ' + TButton(Sender).Caption;
 

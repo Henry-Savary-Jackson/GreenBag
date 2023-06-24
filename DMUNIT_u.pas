@@ -36,7 +36,7 @@ type
     userID: string;
     CartID: string;
     dDate: tDate;
-    lastForm : TForm;
+    lastForm: TForm;
 
     procedure findInTable(table: TADOTable; pk: string; pkVal: string);
 
@@ -86,8 +86,8 @@ type
 
     procedure CheckoutCart(ShoppingCartID: string);
 
-    function addToCart(ShoppingCartID, itemID: string;
-      quantity: integer; itemPrice: double): string;
+    function addToCart(ShoppingCartID, itemID: string; quantity: integer;
+      itemPrice: double): string;
 
     function getCartItems(ShoppingCartID: string): tADODataSet;
     procedure removeFromCart(ShoppingCartItemID: string);
@@ -171,78 +171,77 @@ begin
     Result := ShoppingCartItemID;
   end;
 
-  dsResult := runSQL(sql, params);
+  try
+    dsResult := runSQL(sql, params);
 
-  if dsResult['Status'] <> 'Success' then
-  begin
-    // deallocate memory for query result
-    dsResult.Free;
-    RollBack;
-    // raise exception
-    raise Exception.Create(dsResult['Status']);
+    if dsResult['Status'] <> 'Success' then
+    begin
+      RollBack;
+      // raise exception
+      raise Exception.Create(dsResult['Status']);
+    end;
+
+
+    // update stock
+
+    // check if  there is enough stock to withdraw that quantity
+
+    // TODO: DAFUCK IS UP WITH PARAMETERS NOT WORKING
+
+    sql := 'SELECT ItemTB.Stock, ItemTB.MaxWithdrawableStock, ShoppingCartItemsTB.Quantity '
+      + 'FROM ShoppingCartItemsTB, ItemTB WHERE ItemTB.ItemID = :ItemID AND ' +
+      ' ShoppingCartItemID = "' + ShoppingCartItemID + '"';
+
+    params.clear;
+    params.Add('ItemID', itemID);
+
+    dsResult := runSQL(sql, params);
+
+    if dsResult.Fields.FindField('Status') <> nil then
+    begin
+
+      raise Exception.Create(dsResult['Status']);
+    end;
+
+    if dsResult['Stock'] - quantity < 0 then
+    begin
+      // if not enough stock
+      // rollback changes
+      showMessage(dsResult['Stock']);
+      RollBack;
+      raise Exception.Create('Not enough Stock for this item');
+    end
+    // if the amount of stock the user wishes to get is over the limit
+    // set by the buyer, rollback transaction
+    else if dsResult['MaxWithdrawableStock'] < dsResult['Quantity'] then
+    begin
+      RollBack;
+      raise Exception.Create
+        ('You are not permitted to withdraw more units at once.');
+    end;
+
+    // if all goes well, remove that withdrawn stock from the buyer
+    sql := 'UPDATE ItemTB SET Stock = Stock - :Quantity WHERE ItemID = :ItemID';
+    params.clear;
+    params.Add('Quantity', quantity);
+    params.Add('ItemID', itemID);
+    dsResult := runSQL(sql, params);
+
+    if dsResult['Status'] <> 'Success' then
+    begin
+
+      // raise exception
+      raise Exception.Create(dsResult['Status']);
+    end;
+
+    // commit changes to DB
+    CommitTransaction;
+
+  finally
+    if Assigned(dsResult) then
+      dsResult.Free;
+    params.Free;
   end;
-
-
-  // update stock
-
-  // check if  there is enough stock to withdraw that quantity
-
-  //TODO: DAFUCK IS UP WITH PARAMETERS NOT WORKING
-
-  sql := 'SELECT ItemTB.Stock, ItemTB.MaxWithdrawableStock, ShoppingCartItemsTB.Quantity '
-    + 'FROM ShoppingCartItemsTB, ItemTB WHERE ItemTB.ItemID = :ItemID AND '
-    + ' ShoppingCartItemID = "' + ShoppingCartItemID + '"';
-
-  params.clear;
-  params.Add('ItemID', itemID);
-
-  dsResult := runSQL(sql, params);
-
-  if dsResult.Fields.FindField('Status') <> nil then
-  begin
-
-    raise Exception.Create(dsResult['Status']);
-  end;
-
-  if dsResult['Stock'] - quantity < 0 then
-  begin
-    // if not enough stock
-    // rollback changes
-    showMessage(dsResult['Stock']);
-    RollBack;
-    // deallocate memory for query result
-    dsResult.Free;
-    raise Exception.Create('Not enough Stock for this item');
-  end
-  // if the amount of stock the user wishes to get is over the limit
-  // set by the buyer, rollback transaction
-  else if dsResult['MaxWithdrawableStock'] < dsResult['Quantity'] then
-  begin
-    RollBack;
-    dsResult.Free;
-    raise Exception.Create
-      ('You are not permitted to withdraw more units at once.');
-  end;
-
-  // if all goes well, remove that withdrawn stock from the buyer
-  sql := 'UPDATE ItemTB SET Stock = Stock - :Quantity WHERE ItemID = :ItemID';
-  params.clear;
-  params.Add('Quantity', quantity);
-  params.Add('ItemID', itemID);
-  dsResult := runSQL(sql, params);
-  params.Free;
-
-  if dsResult['Status'] <> 'Success' then
-  begin
-    // deallocate memory for query result
-    dsResult.Free;
-    // raise exception
-    raise Exception.Create(dsResult['Status']);
-  end;
-
-  // commit changes to DB
-  CommitTransaction;
-  dsResult.Free;
 
 end;
 
@@ -269,61 +268,64 @@ begin
 
   params.Add('ShoppingCartID', ShoppingCartID);
 
-  dsResult := runSQL(sql, params);
+  try
+    dsResult := runSQL(sql, params);
 
-  if dsResult.Fields.FindField('Status') <> nil then
-  begin
+    if dsResult.Fields.FindField('Status') <> nil then
+    begin
+      // raise exception
+      raise Exception.Create(dsResult['Status']);
+    end;
+
+    dsResult.First;
+
+    // for each item in shopping cart, return the withdrawn stock back to the buyer
+    sql := 'UPDATE ItemTB SET Stock = Stock + :Quantity WHERE ItemID = :ItemID';
+
+    while not dsResult.Eof do
+    begin
+      params.clear;
+
+      params.Add('Quantity', dsResult['Quantity']);
+      params.Add('ItemID', dsResult['ItemID']);
+      dsResultUpdateItem := runSQL(sql, params);
+
+      if dsResultUpdateItem['Status'] <> 'Success' then
+      begin
+        raise Exception.Create(dsResultUpdateItem['Status']);
+      end;
+      dsResult.Next;
+
+    end;
+
     // deallocate memory for query result
     dsResult.Free;
-    // raise exception
-    raise Exception.Create(dsResult['Status']);
-  end;
 
-  dsResult.First;
 
-  // for each item in shopping cart, return the withdrawn stock back to the buyer
-  sql := 'UPDATE ItemTB SET Stock = Stock + :Quantity WHERE ItemID = :ItemID';
+    // After you put back the stock, delete the records of
+    // the user's current shopping cart from the database
 
-  while not dsResult.Eof do
-  begin
+    sql := 'DELETE FROM ShoppingCartTB WHERE ShoppingCartID = :ShoppingCartID';
     params.clear;
 
-    params.Add('Quantity', dsResult['Quantity']);
-    params.Add('ItemID', dsResult['ItemID']);
-    dsResultUpdateItem := runSQL(sql, params);
+    params.Add('ShoppingCartID', ShoppingCartID);
 
-    if dsResultUpdateItem['Status'] <> 'Success' then
+    dsResult := runSQL(sql, params);
+
+    if dsResult['Status'] <> 'Success' then
     begin
-      dsResult.Free;
-      raise Exception.Create(dsResultUpdateItem['Status']);
+      showMessage(dsResult['Status']);
+      exit;
     end;
-    dsResult.Next;
 
+    // commit changes to db
+    CommitTransaction;
+
+  finally
+    if Assigned(dsResult) then
+      dsResult.Free;
+    params.Free;
   end;
-
-  // deallocate memory for query result
-  dsResult.Free;
-
-
-  // After you put back the stock, delete the records of
-  // the user's current shopping cart from the database
-
-  sql := 'DELETE FROM ShoppingCartTB WHERE ShoppingCartID = :ShoppingCartID';
-  params.clear;
-
-  params.Add('ShoppingCartID', ShoppingCartID);
-
-  dsResult := runSQL(sql, params);
-
-  if dsResult['Status'] <> 'Success' then
-  begin
-    showMessage(dsResult['Status']);
-    exit;
-  end;
-
-  // commit changes to db
-  CommitTransaction;
-  dsResult.Free;
 
 end;
 
@@ -354,172 +356,177 @@ begin
   params := tObjectDictionary<string, Variant>.Create();
   params.Add('ShoppingCartID', ShoppingCartID);
 
-  dsResult := runSQL(sql, params);
-
-  if dsResult['Status'] <> 'Success' then
-  begin
-    raise Exception.Create(dsResult['Status']);
-  end;
-  dsResult.Free;
-
-  // Then for TransactionItemTB
-  sql := 'INSERT INTO TransactionItemTB (CartItemID, ItemID, Quantity, TransactionID, Cost) '
-    + 'SELECT ShoppingCartItemID, ItemID, Quantity, ShoppingCartID, Cost FROM ShoppingCartItemsTB WHERE ShoppingCartID  = :ShoppingCartID ';
-
-  dsResult := runSQL(sql, params);
-
-  if dsResult['Status'] <> 'Success' then
-  begin
-    raise Exception.Create(dsResult['Status']);
-  end;
-
-  dsResult.Free;
-
-  // Next, select user's id and balance
-
-  sql := 'SELECT BuyerID, UserTB.Balance FROM ShoppingCartTB' +
-    ' INNER JOIN UserTB ON UserTB.UserID = ShoppingCartTB.BuyerID ' +
-    'WHERE ShoppingCartID = :ShoppingCartID  ';
-
-  dsResult := runSQL(sql, params);
-
-  if dsResult.Fields.FindField('Status') <> nil then
-  begin
-    raise Exception.Create(dsResult['Status']);
-  end;
-
-  BuyerID := dsResult['BuyerID'];
-  buyerBalance := dsResult['Balance'];
-
-  // Select all relevant data on the items and Seller for each item in user's cart
-
-  sql := 'SELECT ShoppingCartItemsTB.Quantity, ShoppingCartItemsTB.ItemID, ShoppingCartItemsTB.Cost' +
-    ' , ItemTB.SellerID ' +
-    ' FROM ((ShoppingCartItemsTB INNER JOIN ShoppingCartTB ' +
-    'ON ShoppingCartItemsTB.ShoppingCartID = ShoppingCartTB.ShoppingCartID) ' +
-    'INNER JOIN ItemTB ON ItemTB.ItemID = ShoppingCartItemsTB.ItemID )' +
-    'WHERE ShoppingCartItemsTB.ShoppingCartID = :ShoppingCartID';
-
-  dsResult := runSQL(sql, params);
-
-  if dsResult.Fields.FindField('Status') <> nil then
-  begin
-    raise Exception.Create(dsResult['Status']);
-  end;
-
-  params.clear;
-
-  // Once you have all of the necessary data
-  // transfer money from buyer to sender
-
-  // update number of sales of each item
-  sqlUpdateItem :=
-    'UPDATE ItemTB SET Sales = Sales + :Sales WHERE ItemID = :ItemID';
-
-  // lower the user's balance
-  sqlUpdateBuyer :=
-    'UPDATE UserTB SET Balance = :Balance WHERE UserID = :UserID ';
-
-  // increase the seller's revenue
-  sqlUpdateSeller :=
-    'UPDATE SellerTB SET Revenue = Revenue + :Revenue WHERE UserID = :SellerID';
-
-  dsResult.First;
-
-  while not dsResult.Eof do
-  begin
-    // update buyer
-
-    itemPrice := dsResult['Cost'];
-    buyerBalance := buyerBalance - itemPrice;
-
-    if buyerBalance < 0 then
-    begin
-      // Rollback in case of insufficient funds from user
-      RollBack;
-      raise Exception.Create('Out of balance');
-    end;
-
-    // if sufficient funds remove from user's account
-    params.clear;
-    params.Add('Balance', buyerBalance);
-    params.Add('UserID', BuyerID);
-
-    dsResultUpdateBuyer := runSQL(sqlUpdateBuyer, params);
-
-    if dsResultUpdateBuyer['Status'] <> 'Success' then
-    begin
-      raise Exception.Create(dsResult['Status']);
-    end;
-
-    dsResultUpdateBuyer.Free;
-
-    // update item's number of units sold
-
-    params.clear;
-
-    params.Add('ItemID', dsResult['ItemID']);
-
-    params.Add('Sales', dsResult['Quantity']);
-    dsResultUpdateItem := runSQL(sqlUpdateItem, params);
-
-    if dsResultUpdateItem['Status'] <> 'Success' then
-    begin
-      raise Exception.Create(dsResult['Status']);
-    end;
-    dsResultUpdateItem.Free;
-
-
-    // update seller's revenue amount
-
-    params.clear;
-    params.Add('Revenue', itemPrice);
-    params.Add('SellerID', dsResult['SellerID']);
-
-    dsResultUpdateSeller := runSQL(sqlUpdateSeller, params);
-    if dsResultUpdateSeller['Status'] <> 'Success' then
-    begin
-      raise Exception.Create(dsResult['Status']);
-
-    end;
-
-    dsResultUpdateSeller.Free;
-
-    dsResult.Next;
-  end;
-
-  // update The user's  and buyers' statistics  based on these transactions
-
   try
-    updateStats(ShoppingCartID);
-  except
-    on e: Exception do
+    dsResult := runSQL(sql, params);
+
+    if dsResult['Status'] <> 'Success' then
     begin
-      if Connection.InTransaction then
-        RollBack;
-      raise e;
+      raise Exception.Create(dsResult['Status']);
     end;
+    dsResult.Free;
+
+    // Then for TransactionItemTB
+    sql := 'INSERT INTO TransactionItemTB (CartItemID, ItemID, Quantity, TransactionID, Cost) '
+      + 'SELECT ShoppingCartItemID, ItemID, Quantity, ShoppingCartID, Cost FROM ShoppingCartItemsTB WHERE ShoppingCartID  = :ShoppingCartID ';
+
+    dsResult := runSQL(sql, params);
+
+    if dsResult['Status'] <> 'Success' then
+    begin
+      raise Exception.Create(dsResult['Status']);
+    end;
+
+    dsResult.Free;
+
+    // Next, select user's id and balance
+
+    sql := 'SELECT BuyerID, UserTB.Balance FROM ShoppingCartTB' +
+      ' INNER JOIN UserTB ON UserTB.UserID = ShoppingCartTB.BuyerID ' +
+      'WHERE ShoppingCartID = :ShoppingCartID  ';
+
+    dsResult := runSQL(sql, params);
+
+    if dsResult.Fields.FindField('Status') <> nil then
+    begin
+      raise Exception.Create(dsResult['Status']);
+    end;
+
+    BuyerID := dsResult['BuyerID'];
+    buyerBalance := dsResult['Balance'];
+
+    // Select all relevant data on the items and Seller for each item in user's cart
+
+    sql := 'SELECT ShoppingCartItemsTB.Quantity, ShoppingCartItemsTB.ItemID, ShoppingCartItemsTB.Cost'
+      + ' , ItemTB.SellerID ' +
+      ' FROM ((ShoppingCartItemsTB INNER JOIN ShoppingCartTB ' +
+      'ON ShoppingCartItemsTB.ShoppingCartID = ShoppingCartTB.ShoppingCartID) '
+      + 'INNER JOIN ItemTB ON ItemTB.ItemID = ShoppingCartItemsTB.ItemID )' +
+      'WHERE ShoppingCartItemsTB.ShoppingCartID = :ShoppingCartID';
+
+    dsResult := runSQL(sql, params);
+
+    if dsResult.Fields.FindField('Status') <> nil then
+    begin
+      raise Exception.Create(dsResult['Status']);
+    end;
+
+    params.clear;
+
+    // Once you have all of the necessary data
+    // transfer money from buyer to sender
+
+    // update number of sales of each item
+    sqlUpdateItem :=
+      'UPDATE ItemTB SET Sales = Sales + :Sales WHERE ItemID = :ItemID';
+
+    // lower the user's balance
+    sqlUpdateBuyer :=
+      'UPDATE UserTB SET Balance = :Balance WHERE UserID = :UserID ';
+
+    // increase the seller's revenue
+    sqlUpdateSeller :=
+      'UPDATE SellerTB SET Revenue = Revenue + :Revenue WHERE UserID = :SellerID';
+
+    dsResult.First;
+
+    while not dsResult.Eof do
+    begin
+      // update buyer
+
+      itemPrice := dsResult['Cost'];
+      buyerBalance := buyerBalance - itemPrice;
+
+      if buyerBalance < 0 then
+      begin
+        // Rollback in case of insufficient funds from user
+        RollBack;
+        raise Exception.Create('Out of balance');
+      end;
+
+      // if sufficient funds remove from user's account
+      params.clear;
+      params.Add('Balance', buyerBalance);
+      params.Add('UserID', BuyerID);
+
+      dsResultUpdateBuyer := runSQL(sqlUpdateBuyer, params);
+
+      if dsResultUpdateBuyer['Status'] <> 'Success' then
+      begin
+        raise Exception.Create(dsResult['Status']);
+      end;
+
+      dsResultUpdateBuyer.Free;
+
+      // update item's number of units sold
+
+      params.clear;
+
+      params.Add('ItemID', dsResult['ItemID']);
+
+      params.Add('Sales', dsResult['Quantity']);
+      dsResultUpdateItem := runSQL(sqlUpdateItem, params);
+
+      if dsResultUpdateItem['Status'] <> 'Success' then
+      begin
+        raise Exception.Create(dsResult['Status']);
+      end;
+      dsResultUpdateItem.Free;
+
+
+      // update seller's revenue amount
+
+      params.clear;
+      params.Add('Revenue', itemPrice);
+      params.Add('SellerID', dsResult['SellerID']);
+
+      dsResultUpdateSeller := runSQL(sqlUpdateSeller, params);
+      if dsResultUpdateSeller['Status'] <> 'Success' then
+      begin
+        raise Exception.Create(dsResult['Status']);
+
+      end;
+
+      dsResultUpdateSeller.Free;
+
+      dsResult.Next;
+    end;
+
+    // update The user's  and buyers' statistics  based on these transactions
+
+    try
+      updateStats(ShoppingCartID);
+    except
+      on e: Exception do
+      begin
+        if Connection.InTransaction then
+          RollBack;
+        raise e;
+      end;
+    end;
+
+    // Now, Delete all temporary shopping cart records from the database
+
+    sql := 'DELETE FROM ShoppingCartTB WHERE ShoppingCartID = :ShoppingCartID';
+    params.clear;
+
+    params.Add('ShoppingCartID', ShoppingCartID);
+
+    dsResult := runSQL(sql, params);
+
+    if dsResult['Status'] <> 'Success' then
+    begin
+      raise Exception.Create(dsResult['Status']);
+    end;
+    // commit transaction
+
+    CommitTransaction;
+
+  finally
+    if Assigned(dsResult) then
+      dsResult.Free;
+    params.Free;
+
   end;
-
-  // Now, Delete all temporary shopping cart records from the database
-
-  sql := 'DELETE FROM ShoppingCartTB WHERE ShoppingCartID = :ShoppingCartID';
-  params.clear;
-
-  params.Add('ShoppingCartID', ShoppingCartID);
-
-  dsResult := runSQL(sql, params);
-
-  if dsResult['Status'] <> 'Success' then
-  begin
-    raise Exception.Create(dsResult['Status']);
-  end;
-
-  dsResult.Free;
-
-  // commit transaction
-
-  CommitTransaction;
 
 end;
 
@@ -554,18 +561,24 @@ begin
   // insert user's shopping cart into database
   sql := 'INSERT INTO ShoppingCartTB (ShoppingCartID, BuyerID, DateCreated) VALUES (:ShoppingCartID, :UserID , :Date)';
 
-  dsResult := runSQL(sql, params);
+  try
+    dsResult := runSQL(sql, params);
 
-  params.Free;
+    if dsResult['Status'] <> 'Success' then
+    begin
+      raise Exception.Create(dsResult['Status']);
+    end;
+    // commit changes
+    CommitTransaction;
 
-  if dsResult['Status'] <> 'Success' then
-  begin
-    raise Exception.Create(dsResult['Status']);
+    Result := sShoppingCartID;
+
+  finally
+    params.Free;
+    if Assigned(dsResult) then
+      dsResult.Free;
   end;
-  // commit changes
-  CommitTransaction;
 
-  Result := sShoppingCartID;
 end;
 
 procedure TDataModule1.DataModuleCreate(Sender: TObject);
@@ -674,13 +687,18 @@ begin
 
   params.Add('ShoppingCartID', ShoppingCartID);
 
-  // retur nsql result
-  Result := runSQL(sql, params);
+  try
+    // retur nsql result
+    Result := runSQL(sql, params);
 
-  // handle db errors
-  if Result.Fields.FindField('Status') <> nil then
-  begin
-    raise Exception.Create(Result['Status']);
+    // handle db errors
+    if Result.Fields.FindField('Status') <> nil then
+    begin
+      raise Exception.Create(Result['Status']);
+    end;
+
+  finally
+    params.Free;
   end;
 
 end;
@@ -692,7 +710,7 @@ var
 begin
   sql := 'SELECT DISTINCT Category FROM ItemTB;';
 
-  Result := runSQL(sql, nil);
+  Result := runSQL(sql);
 
 end;
 
@@ -728,24 +746,32 @@ begin
   params := tObjectDictionary<string, Variant>.Create();
   params.Add('UserID', userID);
 
-  dsResult := runSQL(sql, params);
-
-  if dsResult.Fields.FindField('Status') <> nil then
-  begin
-    raise Exception.Create(dsResult['Status']);
-  end;
-
-  imageStream := dsResult.CreateBlobStream
-    (dsResult.FieldByName('ProfileImage'), bmRead);
   try
-    try
-      Image.Picture.LoadFromStream(imageStream);
-    finally
-      imageStream.Free;
+    dsResult := runSQL(sql, params);
+
+    if dsResult.Fields.FindField('Status') <> nil then
+    begin
+      raise Exception.Create(dsResult['Status']);
     end;
 
-  except
-    raise Exception.Create('Failed to load profile Image');
+    imageStream := dsResult.CreateBlobStream
+      (dsResult.FieldByName('ProfileImage'), bmRead);
+    try
+      try
+        Image.Picture.LoadFromStream(imageStream);
+      finally
+        imageStream.Free;
+      end;
+
+    except
+      raise Exception.Create('Failed to load profile Image');
+    end;
+
+  finally
+    if Assigned(dsResult) then
+      dsResult.Free;
+    params.Free;
+
   end;
 
 end;
@@ -763,7 +789,7 @@ begin
   // does not show deleted items
   sql := 'SELECT ItemID FROM ItemTB WHERE ItemName LIKE :SearchQuery AND Deleted = False ';
 
-  params := tObjectDictionary<string, Variant>.Create();;
+  params := tObjectDictionary<string, Variant>.Create();
   params.Add('SearchQuery', '%' + searchQuery + '%');
 
   // if the user has specifed a category, use that as a condition as well
@@ -773,17 +799,20 @@ begin
     params.Add('Category', category);
   end;
 
-  // return the results
-  Result := runSQL(sql, params);
-  params.Free;
+  try
+    // return the results
+    Result := runSQL(sql, params);
+
+  finally
+    params.Free;
+  end;
 
 end;
 
 function TDataModule1.ImageToVariant(Image: tImage): Variant;
 var
   imageStream: TBytesStream;
-  streamSize : integer;
-  
+
 begin
 
   imageStream := TBytesStream.Create;
@@ -812,28 +841,31 @@ begin
   params.Add('ItemID', itemID);
   params.Add('ShoppingCartID', ShoppingCartID);
 
-  // run sql
-  dsResult := runSQL(sql, params);
+  try
+    // run sql
+    dsResult := runSQL(sql, params);
 
-  // handle errors
-  if dsResult.Fields.FindField('Status') <> nil then
-  begin
-    dsResult.Free;
-    raise Exception.Create(dsResult['Status']);
+    // handle errors
+    if dsResult.Fields.FindField('Status') <> nil then
+    begin
+      raise Exception.Create(dsResult['Status']);
+    end;
+
+    if dsResult.IsEmpty then
+    begin
+      // return emtpy string if the item is not in the cart
+      Result := '';
+    end
+    else
+    begin
+      // if the item is present in that cart, return its shoppingcartItemID
+      Result := dsResult['ShoppingCartItemID'];
+    end;
+  finally
+    if Assigned(dsResult) then
+      dsResult.Free;
+    params.Free;
   end;
-
-  if dsResult.IsEmpty then
-  begin
-    // return emtpy string if the item is not in the cart
-    Result := '';
-  end
-  else
-  begin
-    // if the item is present in that cart, return its shoppingcartItemID
-    Result := dsResult['ShoppingCartItemID'];
-  end;
-
-  dsResult.Free;
 
 end;
 
@@ -909,12 +941,20 @@ begin
   params.Add('statType', statType);
   params.Add('statValue', value);
 
-  // send sql insert statement
-  dsResult := runSQL(sql, params);
+  try
+    // send sql insert statement
+    dsResult := runSQL(sql, params);
 
-  if dsResult['Status'] <> 'Success' then
-  begin
-    raise Exception.Create(dsResult['Status']);
+    if dsResult['Status'] <> 'Success' then
+    begin
+      raise Exception.Create(dsResult['Status']);
+    end;
+
+  finally
+    if Assigned(dsResult) then
+      dsResult.Free;
+    params.Free;
+
   end;
 
 end;
@@ -934,7 +974,7 @@ begin
   sql := 'SELECT 1 FROM ' + tbName + ' WHERE ';
 
   // generate all the parameters
-  dParams := tObjectDictionary<String, Variant>.Create();
+  dParams := tObjectDictionary<string, Variant>.Create();
   for i := 1 to length(pkValue) do
   begin
     paramName := 'pkVal' + intToStr(i);
@@ -960,8 +1000,11 @@ begin
     dParams.Free;
 
     Result := not dsResult.IsEmpty;
+
   finally
-    dsResult.Free;
+    if Assigned(dsResult) then
+      dsResult.Free;
+    dParams.Free;
   end;
 
 end;
@@ -974,7 +1017,7 @@ begin
   // open filchooser
   fileChooser := tOpenDialog.Create(window);
   try
-    fileChooser.Filter := 'jpg Files|*.jpg|png files|*png';
+    fileChooser.Filter := 'png files|*.png|jpg Files|*.jpg';
     fileChooser.InitialDir := 'C:\';
 
     if fileChooser.Execute then
@@ -1005,39 +1048,44 @@ begin
   Parameters := tObjectDictionary<string, Variant>.Create();
   Parameters.Add('Username', Username);
 
-  sqlResult := runSQL(sql, Parameters);
-  Parameters.Free;
+  try
+    sqlResult := runSQL(sql, Parameters);
 
-  // handle error occuring whilst trying to access database
-  if sqlResult.Fields.FindField('Status') <> nil then
-  begin
-    Result := 'Error: ' + sqlResult['Status'];
-    showMessage(Result);
-    exit;
+    // handle error occuring whilst trying to access database
+    if sqlResult.Fields.FindField('Status') <> nil then
+    begin
+      Result := 'Error: ' + sqlResult['Status'];
+      showMessage(Result);
+      exit;
+    end;
+
+
+    // check if any users with matching username
+
+    if sqlResult.IsEmpty then
+    begin
+      Result := 'Error: User does not Exist';
+      exit;
+    end;
+
+    // check password match
+    b := False;
+    if not tScrypt.CheckPassword(UpperCase(Username) + password +
+      sqlResult['Salt'], sqlResult['Password'], b) then
+    begin
+      Result := 'Error: Incorrect Password';
+      exit;
+    end;
+
+    // return the corresponding user id of the user that the program can use
+    // for functions
+    Result := sqlResult['UserID'];
+
+  finally
+    if Assigned(sqlResult) then
+      sqlResult.Free;
+    Parameters.Free;
   end;
-
-
-  // check if any users with matching username
-
-  if sqlResult.IsEmpty then
-  begin
-    Result := 'Error: User does not Exist';
-    exit;
-  end;
-
-  // check password match
-  b := False;
-  if not tScrypt.CheckPassword(UpperCase(Username) + password +
-    sqlResult['Salt'], sqlResult['Password'], b) then
-  begin
-    Result := 'Error: Incorrect Password';
-    exit;
-  end;
-
-  // return the corresponding user id of the user that the program can use
-  // for functions
-  Result := sqlResult['UserID'];
-  sqlResult.Free;
 
 end;
 
@@ -1059,7 +1107,12 @@ begin;
   params.Add('MonthBegin', DateBegin);
   params.Add('MonthEnd', DateEnd);
 
-  Result := runSQL(sql, params);
+  try
+    Result := runSQL(sql, params);
+
+  finally
+    params.Free;
+  end;
 
 end;
 
@@ -1077,6 +1130,7 @@ begin
   // all transactions will be rolled back
   BeginTransaction;
 
+
   // get cart item's details
 
   sql := 'SELECT Quantity, ItemID FROM ShoppingCartItemsTB WHERE ShoppingCartItemID = :ShoppingCartItemID';
@@ -1085,68 +1139,69 @@ begin
 
   params.Add('ShoppingCartItemID', ShoppingCartItemID);
 
-  dsResultItemInfo := runSQL(sql, params);
+  try
+    dsResultItemInfo := runSQL(sql, params);
 
-  if dsResultItemInfo.Fields.FindField('Status') <> nil then
-  begin
-    // deallocate memory for query result
-    dsResult.Free;
-    // raise exception
-    raise Exception.Create(dsResult['Status']);
+    if dsResultItemInfo.Fields.FindField('Status') <> nil then
+    begin
+      // raise exception
+      raise Exception.Create(dsResult['Status']);
+    end;
+
+    if dsResultItemInfo.IsEmpty then
+    begin
+      RollBack;
+      showMessage('Error: Could not find ShoppingCart Item');
+      // rollback
+      exit;
+    end;
+    quantity := dsResultItemInfo['Quantity'];
+    itemID := dsResultItemInfo['ItemID'];
+
+    dsResultItemInfo.Free;
+    params.clear;
+
+    // update stock
+
+    sql := 'UPDATE ItemTB SET Stock = Stock + :Quantity WHERE ItemID = :ItemID';
+    params.Add('Quantity', quantity);
+    params.Add('ItemID', itemID);
+
+    dsResult := runSQL(sql, params);
+    params.clear;
+
+    if dsResult['Status'] <> 'Success' then
+    begin
+      // raise exception
+      raise Exception.Create(dsResult['Status']);
+    end;
+
+    params.clear;
+
+    // delete from shoppingcart
+
+    sql := 'DELETE FROM ShoppingCartItemsTB WHERE ShoppingCartItemID = :ShoppingCartItemID';
+
+    params.Add('ShoppingCartItemID', ShoppingCartItemID);
+
+    dsResult := runSQL(sql, params);
+
+    if dsResult['Status'] <> 'Success' then
+    begin
+      // raise exception
+      raise Exception.Create(dsResult['Status']);
+    end;
+
+    // commit changes if no error occurs
+    CommitTransaction;
+
+  finally
+    if Assigned(dsResult) then
+      dsResult.Free;
+    if Assigned(dsResultItemInfo) then
+      dsResultItemInfo.Free;
+    params.Free;
   end;
-
-  if dsResultItemInfo.IsEmpty then
-  begin
-    RollBack;
-    showMessage('Error: Could not find ShoppingCart Item');
-    // rollback
-    exit;
-  end;
-  quantity := dsResultItemInfo['Quantity'];
-  itemID := dsResultItemInfo['ItemID'];
-
-  dsResultItemInfo.Free;
-  params.clear;
-
-  // update stock
-
-  sql := 'UPDATE ItemTB SET Stock = Stock + :Quantity WHERE ItemID = :ItemID';
-  params.Add('Quantity', quantity);
-  params.Add('ItemID', itemID);
-
-  dsResult := runSQL(sql, params);
-  params.clear;
-
-  if dsResult['Status'] <> 'Success' then
-  begin
-    // deallocate memory for query result
-    dsResult.Free;
-    // raise exception
-    raise Exception.Create(dsResult['Status']);
-  end;
-
-  params.clear;
-
-  // delete from shoppingcart
-
-  sql := 'DELETE FROM ShoppingCartItemsTB WHERE ShoppingCartItemID = :ShoppingCartItemID';
-
-  params.Add('ShoppingCartItemID', ShoppingCartItemID);
-
-  dsResult := runSQL(sql, params);
-
-  params.Free;
-
-  if dsResult['Status'] <> 'Success' then
-  begin
-    // deallocate memory for query result
-    dsResult.Free;
-    // raise exception
-    raise Exception.Create(dsResult['Status']);
-  end;
-
-  // commit changes if no error occurs
-  CommitTransaction;
 
 end;
 
@@ -1172,7 +1227,7 @@ begin
   Query.sql.Add(sql);
 
   // assign parameters to query
-  if assigned(params) then
+  if Assigned(params) then
   begin
     for Item in params do
     begin
@@ -1200,7 +1255,7 @@ begin
         begin
           // Create update delete
           // Create update delete
-          //Query.Prepared := True;
+          // Query.Prepared := True;
           Query.ExecSQL;
 
           dsOutput.InsertRecord(['Success']);
@@ -1256,32 +1311,36 @@ begin
   params := tObjectDictionary<string, Variant>.Create();
   params.Add('ItemID', itemID);
 
-  dsResult := runSQL(sql, params);
+  try
+    dsResult := runSQL(sql, params);
 
-  if dsResult.Fields.FindField('Status') <> nil then
-  begin
-    showMessage(dsResult['Status']);
-    dsResult.Free;
-    exit;
+    if dsResult.Fields.FindField('Status') <> nil then
+    begin
+      showMessage(dsResult['Status']);
+      exit;
+    end;
+
+    numRatings := dsResult['RatingsAmount'] + 1;
+
+    avgRatings := (dsResult['totalRating'] + rating) / numRatings;
+
+    sql := 'UPDATE ItemTB SET Rating = :Rating, RatingsAmount = :RatingsAmount WHERE ItemID = :ItemID ';
+
+    params.Add('Rating', avgRatings);
+    params.Add('RatingsAmount', numRatings);
+
+    dsResult := runSQL(sql, params);
+
+    if dsResult['Status'] <> 'Success' then
+    begin
+      showMessage(dsResult['Status']);
+    end;
+
+  finally
+    params.Free;
+    if Assigned(dsResult) then
+      dsResult.Free;
   end;
-
-  numRatings := dsResult['RatingsAmount'] + 1;
-
-  avgRatings := (dsResult['totalRating'] + rating) / numRatings;
-
-  sql := 'UPDATE ItemTB SET Rating = :Rating, RatingsAmount = :RatingsAmount WHERE ItemID = :ItemID ';
-
-  params.Add('Rating', avgRatings);
-  params.Add('RatingsAmount', numRatings);
-
-  dsResult := runSQL(sql, params);
-
-  if dsResult['Status'] <> 'Success' then
-  begin
-    showMessage(dsResult['Status']);
-  end;
-
-  dsResult.Free;
 
 end;
 
@@ -1289,7 +1348,7 @@ procedure TDataModule1.setProfilePicture(userID: string; imgPfp: tImage);
 var
   sql: string;
   params: tObjectDictionary<String, Variant>;
-  dsResult : tAdoDataset;
+  dsResult: tADODataSet;
 begin
   sql := 'UPDATE UserTB SET ProfileImage = :ProfileImage WHERE UserID = :UserID';
 
@@ -1298,13 +1357,20 @@ begin
   params.Add('UserID', userID);
   params.Add('ProfileImage', ImageToVariant(imgPfp));
 
-  dsResult :=  runSQL(sql, params);
+  try
+    dsResult := runSQL(sql, params);
 
-  if dsResult['status'] <> 'Success' then
-  begin
-    raise Exception.Create(dsResult['status']);
+    if dsResult['status'] <> 'Success' then
+    begin
+      raise Exception.Create(dsResult['status']);
+    end;
+
+  finally
+    if Assigned(dsResult) then
+      dsResult.Free;
+    params.Free;
   end;
-  
+
 end;
 
 // a function used to create a new user in the database and return the new user's userid for use by the program
@@ -1363,49 +1429,56 @@ begin
   params.Add('Salt', salt);
   params.Add('ProfileImage', ImageToVariant(imgPfp));
 
-  sqlResult := runSQL(sql, params);
+  try
+    sqlResult := runSQL(sql, params);
 
-  // handle errors
-  if sqlResult['status'] <> 'Success' then
-  begin
-    Result := 'Error: '+sqlResult['status'];
-    exit;
-  end;
+    // handle errors
+    if sqlResult['status'] <> 'Success' then
+    begin
+      Result := 'Error: ' + sqlResult['status'];
+      exit;
+    end;
 
-  // if user is a seller, set up a corresponding record in seller tb as well
-  if usertype = 'SELLER' then
-  begin
-    try
+    // if user is a seller, set up a corresponding record in seller tb as well
+    if usertype = 'SELLER' then
+    begin
+      try
 
-      with SellerTB do
-      begin
-        SellerTB.Open;
-        SellerTB.Insert;
+        with SellerTB do
+        begin
+          SellerTB.Open;
+          SellerTB.Insert;
 
-        SellerTB['UserID'] := userID;
-        SellerTB['Revenue'] := 0.0;
-        SellerTB['CertificationCode'] := certificationcode;
+          SellerTB['UserID'] := userID;
+          SellerTB['Revenue'] := 0.0;
+          SellerTB['CertificationCode'] := certificationcode;
 
-        SellerTB.Post;
-        SellerTB.Refresh;
-        SellerTB.First;
-      end;
+          SellerTB.Post;
+          SellerTB.Refresh;
+          SellerTB.First;
+        end;
 
-    except
-      on e: EADOError do
-      begin
-        Result := 'Error: ' + e.Message;
-      end;
-      on e: EOleException do
-      begin
-        Result := 'Error: ' + e.Message;
+      except
+        on e: EADOError do
+        begin
+          Result := 'Error: ' + e.Message;
+        end;
+        on e: EOleException do
+        begin
+          Result := 'Error: ' + e.Message;
+        end;
+
       end;
 
     end;
 
-  end;
+    Result := userID;
 
-  Result := userID;
+  finally
+    params.Free;
+    if Assigned(sqlResult) then
+      sqlResult.Free;
+  end;
 
 end;
 
@@ -1479,60 +1552,64 @@ begin
 
   params.Add('ShoppingCartID', ShoppingCartID);
 
-  dsResult := runSQL(sql, params);
+  try
+    dsResult := runSQL(sql, params);
 
-  BuyerID := dsResult['BuyerID'];
+    BuyerID := dsResult['BuyerID'];
 
-  // for each item in this cart, select all relevant data
-  sql := 'SELECT ShoppingCartItemsTB.ItemID, Quantity, ItemTB.SellerID, ShoppingCartItemsTB.Cost, '
-    + ' (CarbonFootprintProduction + CarbonFootprintUsage) AS CF , ' +
-    '(WaterUsageProduction + WaterFootprintUsage) AS WU, ' +
-    '(EnergyUsageProduction + EnergyFootprintUsage) AS EU ' +
-    'FROM  ShoppingCartItemsTB, ItemTB ' +
-    'WHERE ShoppingCartID = :ShoppingCartID AND ShoppingCartItemsTB.ItemID = ItemTB.ItemID ';
+    // for each item in this cart, select all relevant data
+    sql := 'SELECT ShoppingCartItemsTB.ItemID, Quantity, ItemTB.SellerID, ShoppingCartItemsTB.Cost, '
+      + ' (CarbonFootprintProduction + CarbonFootprintUsage) AS CF , ' +
+      '(WaterUsageProduction + WaterFootprintUsage) AS WU, ' +
+      '(EnergyUsageProduction + EnergyFootprintUsage) AS EU ' +
+      'FROM  ShoppingCartItemsTB, ItemTB ' +
+      'WHERE ShoppingCartID = :ShoppingCartID AND ShoppingCartItemsTB.ItemID = ItemTB.ItemID ';
 
-  dsResult := runSQL(sql, params);
+    dsResult := runSQL(sql, params);
 
-  // handle database errors
-  if dsResult.Fields.FindField('Status') <> nil then
-  begin
-    raise Exception.Create(dsResult['Status']);
-  end;
+    // handle database errors
+    if dsResult.Fields.FindField('Status') <> nil then
+    begin
+      raise Exception.Create(dsResult['Status']);
+    end;
 
-  dsResult.First;
-  // loop through all transactions and update stats accordingly
-  while not dsResult.Eof do
-  begin
-    // get data from one transaction
-    SellerID := dsResult['SellerID'];
-    CFItem := dsResult['CF'];
-    WUItem := dsResult['WU'];
-    EUItem := dsResult['EU'];
-    quantityItem := dsResult['Quantity'];
-    CostItem := dsResult['Cost'];
-    // insert records into statsTB
-    try
-      insertStatData(SellerID, dDate, 'REV', CostItem );
-      insertStatData(SellerID, dDate, 'SAL', quantityItem);
-      insertStatData(BuyerID, dDate, 'SPE', CostItem );
-      insertStatData(BuyerID, dDate, 'CF', CFItem * quantityItem);
-      insertStatData(BuyerID, dDate, 'EU', EUItem * quantityItem);
-      insertStatData(BuyerID, dDate, 'WU', WUItem * quantityItem);
+    dsResult.First;
+    // loop through all transactions and update stats accordingly
+    while not dsResult.Eof do
+    begin
+      // get data from one transaction
+      SellerID := dsResult['SellerID'];
+      CFItem := dsResult['CF'];
+      WUItem := dsResult['WU'];
+      EUItem := dsResult['EU'];
+      quantityItem := dsResult['Quantity'];
+      CostItem := dsResult['Cost'];
+      // insert records into statsTB
+      try
+        insertStatData(SellerID, dDate, 'REV', CostItem);
+        insertStatData(SellerID, dDate, 'SAL', quantityItem);
+        insertStatData(BuyerID, dDate, 'SPE', CostItem);
+        insertStatData(BuyerID, dDate, 'CF', CFItem * quantityItem);
+        insertStatData(BuyerID, dDate, 'EU', EUItem * quantityItem);
+        insertStatData(BuyerID, dDate, 'WU', WUItem * quantityItem);
 
-    except
-      on e: Exception do
-      begin
-        raise e;
+      except
+        on e: Exception do
+        begin
+          raise e;
+        end;
+
       end;
+
+      dsResult.Next;
 
     end;
 
-    dsResult.Next;
-
+  finally
+    if Assigned(dsResult) then
+      dsResult.Free;
+    params.Free;
   end;
-
-  dsResult.Free;
-  params.Free;
 end;
 
 function TDataModule1.userInfo(userID: string): tADODataSet;
@@ -1541,7 +1618,6 @@ var
   params: tObjectDictionary<string, Variant>;
   dsResult: tADODataSet;
   dRevenue, dBalance, dTotalSpending, dTotalCF, dTotalEU, dTotalWU: double;
-  sUserType: string;
 begin
 
   // select user's current balance and type of user
@@ -1551,52 +1627,7 @@ begin
 
   params.Add('UserID', userID);
 
-  dsResult := runSQL(sql, params);
-
-  if dsResult.Fields.FindField('Status') <> nil then
-  begin
-    showMessage(dsResult['Status']);
-    exit;
-  end;
-
-  if dsResult.IsEmpty then
-  begin
-    showMessage('No user with userID');
-    exit;
-  end;
-
-  Result := tADODataSet.Create(nil);
-  Result.FieldDefs.Add('Username', ftString, 100);
-  Result.FieldDefs.Add('UserType', ftString, 10);
-  Result.FieldDefs.Add('ProfileImage', ftBlob);
-  Result.FieldDefs.Add('Balance', ftFloat);
-  Result.FieldDefs.Add('Revenue', ftFloat);
-  Result.FieldDefs.Add('TotalSales', ftInteger);
-  Result.FieldDefs.Add('TotalEU', ftFloat);
-  Result.FieldDefs.Add('TotalWU', ftFloat);
-  Result.FieldDefs.Add('TotalCF', ftFloat);
-  Result.FieldDefs.Add('TotalSpending', ftCurrency);
-  Result.CreateDataSet;
-
-  // mf clean this shit up at some point
-  Result.Insert;
-  Result.Edit;
-  Result['UserType'] := dsResult['UserType'];
-  Result.Edit;
-  Result['Balance'] := dsResult['Balance'];
-  Result.Edit;
-  Result['Username'] := dsResult['Username'];
-  Result.Edit;
-  Result['ProfileImage'] := dsResult['ProfileImage'];
-
-  Result.First;
-
-  // if user is a seller, get sales and revenue
-  if dsResult['UserType'] = 'SELLER' then
-  begin
-
-    sql := 'SELECT Revenue FROM SellerTB WHERE UserID = :UserID';
-
+  try
     dsResult := runSQL(sql, params);
 
     if dsResult.Fields.FindField('Status') <> nil then
@@ -1606,55 +1637,105 @@ begin
     end;
 
     if dsResult.IsEmpty then
-      showMessage('Empty sql result');
+    begin
+      showMessage('No user with userID');
+      exit;
+    end;
 
+    Result := tADODataSet.Create(nil);
+    Result.FieldDefs.Add('Username', ftString, 100);
+    Result.FieldDefs.Add('UserType', ftString, 10);
+    Result.FieldDefs.Add('ProfileImage', ftBlob);
+    Result.FieldDefs.Add('Balance', ftFloat);
+    Result.FieldDefs.Add('Revenue', ftFloat);
+    Result.FieldDefs.Add('TotalSales', ftInteger);
+    Result.FieldDefs.Add('TotalEU', ftFloat);
+    Result.FieldDefs.Add('TotalWU', ftFloat);
+    Result.FieldDefs.Add('TotalCF', ftFloat);
+    Result.FieldDefs.Add('TotalSpending', ftCurrency);
+    Result.CreateDataSet;
+
+    // mf clean this shit up at some point
+    Result.Insert;
     Result.Edit;
-    Result['Revenue'] := dsResult['Revenue'];
+    Result['UserType'] := dsResult['UserType'];
+    Result.Edit;
+    Result['Balance'] := dsResult['Balance'];
+    Result.Edit;
+    Result['Username'] := dsResult['Username'];
+    Result.Edit;
+    Result['ProfileImage'] := dsResult['ProfileImage'];
 
-    sql := 'SELECT Sum(Sales) AS TotalSales from ItemTB WHERE SellerID = :UserID';
+    Result.First;
+
+    // if user is a seller, get sales and revenue
+    if dsResult['UserType'] = 'SELLER' then
+    begin
+
+      sql := 'SELECT Revenue FROM SellerTB WHERE UserID = :UserID';
+
+      dsResult := runSQL(sql, params);
+
+      if dsResult.Fields.FindField('Status') <> nil then
+      begin
+        showMessage(dsResult['Status']);
+        exit;
+      end;
+
+      if dsResult.IsEmpty then
+        showMessage('Empty sql result');
+
+      Result.Edit;
+      Result['Revenue'] := dsResult['Revenue'];
+
+      sql := 'SELECT Sum(Sales) AS TotalSales from ItemTB WHERE SellerID = :UserID';
+
+      dsResult := runSQL(sql, params);
+      Result.Edit;
+      Result['TotalSales'] := dsResult['TotalSales'];
+
+    end;
+
+    // select total spending
+
+    sql := 'SELECT IIF(Sum(statValue) is Null ,0 ,Sum(statValue)) AS total FROM StatsTB WHERE UserID = :UserID AND Type = :statType ';
+    params.clear;
+    params.Add('UserID', userID);
+    params.Add('statType', 'SPE');
 
     dsResult := runSQL(sql, params);
     Result.Edit;
-    Result['TotalSales'] := dsResult['TotalSales'];
 
+    Result['TotalSpending'] := dsResult['total'];
+
+    // select total cf
+
+    params.AddOrSetValue('statType', 'CF');
+
+    dsResult := runSQL(sql, params);
+
+    Result.Edit;
+    Result['TotalCF'] := dsResult['total'];
+    // select total eu
+
+    params.AddOrSetValue('statType', 'EU');
+
+    dsResult := runSQL(sql, params);
+    Result.Edit;
+    Result['TotalEU'] := dsResult['total'];
+
+    // select total wu
+    params.AddOrSetValue('statType', 'WU');
+
+    dsResult := runSQL(sql, params);
+    Result.Edit;
+    Result['TotalWU'] := dsResult['total'];
+
+  finally
+    params.Free;
+    if Assigned(dsResult) then
+      dsResult.Free;
   end;
-
-  // select total spending
-
-  sql := 'SELECT IIF(Sum(statValue) is Null ,0 ,Sum(statValue)) AS total FROM StatsTB WHERE UserID = :UserID AND Type = :statType ';
-  params.clear;
-  params.Add('UserID', userID);
-  params.Add('statType', 'SPE');
-
-  dsResult := runSQL(sql, params);
-  Result.Edit;
-  
-  Result['TotalSpending'] := dsResult['total'];
-
-  // select total cf
-
-  params.AddOrSetValue('statType', 'CF');
-
-  dsResult := runSQL(sql, params);
-
-  Result.Edit;
-  Result['TotalCF'] := dsResult['total'];
-  // select total eu
-
-  params.AddOrSetValue('statType', 'EU');
-
-  dsResult := runSQL(sql, params);
-  Result.Edit;
-  Result['TotalEU'] := dsResult['total'];
-
-  // select total wu
-  params.AddOrSetValue('statType', 'WU');
-
-  dsResult := runSQL(sql, params);
-  Result.Edit;
-  Result['TotalWU'] := dsResult['total'];
-
-  params.Free;
 
 end;
 
@@ -1673,24 +1754,29 @@ begin
   params := tObjectDictionary<string, Variant>.Create();
   params.Add('ItemID', itemID);
 
-  dsResult := runSQL(sql, params);
+  try
+    dsResult := runSQL(sql, params);
 
-  if dsResult.Fields.FindField('Status') <> nil then
-  begin
-    showMessage(dsResult['Status']);
-    exit;
+    if dsResult.Fields.FindField('Status') <> nil then
+    begin
+      showMessage(dsResult['Status']);
+      exit;
+    end;
+
+    if dsResult.IsEmpty then
+    begin
+      dsResult.Close;
+      dsResult.FieldDefs.Add('Status', ftString, 100);
+      dsResult.CreateDataSet;
+      dsResult.Insert;
+      dsResult['Status'] := 'Error: Item does not exist.'
+    end;
+
+    Result := dsResult;
+
+  finally
+    params.Free;
   end;
-
-  if dsResult.IsEmpty then
-  begin
-    dsResult.Close;
-    dsResult.FieldDefs.Add('Status', ftString, 100);
-    dsResult.CreateDataSet;
-    dsResult.Insert;
-    dsResult['Status'] := 'Error: Item does not exist.'
-  end;
-
-  Result := dsResult;
 
 end;
 

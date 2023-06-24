@@ -268,6 +268,8 @@ begin
 
     cmbCategory.ItemIndex := cmbCategory.Items.IndexOf(dsResult['Category']);
 
+    edtMaxWithdrawStock.Text := inttostr(dsResult['MaxWithdrawableStock']);
+
     imageStream :=   dsResult.CreateBlobStream( dsResult.FieldByName('Image'), bmRead);
     try
       imgItem.Picture.LoadFromStream(imageStream);
