@@ -2,7 +2,7 @@ object frmAddItem: TfrmAddItem
   Left = 0
   Top = 0
   Caption = 'Add Item'
-  ClientHeight = 682
+  ClientHeight = 753
   ClientWidth = 433
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -16,8 +16,8 @@ object frmAddItem: TfrmAddItem
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 13
-  object imgProduct: TImage
-    Left = 152
+  object imgItem: TImage
+    Left = 161
     Top = 24
     Width = 105
     Height = 105
@@ -164,39 +164,39 @@ object frmAddItem: TfrmAddItem
       0C8A9290605094840483A2242418142521C1F81F6A56421A7621677E00000000
       49454E44AE426082}
     Stretch = True
-    OnClick = imgProductClick
+    OnClick = imgItemClick
   end
   object lblDesc: TLabel
     Left = 93
-    Top = 577
+    Top = 652
     Width = 57
     Height = 13
     Caption = 'Description:'
   end
   object lblCategory: TLabel
     Left = 108
-    Top = 519
+    Top = 594
     Width = 49
     Height = 13
     Caption = 'Category:'
   end
   object lblCF: TLabel
     Left = 8
-    Top = 290
+    Top = 365
     Width = 133
     Height = 13
     Caption = 'Carbon FootPrint of its use:'
   end
   object lblEU: TLabel
     Left = 8
-    Top = 321
+    Top = 393
     Width = 118
     Height = 13
     Caption = 'Energy Usage of its use:'
   end
   object lblWaterUsage: TLabel
     Left = 8
-    Top = 364
+    Top = 436
     Width = 114
     Height = 13
     Caption = 'Water Usage of its use:'
@@ -231,24 +231,39 @@ object frmAddItem: TfrmAddItem
   end
   object lblCFProduce: TLabel
     Left = 8
-    Top = 405
+    Top = 480
     Width = 167
     Height = 13
     Caption = 'Carbon FootPrint of its production:'
   end
   object lblEUProduce: TLabel
     Left = 8
-    Top = 442
+    Top = 517
     Width = 148
     Height = 13
     Caption = 'Energy Usage of its production'
   end
   object lblWUProduce: TLabel
     Left = 8
-    Top = 478
+    Top = 553
     Width = 148
     Height = 13
     Caption = 'Water Usage of its production:'
+  end
+  object lblStock: TLabel
+    Left = 118
+    Top = 279
+    Width = 30
+    Height = 13
+    Caption = 'Stock:'
+  end
+  object lblMaxWithdrawStock: TLabel
+    Left = 26
+    Top = 314
+    Width = 142
+    Height = 26
+    Caption = 'Maximum withdrawable stock per customer'
+    WordWrap = True
   end
   object btnBack: TButton
     Left = 8
@@ -261,7 +276,7 @@ object frmAddItem: TfrmAddItem
   end
   object redDesc: TRichEdit
     Left = 176
-    Top = 553
+    Top = 628
     Width = 185
     Height = 89
     Font.Charset = ANSI_CHARSET
@@ -289,28 +304,28 @@ object frmAddItem: TfrmAddItem
   end
   object edtCF: TEdit
     Left = 176
-    Top = 287
+    Top = 362
     Width = 121
     Height = 21
     TabOrder = 4
   end
   object edtEU: TEdit
     Left = 176
-    Top = 318
+    Top = 393
     Width = 121
     Height = 21
     TabOrder = 5
   end
   object edtWU: TEdit
     Left = 176
-    Top = 361
+    Top = 436
     Width = 121
     Height = 21
     TabOrder = 6
   end
   object btnSaveChanges: TButton
     Left = 181
-    Top = 656
+    Top = 731
     Width = 94
     Height = 25
     Caption = 'Save Changes'
@@ -319,30 +334,44 @@ object frmAddItem: TfrmAddItem
   end
   object cmbCategory: TComboBox
     Left = 181
-    Top = 516
+    Top = 591
     Width = 121
     Height = 21
     TabOrder = 8
   end
   object edtCFProduce: TEdit
     Left = 181
-    Top = 402
+    Top = 477
     Width = 121
     Height = 21
     TabOrder = 9
   end
   object edtEUProduce: TEdit
     Left = 176
-    Top = 439
+    Top = 514
     Width = 121
     Height = 21
     TabOrder = 10
   end
   object edtWUProduce: TEdit
     Left = 176
-    Top = 475
+    Top = 550
     Width = 121
     Height = 21
     TabOrder = 11
+  end
+  object edtStock: TEdit
+    Left = 176
+    Top = 276
+    Width = 121
+    Height = 21
+    TabOrder = 12
+  end
+  object edtMaxWithdrawStock: TEdit
+    Left = 181
+    Top = 319
+    Width = 121
+    Height = 21
+    TabOrder = 13
   end
 end

@@ -65,7 +65,7 @@ uses
 procedure TfrmAddItem.btnBackClick(Sender: TObject);
 begin
   frmAddItem.Hide;
-  frmYourProducts.Show;
+  DataModule1.lastForm.Show;
 end;
 
 procedure TfrmAddItem.btnSaveChangesClick(Sender: TObject);
@@ -179,7 +179,7 @@ begin
 
       // naviguate back to your products
       frmAddItem.Hide;
-      frmYourProducts.Show;
+      DataModule1.lastForm.Show;
 
     except
       on e: exception do

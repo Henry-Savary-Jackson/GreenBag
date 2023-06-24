@@ -59,6 +59,7 @@ end;
 procedure TfrmYourProducts.btnViewItemClick(Sender: TObject);
 begin
   frmYourProducts.Hide;
+  DataModule1.lastForm := self;
   frmAddItem.Show;
 end;
 

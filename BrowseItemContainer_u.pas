@@ -151,9 +151,9 @@ begin
   imgItem.Center := true;
   imgItem.Parent := self;
   imgItem.Left := 150;
-  imgItem.Top := 40;
-  imgItem.Width := 200;
-  imgItem.Height := 190;
+  imgItem.Top := 30;
+  imgItem.Width := 180;
+  imgItem.Height := 180;
   imgItem.Center := true;
   imgItem.Stretch := true;
 

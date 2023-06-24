@@ -42,7 +42,7 @@ object frmBrowse: TfrmBrowse
         object flpnlCategories: TFlowPanel
           Left = 0
           Top = 0
-          Width = 112
+          Width = 187
           Height = 45
           Align = alLeft
           AutoSize = True

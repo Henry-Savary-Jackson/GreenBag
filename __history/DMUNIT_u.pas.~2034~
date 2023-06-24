@@ -725,7 +725,7 @@ begin
 
   sql := 'SELECT ProfileImage FROM UserTB WHERE UserID = :UserID';
 
-  params := tObjectDictionary<string, Variant>.Create(nil);
+  params := tObjectDictionary<string, Variant>.Create();
   params.Add('UserID', userID);
 
   dsResult := runSQL(sql, params);
@@ -1568,6 +1568,7 @@ begin
   Result := tADODataSet.Create(nil);
   Result.FieldDefs.Add('Username', ftString, 100);
   Result.FieldDefs.Add('UserType', ftString, 10);
+  Result.FieldDefs.Add('ProfileImage', ftBlob);
   Result.FieldDefs.Add('Balance', ftFloat);
   Result.FieldDefs.Add('Revenue', ftFloat);
   Result.FieldDefs.Add('TotalSales', ftInteger);
@@ -1577,6 +1578,7 @@ begin
   Result.FieldDefs.Add('TotalSpending', ftCurrency);
   Result.CreateDataSet;
 
+  // mf clean this shit up at some point
   Result.Insert;
   Result.Edit;
   Result['UserType'] := dsResult['UserType'];
@@ -1584,6 +1586,8 @@ begin
   Result['Balance'] := dsResult['Balance'];
   Result.Edit;
   Result['Username'] := dsResult['Username'];
+  Result.Edit;
+  Result['ProfileImage'] := dsResult['ProfileImage'];
 
   Result.First;
 
@@ -1602,7 +1606,7 @@ begin
     end;
 
     if dsResult.IsEmpty then
-      showMessage('uh oh');
+      showMessage('Empty sql result');
 
     Result.Edit;
     Result['Revenue'] := dsResult['Revenue'];
@@ -1617,13 +1621,14 @@ begin
 
   // select total spending
 
-  sql := 'SELECT Sum(statValue) AS total FROM StatsTB WHERE UserID = :UserID AND Type = :statType ';
+  sql := 'SELECT IIF(Sum(statValue) is Null ,0 ,Sum(statValue)) AS total FROM StatsTB WHERE UserID = :UserID AND Type = :statType ';
   params.clear;
   params.Add('UserID', userID);
   params.Add('statType', 'SPE');
 
   dsResult := runSQL(sql, params);
   Result.Edit;
+  
   Result['TotalSpending'] := dsResult['total'];
 
   // select total cf

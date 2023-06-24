@@ -160,6 +160,7 @@ end;
 procedure TfrmBrowse.imgProfileClick(Sender: TObject);
 begin
   frmBrowse.Hide;
+  DataModule1.lastForm := self;
   frmProfile.Show;
 end;
 
@@ -171,6 +172,11 @@ begin
   if Sender is TButton then
   begin
     button := TButton(Sender);
+    if category = button.Caption then
+    begin
+      category := '';
+      Exit;
+    end;
     category := button.Caption;
     // use the button's caption as category name
 
@@ -248,6 +254,7 @@ begin
     frmViewItem.Show;
 
   end;
+  DataModule1.lastForm := self;
 
   frmBrowse.Hide;
 

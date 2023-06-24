@@ -36,6 +36,7 @@ type
     userID: string;
     CartID: string;
     dDate: tDate;
+    lastForm : TForm;
 
     procedure findInTable(table: TADOTable; pk: string; pkVal: string);
 

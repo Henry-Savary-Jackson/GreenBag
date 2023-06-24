@@ -35,6 +35,7 @@ type
     procedure OnClickCategory(Sender: TObject);
     procedure SearchItems(Sender: TObject);
     procedure ViewItem(sellerID, itemID: string);
+    procedure srchSearchItemsChange(Sender: TObject);
   private
     { Private declarations }
   public
@@ -144,6 +145,8 @@ begin
     end;
 
     dsResult.Free;
+
+    DataModule1.loadProfilePicture(DataModule1.userID, imgProfile);
   end;
 
 end;
@@ -181,10 +184,13 @@ var
 
 begin
 
-  //
-  flpnlItems.Caption := '';
-
   searchQuery := srchSearchItems.Text;
+
+  if searchQuery = '' then
+  begin
+    showMessage('Please enter a search query');
+    Exit;
+  end;
 
   dsResult := DataModule1.getSearchResults(searchQuery, category);
 
@@ -218,6 +224,11 @@ begin
   end;
 
   dsResult.Free;
+
+end;
+
+procedure TfrmBrowse.srchSearchItemsChange(Sender: TObject);
+begin
 
 end;
 

@@ -145,6 +145,8 @@ begin
     end;
 
     dsResult.Free;
+
+    DataModule1.loadProfilePicture(DataModule1.userID, imgProfile);
   end;
 
 end;
@@ -169,6 +171,11 @@ begin
   if Sender is TButton then
   begin
     button := TButton(Sender);
+    if category = button.Caption then
+    begin
+      category = '';
+      Exit;
+    end;
     category := button.Caption;
     // use the button's caption as category name
 
@@ -182,10 +189,13 @@ var
 
 begin
 
-  //
-  flpnlItems.Caption := '';
-
   searchQuery := srchSearchItems.Text;
+
+  if searchQuery = '' then
+  begin
+    showMessage('Please enter a search query');
+    Exit;
+  end;
 
   dsResult := DataModule1.getSearchResults(searchQuery, category);
 

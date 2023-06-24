@@ -117,7 +117,7 @@ procedure TfrmProfile.changeChartDateRange(direction: integer);
 begin
 
   dateRangeBegin := IncMonth(dateRangeBegin, direction);
-  dateRangeEnd :=IncMonth(dateRangeEnd, direction);
+  dateRangeEnd := IncMonth(dateRangeEnd, direction);
 end;
 
 procedure TfrmProfile.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -143,6 +143,7 @@ procedure TfrmProfile.FormShow(Sender: TObject);
 var
   dsResult: TADODataSet;
   dateLowerLimit: tDateTime;
+  imageStream: tStream;
 begin
   //
 
@@ -187,14 +188,24 @@ begin
 
   end;
 
-  dateLowerLimit := IncMonth(date, -9);
+  dateLowerLimit := IncMonth(DataModule1.dDate, -9);
 
-  dateRangeEnd := StrToDate(intTOstr(YearOf(date)) + '/' +
-    intTOstr(MonthOf(date) + 1) + '/01');
+  dateRangeEnd := StrToDate(intTOstr(YearOf(DataModule1.dDate)) + '/' +
+    intTOstr(MonthOf(DataModule1.dDate) + 1) + '/01');
   dateRangeBegin := StrToDate(intTOstr(YearOf(dateLowerLimit)) + '/' +
     intTOstr(MonthOf(dateLowerLimit)) + '/01');
 
   srsStats.Marks.Visible := False;
+
+  imageStream := dsResult.CreateBlobStream
+    (dsResult.FieldByName('ProfileImage'), bmRead);
+  try
+    imgProfilePic.Picture.LoadFromStream(imageStream);
+
+  finally
+    imageStream.Free;
+
+  end;
 
 end;
 
@@ -204,26 +215,20 @@ var
   sImagePath: string;
 begin
   // open filchooser
-  fileChooser := tOpenDialog.Create(self);
-  try
-    fileChooser.Filter := 'jpg Files|*.jpg|png files|*.png';
-    fileChooser.InitialDir := 'C:\';
+  DataModule1.loadImageFromFile(imgProfilePic, self);
 
-    if fileChooser.Execute(self) then
+  try
+    DataModule1.setProfilePicture(DataModule1.userID, imgProfilePic);
+
+  except
+    on e: exception do
     begin
-      sImagePath := fileChooser.FileName;
-      imgProfilePic.Picture.LoadFromFile(sImagePath);
-    end
-    else
-    begin
-      showMessage('Please choose a file');
+      showMessage(e.Message);
     end;
-  finally
-    fileChooser.Free;
+
   end;
 
 end;
-
 
 // Takes the caption of the button and returns thestring value
 // that is used in the database to represent that category of stats
@@ -265,7 +270,6 @@ var
   currentDate: tDateTime;
   ds: TDataSource;
 begin
-
 
   dsResult := DataModule1.obtainStats(DataModule1.userID, sType, dateRangeBegin,
     dateRangeEnd);

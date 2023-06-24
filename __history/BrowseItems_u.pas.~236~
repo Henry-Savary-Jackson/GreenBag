@@ -35,6 +35,7 @@ type
     procedure OnClickCategory(Sender: TObject);
     procedure SearchItems(Sender: TObject);
     procedure ViewItem(sellerID, itemID: string);
+    procedure srchSearchItemsChange(Sender: TObject);
   private
     { Private declarations }
   public
@@ -144,12 +145,8 @@ begin
     end;
 
     dsResult.Free;
-  end;
 
-  if DataModule1.CartID = '' then
-  begin
-    DataModule1.CartID := DataModule1.CreateUserCart(DataModule1.userID);
-    showMessage(DataModule1.CartID)
+    DataModule1.loadProfilePicture(DataModule1.userID, imgProfile);
   end;
 
 end;
@@ -157,6 +154,7 @@ end;
 procedure TfrmBrowse.grpCheckoutClick(Sender: TObject);
 begin
   frmBrowse.Hide;
+  DataModule1.lastForm := self;
   frmCheckout.Show;
 end;
 
@@ -174,6 +172,11 @@ begin
   if Sender is TButton then
   begin
     button := TButton(Sender);
+    if category = button.Caption then
+    begin
+      category := '';
+      Exit;
+    end;
     category := button.Caption;
     // use the button's caption as category name
 
@@ -187,10 +190,13 @@ var
 
 begin
 
-  //
-  flpnlItems.Caption := '';
-
   searchQuery := srchSearchItems.Text;
+
+  if searchQuery = '' then
+  begin
+    showMessage('Please enter a search query');
+    Exit;
+  end;
 
   dsResult := DataModule1.getSearchResults(searchQuery, category);
 
@@ -224,6 +230,11 @@ begin
   end;
 
   dsResult.Free;
+
+end;
+
+procedure TfrmBrowse.srchSearchItemsChange(Sender: TObject);
+begin
 
 end;
 
