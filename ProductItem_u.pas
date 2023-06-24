@@ -49,12 +49,11 @@ var
 begin
   self.removeProcedure := removeProcedure;
   //
-  sql := 'SELECT ItemName, Sales, (Sales*Cost) AS Revenue , Image FROM ItemTB WHERE ItemID = :ItemID';
+  sql := 'SELECT ItemName, Sales, Image FROM ItemTB WHERE ItemID = :ItemID';
 
   params := tObjectDictionary<string, Variant>.Create();
   params.Add('ItemID', ItemID);
   dsResult := DataModule1.runSQL(sql, params);
-  params.Free;
 
   if dsResult.Fields.FindField('Status') <> nil then
   begin
@@ -64,12 +63,29 @@ begin
 
   Name := dsResult['ItemName'];
   Sales := dsResult['Sales'];
-  revenue := dsResult['Revenue'];
+  // calculate revenue
 
   imageStream := dsResult.CreateBlobStream
     (dsResult.FieldByName('Image'), bmRead);
 
+
   dsResult.Free;
+
+  sql := 'SELECT IIF(SUM(Cost) IS NULL, 0, SUM(Cost)) AS ItemRevenue FROM TransactionItemTB WHERE ItemID = :ItemID';
+
+  dsResult := DataModule1.runSQL(sql, params);
+
+  if dsResult.Fields.FindField('Status') <> nil then
+  begin
+    showMessage(dsResult['Status']);
+    Exit;
+  end;
+
+  revenue := dsResult['ItemRevenue'];
+
+  dsResult.Free;
+  params.Free;
+
   Inherited Create(Owner, Parent, ItemID);
 
 end;

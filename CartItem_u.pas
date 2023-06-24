@@ -13,7 +13,7 @@ type
   tRemoveProcedure = procedure(itemID: string) of object;
 
 type
-  tUpdateQuantityProcedure = procedure(itemID: string; iQuantity: integer)
+  tUpdateQuantityProcedure = procedure(itemID: string; iQuantity: integer; Cost : double)
     of object;
 
 type
@@ -224,7 +224,7 @@ begin
   self.iQuantity := spnQuantity.Value;
   self.updateInfo;
   self.UpdateRedInfo;
-  self.updateQuantityProcedure(itemID, self.iQuantity- oldQuantity);
+  self.updateQuantityProcedure(itemID, self.iQuantity- oldQuantity, itemPrice  );
 end;
 
 procedure CartItem.updateInfo;

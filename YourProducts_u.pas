@@ -46,6 +46,7 @@ uses
 procedure TfrmYourProducts.btnAddItemClick(Sender: TObject);
 begin
   frmYourProducts.Hide;
+  datamodule1.lastForm := self;
   frmAddItem.Show;
 end;
 

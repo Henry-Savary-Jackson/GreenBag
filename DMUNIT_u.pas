@@ -87,7 +87,7 @@ type
     procedure CheckoutCart(ShoppingCartID: string);
 
     function addToCart(ShoppingCartID, itemID: string;
-      quantity: integer): string;
+      quantity: integer; itemPrice: double): string;
 
     function getCartItems(ShoppingCartID: string): tADODataSet;
     procedure removeFromCart(ShoppingCartItemID: string);
@@ -118,7 +118,7 @@ implementation
 {$R *.dfm}
 
 function TDataModule1.addToCart(ShoppingCartID, itemID: string;
-  quantity: integer): string;
+  quantity: integer; itemPrice: double): string;
 var
   ShoppingCartItemID, sql: string;
   params: tObjectDictionary<string, Variant>;
@@ -142,13 +142,14 @@ begin
   params := tObjectDictionary<string, Variant>.Create();
 
   params.Add('Quantity', quantity);
+  params.Add('Cost', quantity * itemPrice);
 
   if ShoppingCartItemID <> '' then
   begin
     // update if item is in user's cart
     params.Add('ShoppingCartItemID', ShoppingCartItemID);
     sql := 'UPDATE ShoppingCartItemsTB' +
-      ' SET Quantity = Quantity + :Quantity WHERE ShoppingCartItemID = :ShoppingCartItemID  ';
+      ' SET Quantity = Quantity + :Quantity, Cost = :Cost + Cost WHERE ShoppingCartItemID = :ShoppingCartItemID  ';
     Result := '';
   end
   else
@@ -161,8 +162,8 @@ begin
     begin
       ShoppingCartItemID := ShoppingCartItemID + intToStr(random(10));
     end;
-    sql := 'INSERT INTO ShoppingCartItemsTB (ShoppingCartItemID, ItemID, Quantity, ShoppingCartID ) '
-      + 'VALUES ( :ShoppingCartItemID, :ItemID, :Quantity, :ShoppingCartID )';
+    sql := 'INSERT INTO ShoppingCartItemsTB (ShoppingCartItemID, ItemID, Quantity, ShoppingCartID, Cost ) '
+      + 'VALUES ( :ShoppingCartItemID, :ItemID, :Quantity, :ShoppingCartID , :Cost)';
 
     params.Add('ItemID', itemID);
     params.Add('ShoppingCartItemID', ShoppingCartItemID);
@@ -176,6 +177,7 @@ begin
   begin
     // deallocate memory for query result
     dsResult.Free;
+    RollBack;
     // raise exception
     raise Exception.Create(dsResult['Status']);
   end;
@@ -185,10 +187,10 @@ begin
 
   // check if  there is enough stock to withdraw that quantity
 
-  // DAFUCK IS UP WITH PARAMETERS NOT WORKING
+  //TODO: DAFUCK IS UP WITH PARAMETERS NOT WORKING
 
   sql := 'SELECT ItemTB.Stock, ItemTB.MaxWithdrawableStock, ShoppingCartItemsTB.Quantity '
-    + 'FROM ShoppingCartItemsTB, ItemTB' + ' WHERE ItemTB.ItemID = :ItemID AND '
+    + 'FROM ShoppingCartItemsTB, ItemTB WHERE ItemTB.ItemID = :ItemID AND '
     + ' ShoppingCartItemID = "' + ShoppingCartItemID + '"';
 
   params.clear;
@@ -341,7 +343,6 @@ var
     : tADODataSet;
   BuyerID: string;
   buyerBalance, itemPrice: double;
-  MyClass: TComponent;
 begin
 
   BeginTransaction;
@@ -362,8 +363,8 @@ begin
   dsResult.Free;
 
   // Then for TransactionItemTB
-  sql := 'INSERT INTO TransactionItemTB (CartItemID, ItemID, Quantity, TransactionID) '
-    + 'SELECT ShoppingCartItemID, ItemID, Quantity, ShoppingCartID FROM ShoppingCartItemsTB WHERE ShoppingCartID  = :ShoppingCartID ';
+  sql := 'INSERT INTO TransactionItemTB (CartItemID, ItemID, Quantity, TransactionID, Cost) '
+    + 'SELECT ShoppingCartItemID, ItemID, Quantity, ShoppingCartID, Cost FROM ShoppingCartItemsTB WHERE ShoppingCartID  = :ShoppingCartID ';
 
   dsResult := runSQL(sql, params);
 
@@ -392,13 +393,11 @@ begin
 
   // Select all relevant data on the items and Seller for each item in user's cart
 
-  sql := 'SELECT Quantity, ShoppingCartItemsTB.ItemID, ItemTB.Cost' +
-    ' , ItemTB.SellerID, BuyerID ' +
-
-    ' FROM (((ShoppingCartItemsTB ' + ' INNER JOIN ShoppingCartTB ' +
+  sql := 'SELECT ShoppingCartItemsTB.Quantity, ShoppingCartItemsTB.ItemID, ShoppingCartItemsTB.Cost' +
+    ' , ItemTB.SellerID ' +
+    ' FROM ((ShoppingCartItemsTB INNER JOIN ShoppingCartTB ' +
     'ON ShoppingCartItemsTB.ShoppingCartID = ShoppingCartTB.ShoppingCartID) ' +
-    'INNER JOIN UserTB ' + 'ON ShoppingCartTB.BuyerID = UserTB.UserID )' +
-    'INNER JOIN ItemTB ' + 'ON ItemTB.ItemID = ShoppingCartItemsTB.ItemID )' +
+    'INNER JOIN ItemTB ON ItemTB.ItemID = ShoppingCartItemsTB.ItemID )' +
     'WHERE ShoppingCartItemsTB.ShoppingCartID = :ShoppingCartID';
 
   dsResult := runSQL(sql, params);
@@ -431,7 +430,7 @@ begin
   begin
     // update buyer
 
-    itemPrice := (dsResult['Quantity'] * dsResult['Cost']);
+    itemPrice := dsResult['Cost'];
     buyerBalance := buyerBalance - itemPrice;
 
     if buyerBalance < 0 then
@@ -441,7 +440,7 @@ begin
       raise Exception.Create('Out of balance');
     end;
 
-    // if sufficient funds add remove from user's account
+    // if sufficient funds remove from user's account
     params.clear;
     params.Add('Balance', buyerBalance);
     params.Add('UserID', BuyerID);
@@ -1201,7 +1200,7 @@ begin
         begin
           // Create update delete
           // Create update delete
-          Query.Prepared := True;
+          //Query.Prepared := True;
           Query.ExecSQL;
 
           dsOutput.InsertRecord(['Success']);
@@ -1369,7 +1368,7 @@ begin
   // handle errors
   if sqlResult['status'] <> 'Success' then
   begin
-    Result := sqlResult['status'];
+    Result := 'Error: '+sqlResult['status'];
     exit;
   end;
 
@@ -1485,7 +1484,7 @@ begin
   BuyerID := dsResult['BuyerID'];
 
   // for each item in this cart, select all relevant data
-  sql := 'SELECT ShoppingCartItemsTB.ItemID, Quantity, ItemTB.SellerID, ItemTB.Cost, '
+  sql := 'SELECT ShoppingCartItemsTB.ItemID, Quantity, ItemTB.SellerID, ShoppingCartItemsTB.Cost, '
     + ' (CarbonFootprintProduction + CarbonFootprintUsage) AS CF , ' +
     '(WaterUsageProduction + WaterFootprintUsage) AS WU, ' +
     '(EnergyUsageProduction + EnergyFootprintUsage) AS EU ' +
@@ -1513,9 +1512,9 @@ begin
     CostItem := dsResult['Cost'];
     // insert records into statsTB
     try
-      insertStatData(SellerID, dDate, 'REV', CostItem * quantityItem);
+      insertStatData(SellerID, dDate, 'REV', CostItem );
       insertStatData(SellerID, dDate, 'SAL', quantityItem);
-      insertStatData(BuyerID, dDate, 'SPE', CostItem * quantityItem);
+      insertStatData(BuyerID, dDate, 'SPE', CostItem );
       insertStatData(BuyerID, dDate, 'CF', CFItem * quantityItem);
       insertStatData(BuyerID, dDate, 'EU', EUItem * quantityItem);
       insertStatData(BuyerID, dDate, 'WU', WUItem * quantityItem);

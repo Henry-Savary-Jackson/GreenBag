@@ -31,7 +31,7 @@ type
     items: tObjectList<CartItem>;
     PriceOrderTotal, CFOrderTotal, WUOrderTotal, EUOrderTotal: double;
     procedure removeItem(shoppingCartItemID: string);
-    procedure updateItemQuantity(itemID: string; iQuantity: integer);
+    procedure updateItemQuantity(itemID: string; iQuantity: integer; Cost : double);
     procedure updateDisplay();
     procedure updateLabels();
   end;
@@ -151,10 +151,10 @@ begin
 
 end;
 
-procedure TfrmCheckout.updateItemQuantity(itemID: string; iQuantity: integer);
+procedure TfrmCheckout.updateItemQuantity(itemID: string; iQuantity: integer; Cost :double);
 begin
   try
-    DataModule1.addToCart(DataModule1.CartID, itemID, iQuantity);
+    DataModule1.addToCart(DataModule1.CartID, itemID, iQuantity, cost);
     updateLabels;
 
   except

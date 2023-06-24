@@ -46,6 +46,7 @@ type
     { Public declarations }
     itemID: string;
     stock: integer;
+    price: double;
   end;
 
 var
@@ -73,7 +74,7 @@ begin;
   end;
 
   try
-    DataModule1.addToCart(DataModule1.CartID, itemID, quantity);
+    DataModule1.addToCart(DataModule1.CartID, itemID, quantity, price);
     frmViewItem.Hide;
     frmBrowse.Show;
 
@@ -141,6 +142,8 @@ begin
   lblPrice.Caption := 'Price: ' + floatToStrf(dsResult['Cost'],
     ffCurrency, 8, 2);
 
+  price := dsResult['Cost'];
+
   lblStock.Caption := 'Stock: ' + inttostr(dsResult['Stock']);
   stock := dsResult['Stock'];
   lblCF.Caption := 'Carbon footprint through usage: ' +
@@ -168,11 +171,11 @@ begin
   lblMaxWithdraw.Caption := 'Maximum Stock you can withdraw at once: ' +
     inttostr(dsResult['MaxWithdrawableStock']);
 
-  if dsResult['Description'] <> NULl then
+  if dsResult['Description'] <> NULL then
     redDesc.Lines.Add(dsResult['Description']);
 
-  imageStream := dsResult.CreateBlobStream(dsResult.FieldByName('Image'),
-    bmRead);
+  imageStream := dsResult.CreateBlobStream
+    (dsResult.FieldByName('Image'), bmRead);
   try
     imgItem.Picture.LoadFromStream(imageStream);
 

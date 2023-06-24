@@ -131,9 +131,9 @@ object frmViewItem: TfrmViewItem
     Caption = 'Stock:'
   end
   object lblMaxWithdraw: TLabel
-    Left = 95
+    Left = 8
     Top = 222
-    Width = 117
+    Width = 204
     Height = 26
     Caption = 'Maximum Stock you can withdraw at once:'
     WordWrap = True
@@ -148,8 +148,8 @@ object frmViewItem: TfrmViewItem
     OnClick = btnBackClick
   end
   object btnAddToCart: TButton
-    Left = 137
-    Top = 694
+    Left = 136
+    Top = 699
     Width = 105
     Height = 35
     Caption = 'Add to Cart'

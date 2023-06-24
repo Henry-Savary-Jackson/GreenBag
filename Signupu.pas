@@ -179,6 +179,7 @@ begin
   begin
     MessageDlg('There was an error accessing the database :' + userId, mtConfirmation,
       [mbOK], 0, mbOK);
+    Exit;
   end;
 
   DataModule1.dDate := StrToDate(inputbox('', 'Date:', ''));
