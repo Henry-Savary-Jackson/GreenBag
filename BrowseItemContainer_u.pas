@@ -15,7 +15,7 @@ type
 type
   BrowseItem = class(ItemContainer)
   public
-    Constructor Create(Owner: tForm; Parent: TWinControl; itemID: string;
+    Constructor Create(Owner: tForm; Parent: TWinControl; ItemData: TADODataSet;
       viewProcedure: tViewProcedure);
     procedure createDesign(); override;
     procedure onViewItem(Sender: TObject);
@@ -43,53 +43,27 @@ implementation
 uses
   ViewItem_u, AddItem_u;
 
-Constructor BrowseItem.Create(Owner: tForm; Parent: TWinControl; itemID: string;
-  viewProcedure: tViewProcedure);
-var
-  sql: string;
-  params: TObjectDictionary<string, Variant>;
-  dsResult: TADODataSet;
+// the data argument is a dataset where it is assumed that the current record is that of this item
+Constructor BrowseItem.Create(Owner: tForm; Parent: TWinControl;
+  ItemData: TADODataSet; viewProcedure: tViewProcedure);
 begin;
-  sql := 'SELECT ItemName, Cost, ' +
-    ' (CarbonFootprintProduction + CarbonFootprintUsage) AS CF , ' +
-    '(WaterUsageProduction + WaterFootprintUsage) AS WU, ' +
-    '(EnergyUsageProduction + EnergyFootprintUsage) AS EU, ' +
-    'UserTB.Username AS SellerName , SellerID , Image ' +
-    'FROM ItemTB LEFT JOIN UserTB ON ItemTB.SellerID = UserTB.UserID WHERE ItemID = :ItemID ';
 
-  params := TObjectDictionary<string, Variant>.Create();
-  params.Add('ItemID', itemID);
+  itemName := ItemData['ItemName'];
+  itemSeller := ItemData['SellerName'];
+  itemPrice := ItemData['Cost'];
+  itemCF := ItemData['CF'];
+  itemWU := ItemData['WU'];
+  itemEU := ItemData['EU'];
+  sellerID := ItemData['SellerID'];
 
-  try
-    dsResult := DataModule1.runSQL(sql, params);
+  self.UserID := UserID;
+  self.viewProcedure := viewProcedure;
 
-    if dsResult.Fields.FindField('Status') <> nil then
-    begin
-      showMessage(dsResult['Status']);
-      Exit;
-    end;
+  imageStream := ItemData.CreateBlobStream
+    (ItemData.FieldByName('Image'), bmRead);
 
-    itemName := dsResult['ItemName'];
-    itemSeller := dsResult['SellerName'];
-    itemPrice := dsResult['Cost'];
-    itemCF := dsResult['CF'];
-    itemWU := dsResult['WU'];
-    itemEU := dsResult['EU'];
-    sellerID := dsResult['SellerID'];
+  Inherited Create(Owner, Parent, itemID);
 
-    self.UserID := UserID;
-    self.viewProcedure := viewProcedure;
-
-    imageStream := dsResult.CreateBlobStream
-      (dsResult.FieldByName('Image'), bmRead);
-
-    Inherited Create(Owner, Parent, itemID);
-
-  finally
-    if Assigned(dsResult) then
-      dsResult.Free;
-    params.Free;
-  end;
 end;
 
 procedure BrowseItem.createDesign();

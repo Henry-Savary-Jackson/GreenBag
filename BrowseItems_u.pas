@@ -7,7 +7,7 @@ uses
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
   Vcl.WinXCtrls, DMUnit_u, Data.win.ADODB, Vcl.Imaging.pngimage,
-  BrowseItemContainer_u, System.Generics.Collections, Data.DB;
+  BrowseItemContainer_u, System.Generics.Collections, Data.DB, Vcl.Samples.Spin;
 
 type
   TfrmBrowse = class(TForm)
@@ -24,6 +24,21 @@ type
     lblCheckout: TLabel;
     Image3: TImage;
     flpnlCategories: TFlowPanel;
+    lblCFRange: TLabel;
+    lbWURange: TLabel;
+    lblEURange: TLabel;
+    spnCFMin: TSpinEdit;
+    spnEUMin: TSpinEdit;
+    spnWUMin: TSpinEdit;
+    lblAndCF: TLabel;
+    lblToEU: TLabel;
+    lblToWU: TLabel;
+    spnCFMax: TSpinEdit;
+    spnEUMax: TSpinEdit;
+    spnWUMax: TSpinEdit;
+    chbCFEnable: TCheckBox;
+    chbEUEnable: TCheckBox;
+    chbWUEnable: TCheckBox;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnLogoutClick(Sender: TObject);
     procedure btnProfileClick(Sender: TObject);
@@ -36,6 +51,10 @@ type
     procedure SearchItems(Sender: TObject);
     procedure ViewItem(sellerID, itemID: string);
     procedure srchSearchItemsChange(Sender: TObject);
+    procedure chbCFEnableClick(Sender: TObject);
+    procedure spnCFMinChange(Sender: TObject);
+    procedure spnEUMinChange(Sender: TObject);
+    procedure spnWUMinChange(Sender: TObject);
   private
     { Private declarations }
   public
@@ -49,7 +68,7 @@ type
 
 var
   frmBrowse: TfrmBrowse;
-  categories: TObjectList<TButton>;
+  categories: TObjectList<TCheckBox>;
 
 implementation
 
@@ -93,6 +112,11 @@ begin
   frmViewItem.Show;
 end;
 
+procedure TfrmBrowse.chbCFEnableClick(Sender: TObject);
+begin
+  //
+end;
+
 procedure TfrmBrowse.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   try
@@ -115,7 +139,7 @@ end;
 procedure TfrmBrowse.FormShow(Sender: TObject);
 var
   dsResult: TADODataSet;
-  currentButton: TButton;
+  currentCheckbox: TCheckBox;
 begin
 
   dsResult := DataModule1.getCategories;
@@ -131,15 +155,15 @@ begin
     if categories <> nil then
       categories.Free;
 
-    categories := TObjectList<TButton>.Create();
+    categories := TObjectList<TCheckBox>.Create();
 
     while not dsResult.Eof do
     begin
-      currentButton := TButton.Create(self);
-      currentButton.Parent := flpnlCategories;
-      currentButton.onClick := self.OnClickCategory;
-      currentButton.Caption := dsResult['Category'];
-      categories.Add(currentButton);
+      currentCheckbox := TCheckBox.Create(self);
+      currentCheckbox.Parent := flpnlCategories;
+      currentCheckbox.onClick := self.OnClickCategory;
+      currentCheckbox.Caption := dsResult['Category'];
+      categories.Add(currentCheckbox);
 
       dsResult.Next;
     end;
@@ -187,6 +211,9 @@ procedure TfrmBrowse.SearchItems(Sender: TObject);
 var
   dsResult: TADODataSet;
   searchQuery: string;
+  arrCategories: TList<string>;
+  I: Integer;
+  cfRange, euRange, wuRange: array of Integer;
 
 begin
 
@@ -198,7 +225,44 @@ begin
     Exit;
   end;
 
-  dsResult := DataModule1.getSearchResults(searchQuery, category);
+  arrCategories := TList<String>.Create();
+
+  for I := 0 to categories.Count - 1 do
+  begin
+    if categories.items[I].Checked then
+    begin
+      arrCategories.Add(categories.items[I].Caption);
+    end;
+
+  end;
+
+  if chbCFEnable.Checked then
+  begin
+    SetLength(cfRange, 2);
+    cfRange[0] := spnCFMin.Value;
+    cfRange[1] := spnCFMax.Value;
+
+  end;
+
+  if chbEUEnable.Checked then
+  begin
+    SetLength(euRange, 2);
+    euRange[0] := spnEUMin.Value;
+    euRange[1] := spnEUMax.Value;
+
+  end;
+
+  if chbWUEnable.Checked then
+  begin
+
+    SetLength(wuRange, 2);
+    wuRange[0] := spnWUMin.Value;
+    wuRange[1] := spnWUMax.Value;
+
+  end;
+
+  dsResult := DataModule1.getSearchResults(searchQuery, arrCategories, cfRange,
+    euRange, wuRange);
 
   if items <> nil then
   begin
@@ -216,7 +280,6 @@ begin
   if dsResult.IsEmpty then
   begin
     showMessage('There are no items matching your search query.');
-    flpnlItems.Caption := 'There are no items matching your search query.';
     Exit;
   end;
 
@@ -224,7 +287,7 @@ begin
 
   while not dsResult.Eof do
   begin
-    items.Add(BrowseItem.Create(self, flpnlItems, dsResult['ItemID'],
+    items.Add(BrowseItem.Create(self, flpnlItems, dsResult,
       self.ViewItem));
     dsResult.Next;
   end;
@@ -233,12 +296,37 @@ begin
 
 end;
 
+procedure TfrmBrowse.spnCFMinChange(Sender: TObject);
+begin
+  //
+  if spnCFMax.Value < spnCFMin.Value then
+  begin
+    spnCFMax.Value := spnCFMin.Value;
+  end;
+end;
+
+procedure TfrmBrowse.spnEUMinChange(Sender: TObject);
+begin
+  if spnEUMax.Value < spnEUMin.Value then
+  begin
+    spnEUMax.Value := spnEUMin.Value;
+  end;
+end;
+
+procedure TfrmBrowse.spnWUMinChange(Sender: TObject);
+begin
+  if spnWUMax.Value < spnWUMin.Value then
+  begin
+    spnWUMax.Value := spnWUMin.Value;
+  end;
+end;
+
 procedure TfrmBrowse.srchSearchItemsChange(Sender: TObject);
 begin
 
 end;
 
-//procedure given to all browse item containers
+// procedure given to all browse item containers
 // if the user is the object's seller, rather show them the screen that allows them to edit
 procedure TfrmBrowse.ViewItem(sellerID, itemID: string);
 begin

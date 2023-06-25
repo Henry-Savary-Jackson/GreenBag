@@ -74,7 +74,8 @@ type
 
     function getProducts(userID: string): tADODataSet;
 
-    function getSearchResults(searchQuery, category: string): tADODataSet;
+    function getSearchResults(searchQuery: string; categories: TList<string>;
+      CFRange, EURange, WURange: array of integer  ): tADODataSet;
 
     function isInTable(pkValue: array of Variant; pkName: array of string;
       tbName: string): boolean;
@@ -777,27 +778,80 @@ begin
 end;
 
 // Search for items with a specific string and category
-function TDataModule1.getSearchResults(searchQuery, category: string)
+function TDataModule1.getSearchResults(searchQuery: string;
+  categories: TList<string>; CFRange, EURange, WURange: array of integer)
   : tADODataSet;
 var
-  sql: string;
+  sql, categoryParamName: string;
   params: tObjectDictionary<string, Variant>;
+  i: integer;
 
 begin
 
   // sql statement and params
   // does not show deleted items
-  sql := 'SELECT ItemID FROM ItemTB WHERE ItemName LIKE :SearchQuery AND Deleted = False ';
+  sql := 'SELECT ItemID, ItemName,  Cost, Image, '+
+  ' (CarbonFootprintProduction + CarbonFootprintUsage) AS CF '+
+  ' ( EnergyUsageProduction + EnergyFootprintUsage ) AS EU'+
+  + '(WaterUsageProduction + WaterFootprintUsage) AS WU ' +
+  ', UserTB.Username as SellerName, SellerID ' +
+  'FROM ItemTB WHERE ItemName LIKE :SearchQuery  '+
+  'AND Deleted = False ';
 
   params := tObjectDictionary<string, Variant>.Create();
   params.Add('SearchQuery', '%' + searchQuery + '%');
 
   // if the user has specifed a category, use that as a condition as well
-  if category <> '' then
+  if categories.Count > 0 then
   begin
-    sql := sql + ' AND Category = :Category';
-    params.Add('Category', category);
+    for i := 0 to categories.Count - 1 do
+    begin
+      if i = 0 then
+      begin
+        sql := sql + ' AND ( ';
+      end
+      else
+      begin
+        sql := sql + ' OR ';
+      end;
+
+      categoryParamName := 'Category' + intToStr(i);
+      sql := sql + ' Category = :' + categoryParamName + ' ';
+
+      if i = categories.Count - 1 then
+      begin
+        sql := sql + ')';
+      end;
+
+      params.Add(categoryParamName, categories.Items[i]);
+    end;
   end;
+
+  if length(CFRange) > 0then
+  begin
+    sql := sql + ' AND CarbonFootprintProduction Between :CFMin AND :CFMax';
+
+    params.Add('CFMin', CFRange[0]);
+    params.Add('CFMax', CFRange[1]);
+  end;
+
+  if length(EURange) > 0 then
+  begin
+    sql := sql + ' AND EnergyUsageProduction Between :EUMin AND :EUMax';
+
+    params.Add('EUMin', EURange[0]);
+    params.Add('EUMax', EURange[1]);
+  end;
+
+  if length(WURange) > 0 then
+  begin
+    sql := sql + ' AND  Between :WUMin AND :WUMax';
+
+    params.Add('WUMin', WURange[0]);
+    params.Add('WUMax', WURange[1]);
+  end;
+
+  sql := sql + ' INNER JOIN UserTB ON UserTB.UserID = ItemTB.SellerID ';
 
   try
     // return the results
