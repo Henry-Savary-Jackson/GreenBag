@@ -91,57 +91,60 @@ object frmBrowse: TfrmBrowse
           Height = 45
           Align = alLeft
           AutoSize = True
-          FlowStyle = fsBottomTopRightLeft
+          FlowStyle = fsTopBottomLeftRight
+          FullRepaint = False
           TabOrder = 0
         end
       end
       object srchSearchItems: TSearchBox
-        Left = 37
-        Top = 16
+        Left = 27
+        Top = 12
         Width = 368
         Height = 21
         Anchors = []
         TabOrder = 1
         OnChange = srchSearchItemsChange
         OnInvokeSearch = SearchItems
-        ExplicitLeft = 27
       end
       object spnCFMin: TSpinEdit
         Left = 522
         Top = 39
         Width = 41
         Height = 22
-        MaxValue = 0
+        MaxValue = 1000
         MinValue = 0
         TabOrder = 2
         Value = 0
+        OnChange = spnCFMinChange
       end
       object spnEUMin: TSpinEdit
         Left = 522
         Top = 67
         Width = 41
         Height = 22
-        MaxValue = 0
+        MaxValue = 1000
         MinValue = 0
         TabOrder = 3
         Value = 0
+        OnChange = spnEUMinChange
       end
       object spnWUMin: TSpinEdit
         Left = 522
         Top = 95
         Width = 41
         Height = 22
-        MaxValue = 0
+        MaxValue = 1000
         MinValue = 0
         TabOrder = 4
         Value = 0
+        OnChange = spnWUMinChange
       end
       object spnCFMax: TSpinEdit
         Left = 609
         Top = 39
         Width = 41
         Height = 22
-        MaxValue = 0
+        MaxValue = 1000
         MinValue = 0
         TabOrder = 5
         Value = 0
@@ -151,7 +154,7 @@ object frmBrowse: TfrmBrowse
         Top = 67
         Width = 41
         Height = 22
-        MaxValue = 0
+        MaxValue = 1000
         MinValue = 0
         TabOrder = 6
         Value = 0
@@ -161,7 +164,7 @@ object frmBrowse: TfrmBrowse
         Top = 95
         Width = 41
         Height = 22
-        MaxValue = 0
+        MaxValue = 1000
         MinValue = 0
         TabOrder = 7
         Value = 0

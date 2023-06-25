@@ -27,8 +27,6 @@ type
     imgItem: TImage;
     btnViewItem: TButton;
 
-    // user ID of person querying this item
-    UserID: string;
     // user id of seller of this item
     sellerID: string;
     itemName, itemSeller: string;
@@ -48,6 +46,7 @@ Constructor BrowseItem.Create(Owner: tForm; Parent: TWinControl;
   ItemData: TADODataSet; viewProcedure: tViewProcedure);
 begin;
 
+  itemID := ItemData['ItemID'];
   itemName := ItemData['ItemName'];
   itemSeller := ItemData['SellerName'];
   itemPrice := ItemData['Cost'];
@@ -56,7 +55,6 @@ begin;
   itemEU := ItemData['EU'];
   sellerID := ItemData['SellerID'];
 
-  self.UserID := UserID;
   self.viewProcedure := viewProcedure;
 
   imageStream := ItemData.CreateBlobStream

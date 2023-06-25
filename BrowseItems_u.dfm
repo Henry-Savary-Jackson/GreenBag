@@ -22,8 +22,6 @@ object frmBrowse: TfrmBrowse
     Height = 587
     Align = alClient
     TabOrder = 0
-    ExplicitLeft = 145
-    ExplicitWidth = 735
     object grpHeader: TGroupBox
       Left = 2
       Top = 15
@@ -31,7 +29,6 @@ object frmBrowse: TfrmBrowse
       Height = 131
       Align = alTop
       TabOrder = 0
-      ExplicitWidth = 719
       DesignSize = (
         753
         131)
@@ -205,7 +202,6 @@ object frmBrowse: TfrmBrowse
       VertScrollBar.Tracking = True
       Align = alClient
       TabOrder = 1
-      ExplicitWidth = 719
       object flpnlItems: TFlowPanel
         Left = 0
         Top = 0
@@ -214,7 +210,6 @@ object frmBrowse: TfrmBrowse
         Align = alTop
         AutoSize = True
         TabOrder = 0
-        ExplicitWidth = 715
       end
     end
   end

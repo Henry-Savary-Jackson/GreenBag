@@ -287,8 +287,8 @@ begin
 
   while not dsResult.Eof do
   begin
-    items.Add(BrowseItem.Create(self, flpnlItems, dsResult,
-      self.ViewItem));
+    items.Add(BrowseItem.Create(self, flpnlItems, dsResult, self.ViewItem));
+    showMessage(inttostr(dsResult['CF']));
     dsResult.Next;
   end;
 
@@ -302,6 +302,7 @@ begin
   if spnCFMax.Value < spnCFMin.Value then
   begin
     spnCFMax.Value := spnCFMin.Value;
+    spnCFMax.MinValue := spnCFMin.Value;
   end;
 end;
 
@@ -310,6 +311,7 @@ begin
   if spnEUMax.Value < spnEUMin.Value then
   begin
     spnEUMax.Value := spnEUMin.Value;
+    spnEUMax.MinValue := spnEUMin.Value;
   end;
 end;
 
@@ -317,7 +319,9 @@ procedure TfrmBrowse.spnWUMinChange(Sender: TObject);
 begin
   if spnWUMax.Value < spnWUMin.Value then
   begin
+  //bit broken, at 1000 it breaks
     spnWUMax.Value := spnWUMin.Value;
+    spnWUMax.MinValue := spnWUMin.Value;
   end;
 end;
 

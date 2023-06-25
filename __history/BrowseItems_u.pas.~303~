@@ -213,7 +213,7 @@ var
   searchQuery: string;
   arrCategories: TList<string>;
   I: Integer;
-  cfRange, euRange, wuRange: array [0 .. 1] of Integer;
+  cfRange, euRange, wuRange: array of Integer;
 
 begin
 
@@ -238,36 +238,27 @@ begin
 
   if chbCFEnable.Checked then
   begin
+    SetLength(cfRange, 2);
     cfRange[0] := spnCFMin.Value;
     cfRange[1] := spnCFMax.Value;
 
-  end
-  else
-  begin
-    cfRange := nil;
   end;
 
   if chbEUEnable.Checked then
   begin
+    SetLength(euRange, 2);
     euRange[0] := spnEUMin.Value;
     euRange[1] := spnEUMax.Value;
 
-  end
-  else
-  begin
-    euRange := nil;
   end;
-
 
   if chbWUEnable.Checked then
   begin
+
+    SetLength(wuRange, 2);
     wuRange[0] := spnWUMin.Value;
     wuRange[1] := spnWUMax.Value;
 
-  end
-  else
-  begin
-    wuRange := nil;
   end;
 
   dsResult := DataModule1.getSearchResults(searchQuery, arrCategories, cfRange,
@@ -296,8 +287,7 @@ begin
 
   while not dsResult.Eof do
   begin
-    items.Add(BrowseItem.Create(self, flpnlItems, dsResult['ItemID'],
-      self.ViewItem));
+    items.Add(BrowseItem.Create(self, flpnlItems, dsResult, self.ViewItem));
     dsResult.Next;
   end;
 
@@ -311,6 +301,7 @@ begin
   if spnCFMax.Value < spnCFMin.Value then
   begin
     spnCFMax.Value := spnCFMin.Value;
+    spnCFMax.MinValue := spnCFMin.Value;
   end;
 end;
 
@@ -319,6 +310,7 @@ begin
   if spnEUMax.Value < spnEUMin.Value then
   begin
     spnEUMax.Value := spnEUMin.Value;
+    spnEUMax.MinValue := spnEUMin.Value;
   end;
 end;
 
@@ -327,6 +319,7 @@ begin
   if spnWUMax.Value < spnWUMin.Value then
   begin
     spnWUMax.Value := spnWUMin.Value;
+    spnWUMax.MinValue := spnWUMin.Value;
   end;
 end;
 

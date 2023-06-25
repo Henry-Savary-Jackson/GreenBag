@@ -791,12 +791,12 @@ begin
   // sql statement and params
   // does not show deleted items
   sql := 'SELECT ItemID, ItemName,  Cost, Image, '+
-  ' (CarbonFootprintProduction + CarbonFootprintUsage) AS CF '+
-  ' ( EnergyUsageProduction + EnergyFootprintUsage ) AS EU'+
-  + '(WaterUsageProduction + WaterFootprintUsage) AS WU ' +
-  ', UserTB.Username as SellerName, SellerID ' +
-  'FROM ItemTB WHERE ItemName LIKE :SearchQuery  '+
-  'AND Deleted = False ';
+  ' (CarbonFootprintProduction + CarbonFootprintUsage) AS CF, '+
+  ' ( EnergyUsageProduction + EnergyFootprintUsage ) AS EU,'+
+  '(WaterUsageProduction + WaterFootprintUsage) AS WU, ' +
+  ' UserTB.Username as SellerName, SellerID ' +
+  'FROM ItemTB INNER JOIN UserTB ON UserTB.UserID = ItemTB.SellerID '+
+  ' WHERE ItemName LIKE :SearchQuery AND Deleted = False ';
 
   params := tObjectDictionary<string, Variant>.Create();
   params.Add('SearchQuery', '%' + searchQuery + '%');
@@ -829,7 +829,7 @@ begin
 
   if length(CFRange) > 0then
   begin
-    sql := sql + ' AND CarbonFootprintProduction Between :CFMin AND :CFMax';
+    sql := sql + ' AND (CarbonFootprintProduction + CarbonFootprintUsage) > :CFMin AND (CarbonFootprintProduction + CarbonFootprintUsage) < :CFMax ';
 
     params.Add('CFMin', CFRange[0]);
     params.Add('CFMax', CFRange[1]);
@@ -837,7 +837,7 @@ begin
 
   if length(EURange) > 0 then
   begin
-    sql := sql + ' AND EnergyUsageProduction Between :EUMin AND :EUMax';
+    sql := sql + ' AND ( EnergyUsageProduction + EnergyFootprintUsage ) > :EUMin AND  ( EnergyUsageProduction + EnergyFootprintUsage ) < :EUMax ';
 
     params.Add('EUMin', EURange[0]);
     params.Add('EUMax', EURange[1]);
@@ -845,13 +845,11 @@ begin
 
   if length(WURange) > 0 then
   begin
-    sql := sql + ' AND  Between :WUMin AND :WUMax';
+    sql := sql + ' AND (WaterUsageProduction + WaterFootprintUsage) > :WUMin AND (WaterUsageProduction + WaterFootprintUsage) < :WUMax ';
 
     params.Add('WUMin', WURange[0]);
     params.Add('WUMax', WURange[1]);
   end;
-
-  sql := sql + ' INNER JOIN UserTB ON UserTB.UserID = ItemTB.SellerID ';
 
   try
     // return the results
