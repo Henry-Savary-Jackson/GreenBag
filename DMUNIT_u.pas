@@ -75,7 +75,7 @@ type
     function getProducts(userID: string): tADODataSet;
 
     function getSearchResults(searchQuery: string; categories: TList<string>;
-      CFRange, EURange, WURange: array of integer  ): tADODataSet;
+      CFRange, EURange, WURange: array of integer): tADODataSet;
 
     function isInTable(pkValue: array of Variant; pkName: array of string;
       tbName: string): boolean;
@@ -684,7 +684,14 @@ begin
   // params and sql setup
   params := tObjectDictionary<string, Variant>.Create();
 
-  sql := 'SELECT ShoppingCartItemID FROM ShoppingCartItemsTB WHERE ShoppingCartID = :ShoppingCartID';
+  sql := 'SELECT ShoppingCartItemID, ShoppingCartItemsTB.Quantity,  ' +
+    'ShoppingCartItemsTB.ItemID , ItemTB.ItemName ,' +
+    ' ItemTB.Cost, ItemTB.MaxWithdrawableStock as MaxStock,  ' +
+    ' (ItemTB.CarbonFootprintProduction + ItemTB.CarbonFootprintUsage) AS CF , '
+    + ' ( ItemTB.WaterUsageProduction + ItemTB.WaterFootprintUsage) AS WU , ' +
+    ' (ItemTB.EnergyUsageProduction + ItemTB.EnergyFootprintUsage) AS EU ' +
+    'FROM ShoppingCartItemsTB INNER JOIN ItemTB ON ItemTB.ItemID = ShoppingCartItemsTB.ItemID'
+    + ' WHERE ShoppingCartID = :ShoppingCartID';
 
   params.Add('ShoppingCartID', ShoppingCartID);
 
@@ -720,14 +727,22 @@ function TDataModule1.getProducts(userID: string): tADODataSet;
 var
   sql: string;
   params: tObjectDictionary<string, Variant>;
+  dsResult: tADODataSet;
 begin
-  sql := 'SELECT ItemID FROM ItemTB WHERE SellerID = :SellerID AND Deleted = False';
+  sql := 'SELECT ItemTB.ItemID, Sales, Image, ItemName, Revenue '
+    + 'FROM ItemTB INNER JOIN '+
+    '( SELECT ItemID, '+
+    ' IIF(SUM(Cost) IS NULL, 0, SUM(Cost)) '+
+    ' AS Revenue FROM TransactionItemTB GROUP BY ItemID ) AS revenueTB ON revenueTB.ItemID = ItemTB.ItemID '+
+    ' WHERE SellerID = :SellerID AND Deleted = False '+
+    ' AND TransactionItemTB.ItemID = ItemTB.ItemID';
 
   params := tObjectDictionary<string, Variant>.Create();
   params.Add('SellerID', userID);
 
   try
     Result := runSQL(sql, params);
+
   finally
     params.Free;
   end;
@@ -790,13 +805,13 @@ begin
 
   // sql statement and params
   // does not show deleted items
-  sql := 'SELECT ItemID, ItemName,  Cost, Image, '+
-  ' (CarbonFootprintProduction + CarbonFootprintUsage) AS CF, '+
-  ' ( EnergyUsageProduction + EnergyFootprintUsage ) AS EU,'+
-  '(WaterUsageProduction + WaterFootprintUsage) AS WU, ' +
-  ' UserTB.Username as SellerName, SellerID ' +
-  'FROM ItemTB INNER JOIN UserTB ON UserTB.UserID = ItemTB.SellerID '+
-  ' WHERE ItemName LIKE :SearchQuery AND Deleted = False ';
+  sql := 'SELECT ItemID, ItemName,  Cost, Image, ' +
+    ' (CarbonFootprintProduction + CarbonFootprintUsage) AS CF, ' +
+    ' ( EnergyUsageProduction + EnergyFootprintUsage ) AS EU,' +
+    '(WaterUsageProduction + WaterFootprintUsage) AS WU, ' +
+    ' UserTB.Username as SellerName, SellerID ' +
+    'FROM ItemTB INNER JOIN UserTB ON UserTB.UserID = ItemTB.SellerID ' +
+    ' WHERE ItemName LIKE :SearchQuery AND Deleted = False ';
 
   params := tObjectDictionary<string, Variant>.Create();
   params.Add('SearchQuery', '%' + searchQuery + '%');
@@ -827,9 +842,10 @@ begin
     end;
   end;
 
-  if length(CFRange) > 0then
+  if length(CFRange) > 0 then
   begin
-    sql := sql + ' AND (CarbonFootprintProduction + CarbonFootprintUsage) > :CFMin AND (CarbonFootprintProduction + CarbonFootprintUsage) < :CFMax ';
+    sql := sql +
+      ' AND (CarbonFootprintProduction + CarbonFootprintUsage) > :CFMin AND (CarbonFootprintProduction + CarbonFootprintUsage) < :CFMax ';
 
     params.Add('CFMin', CFRange[0]);
     params.Add('CFMax', CFRange[1]);
@@ -837,7 +853,8 @@ begin
 
   if length(EURange) > 0 then
   begin
-    sql := sql + ' AND ( EnergyUsageProduction + EnergyFootprintUsage ) > :EUMin AND  ( EnergyUsageProduction + EnergyFootprintUsage ) < :EUMax ';
+    sql := sql +
+      ' AND ( EnergyUsageProduction + EnergyFootprintUsage ) > :EUMin AND  ( EnergyUsageProduction + EnergyFootprintUsage ) < :EUMax ';
 
     params.Add('EUMin', EURange[0]);
     params.Add('EUMax', EURange[1]);
@@ -845,7 +862,8 @@ begin
 
   if length(WURange) > 0 then
   begin
-    sql := sql + ' AND (WaterUsageProduction + WaterFootprintUsage) > :WUMin AND (WaterUsageProduction + WaterFootprintUsage) < :WUMax ';
+    sql := sql +
+      ' AND (WaterUsageProduction + WaterFootprintUsage) > :WUMin AND (WaterUsageProduction + WaterFootprintUsage) < :WUMax ';
 
     params.Add('WUMin', WURange[0]);
     params.Add('WUMax', WURange[1]);

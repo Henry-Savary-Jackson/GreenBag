@@ -288,7 +288,6 @@ begin
   while not dsResult.Eof do
   begin
     items.Add(BrowseItem.Create(self, flpnlItems, dsResult, self.ViewItem));
-    showMessage(inttostr(dsResult['CF']));
     dsResult.Next;
   end;
 

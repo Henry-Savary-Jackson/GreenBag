@@ -29,8 +29,8 @@ type
     imageStream: TStream;
 
   public
-    Constructor Create(Owner: tForm; Parent: TWinControl; itemID: string;
-      removeProcedure: tRemoveProcedure);
+    Constructor Create(Owner: tForm; Parent: TWinControl;
+      productData: tAdoDataset; removeProcedure: tRemoveProcedure);
     procedure createDesign(); override;
     procedure viewItem(Sender: tObject);
     // event handling code for the remove button
@@ -41,55 +41,22 @@ type
 implementation
 
 Constructor ProductItem.Create(Owner: tForm; Parent: TWinControl;
-  itemID: string; removeProcedure: tRemoveProcedure);
-var
-  sql: string;
-  params: tObjectDictionary<string, Variant>;
-  dsResult: tADODataset;
+  productData: tAdoDataset; removeProcedure: tRemoveProcedure);
+
 begin
   self.removeProcedure := removeProcedure;
-  //
-  sql := 'SELECT ItemName, Sales, Image FROM ItemTB WHERE ItemID = :ItemID';
 
-  params := tObjectDictionary<string, Variant>.Create();
-  params.Add('ItemID', itemID);
-  try
-    dsResult := DataModule1.runSQL(sql, params);
+  itemID := productData['ItemID'];
+  Name := productData['ItemName'];
+  Sales := productData['Sales'];
+  // calculate revenue
 
-    if dsResult.Fields.FindField('Status') <> nil then
-    begin
-      showMessage(dsResult['Status']);
-      Exit;
-    end;
+  imageStream := productData.CreateBlobStream
+    (productData.FieldByName('Image'), bmRead);
 
-    Name := dsResult['ItemName'];
-    Sales := dsResult['Sales'];
-    // calculate revenue
+  revenue := productData['Revenue'];
 
-    imageStream := dsResult.CreateBlobStream
-      (dsResult.FieldByName('Image'), bmRead);
-
-    dsResult.Free;
-
-    sql := 'SELECT IIF(SUM(Cost) IS NULL, 0, SUM(Cost)) AS ItemRevenue FROM TransactionItemTB WHERE ItemID = :ItemID';
-
-    dsResult := DataModule1.runSQL(sql, params);
-
-    if dsResult.Fields.FindField('Status') <> nil then
-    begin
-      showMessage(dsResult['Status']);
-      Exit;
-    end;
-
-    revenue := dsResult['ItemRevenue'];
-
-    Inherited Create(Owner, Parent, itemID);
-
-  finally
-    if Assigned(dsResult) then
-      dsResult.Free;
-    params.Free;
-  end;
+  Inherited Create(Owner, Parent, itemID);
 
 end;
 

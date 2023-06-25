@@ -140,7 +140,7 @@ begin
   begin
 
     currentItem := CartItem.Create(self, flpnlItems,
-      dsCartItems['ShoppingCartItemID'], self.removeItem,
+      dsCartItems, self.removeItem,
       self.updateItemQuantity);
     items.Add(currentItem);
 

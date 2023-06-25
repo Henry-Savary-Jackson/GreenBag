@@ -38,7 +38,7 @@ type
 
   public
     Constructor Create(Owner: TForm; Parent: TWinControl;
-      shoppingCartItemID: string; remove: tRemoveProcedure;
+      cartItemData: tAdoDataSet; remove: tRemoveProcedure;
       updateQuantity: tUpdateQuantityProcedure);
     procedure createDesign(); override;
     procedure onRemoveClick(Sender: tObject);
@@ -55,67 +55,30 @@ type
 implementation
 
 Constructor CartItem.Create(Owner: TForm; Parent: TWinControl;
-  shoppingCartItemID: string; remove: tRemoveProcedure;
+  cartItemData: tAdoDataSet; remove: tRemoveProcedure;
   updateQuantity: tUpdateQuantityProcedure);
 var
-  sql: string;
-  params: TObjectDictionary<string, variant>;
-  dsResult: TADODataSet;
+  dsResult: tAdoDataSet;
 
 begin;
 
   self.removeProcedure := remove;
   self.updateQuantityProcedure := updateQuantity;
-  self.shoppingCartItemID := shoppingCartItemID;
+  self.shoppingCartItemID := cartItemData['ShoppingCartItemID'];
 
-  sql := 'SELECT ShoppingCartItemsTB.Quantity, ShoppingCartItemsTB.ItemID , ItemTB.ItemName , ItemTB.Cost, ItemTB.MaxWithdrawableStock as MaxStock, '
-    + ' ItemTB.CarbonFootprintProduction AS CFProduce , ItemTB.CarbonFootprintUsage AS CF , '
-    + '  ItemTB.WaterUsageProduction AS WUProduce , ItemTB.WaterFootprintUsage AS WU , '
-    + 'ItemTB.EnergyUsageProduction AS EUProduce , ItemTB.EnergyFootprintUsage AS EU '
-    + ' FROM ShoppingCartItemsTB INNER JOIN ItemTB ON ItemTB.ItemID = ShoppingCartItemsTB.ItemID '
-    + '  WHERE ShoppingCartItemID = :ShoppingCartItemID';
+  self.iQuantity := cartItemData['Quantity'];
+  self.itemID := cartItemData['ItemID'];
+  self.itemPrice := cartItemData['Cost'];
+  self.itemName := cartItemData['ItemName'];
 
-  params := TObjectDictionary<string, variant>.Create();
-  params.Add('ShoppingCartItemID', self.shoppingCartItemID);
+  self.itemCF := cartItemData['CF'];
+  self.itemWU := cartItemData['WU'];
+  self.itemEU := cartItemData['EU'];
 
-  try
-    dsResult := DataModule1.runSQL(sql, params);
+  self.maxwithdraw := cartItemData['MaxStock'];
 
-    if dsResult.IsEmpty then
-    begin
-      showMessage('Error: Item does not exist.');
-      Exit;
-    end;
-
-    if dsResult.Fields.FindField('Status') <> nil then
-    begin
-      showMessage(dsResult['Status']);
-      Exit;
-    end;
-
-    self.iQuantity := dsResult['Quantity'];
-    self.itemID := dsResult['ItemID'];
-    self.itemPrice := dsResult['Cost'];
-    self.itemName := dsResult['ItemName'];
-
-    self.itemCF := dsResult['CF'];
-    self.itemWU := dsResult['WU'];
-    self.itemEU := dsResult['EU'];
-
-    self.itemCFProduce := dsResult['CFProduce'];
-    self.itemWUProduce := dsResult['WUProduce'];
-    self.itemEUProduce := dsResult['EUProduce'];
-
-    self.maxwithdraw := dsResult['MaxStock'];
-
-    self.updateInfo;
-    Inherited Create(Owner, Parent, itemID);
-
-  finally
-    if Assigned(dsResult) then
-      dsResult.Free;
-    params.Free;
-  end;
+  self.updateInfo;
+  Inherited Create(Owner, Parent, itemID);
 
 end;
 
@@ -236,9 +199,9 @@ begin
 
   self.itemTotalPrice := iQuantity * self.itemPrice;
 
-  self.itemTotalCF := (self.itemCF + self.itemCFProduce) * iQuantity;
-  self.itemTotalWU := (self.itemWU + self.itemWUProduce) * iQuantity;
-  self.itemTotalEU := (self.itemEU + self.itemEUProduce) * iQuantity;
+  self.itemTotalCF := self.itemCF  * iQuantity;
+  self.itemTotalWU := self.itemWU * iQuantity;
+  self.itemTotalEU := self.itemEU * iQuantity;
 
 end;
 
