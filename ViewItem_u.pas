@@ -99,7 +99,15 @@ var
 
 begin
   rating := trcRating.Position;
-  DataModule1.sendRating(itemID, rating);
+  try
+    DataModule1.sendRating(DataModule1.userID, itemID, rating);
+
+  except
+    on e: exception do
+    begin
+      showMessage(e.Message);
+    end;
+  end;
   showMessage('Your feedback has been sent.');
 end;
 
@@ -164,7 +172,7 @@ begin
   lblWUProduce.Caption := 'Water usage for production:' +
     floatToStrf(dsResult['WaterUsageProduction'], fffixed, 8, 2);
 
-  lblRating.Caption := 'Rating: ' + inttostr(dsResult['Rating']);
+  lblRating.Caption := 'Rating: ' + inttostr(dsResult['avgRating']);
 
   lblCategory.Caption := 'Category: ' + dsResult['Category'];
 

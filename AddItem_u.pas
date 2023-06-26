@@ -246,7 +246,7 @@ begin
     edtName.Text := dsResult['ItemName'];
 
     lblSeller.Caption := 'Seller: ' + dsResult['SellerName'];
-    lblRating.Caption := 'Rating: ' + intToStr(dsResult['Rating']);
+    lblRating.Caption := 'Rating: ' + intToStr(dsResult['avgRating']);
 
     edtPrice.Text := floatTOStrf(dsResult['Cost'], ffFixed, 8, 2);
 

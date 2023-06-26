@@ -196,9 +196,6 @@ begin
 end;
 
 procedure TfrmSignUp.imgPfpClick(Sender: TObject);
-var
-  fileChooser: tOpenDialog;
-  sImagePath: string;
 begin
   DataModule1.loadImageFromFile(imgPfp, self);
 

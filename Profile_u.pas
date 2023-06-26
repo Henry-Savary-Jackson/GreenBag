@@ -93,11 +93,6 @@ begin
 end;
 
 procedure TfrmProfile.categoryClickStats(Sender: TObject);
-var
-  sCategory: string;
-  dsResult: TADODataSet;
-  i: integer;
-  ds: TDataSource;
 begin
   if Sender is TButton then
   begin
@@ -210,9 +205,6 @@ begin
 end;
 
 procedure TfrmProfile.imgProfilePicClick(Sender: TObject);
-var
-  fileChooser: tOpenDialog;
-  sImagePath: string;
 begin
   // open filchooser
   DataModule1.loadImageFromFile(imgProfilePic, self);
@@ -266,9 +258,7 @@ procedure TfrmProfile.UpdateChart;
 var
   dsResult: TADODataSet;
   i: integer;
-  dValue: double;
   currentDate: tDateTime;
-  ds: TDataSource;
 begin
 
   dsResult := DataModule1.obtainStats(DataModule1.userID, sType, dateRangeBegin,

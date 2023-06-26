@@ -39,6 +39,9 @@ type
     chbCFEnable: TCheckBox;
     chbEUEnable: TCheckBox;
     chbWUEnable: TCheckBox;
+    chbRatingsEnable: TCheckBox;
+    lblMinRating: TLabel;
+    spnMinRating: TSpinEdit;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnLogoutClick(Sender: TObject);
     procedure btnProfileClick(Sender: TObject);
@@ -55,6 +58,9 @@ type
     procedure spnCFMinChange(Sender: TObject);
     procedure spnEUMinChange(Sender: TObject);
     procedure spnWUMinChange(Sender: TObject);
+    procedure chbEUEnableClick(Sender: TObject);
+    procedure chbWUEnableClick(Sender: TObject);
+    procedure chbRatingsEnableClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -114,7 +120,25 @@ end;
 
 procedure TfrmBrowse.chbCFEnableClick(Sender: TObject);
 begin
-  //
+  spnCFMin.Enabled := not spnCFMin.Enabled;
+  spnCFMax.Enabled := not spnCFMax.Enabled;
+end;
+
+procedure TfrmBrowse.chbEUEnableClick(Sender: TObject);
+begin
+  spnEUMin.Enabled := not spnEUMin.Enabled;
+  spnEUMax.Enabled := not spnEUMax.Enabled;
+end;
+
+procedure TfrmBrowse.chbRatingsEnableClick(Sender: TObject);
+begin
+  spnMinRating.Enabled := not spnMinRating.Enabled;
+end;
+
+procedure TfrmBrowse.chbWUEnableClick(Sender: TObject);
+begin
+  spnWUMin.Enabled := not spnWUMin.Enabled;
+  spnWUMax.Enabled := not spnWUMax.Enabled;
 end;
 
 procedure TfrmBrowse.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -212,7 +236,7 @@ var
   dsResult: TADODataSet;
   searchQuery: string;
   arrCategories: TList<string>;
-  I: Integer;
+  I, iMinRating: Integer;
   cfRange, euRange, wuRange: array of Integer;
 
 begin
@@ -261,6 +285,16 @@ begin
 
   end;
 
+  if chbRatingsEnable.Checked then
+  begin
+    iMinRating := spnMinRating.Value;
+
+  end
+  else
+  begin
+    iMinRating := -1;
+  end;
+
   dsResult := DataModule1.getSearchResults(searchQuery, arrCategories, cfRange,
     euRange, wuRange);
 
@@ -287,8 +321,21 @@ begin
 
   while not dsResult.Eof do
   begin
+    if not(chbRatingsEnable.Enabled and dsResult['avgRating'] >= iMinRating)
+    then
+    begin
+      dsResult.Next;
+      continue;
+    end
+    else if not ( chbRatingsEnable.Enabled) then
+    begin
+      dsResult.Next;
+      continue;
+    end;
+
     items.Add(BrowseItem.Create(self, flpnlItems, dsResult, self.ViewItem));
     dsResult.Next;
+
   end;
 
   dsResult.Free;
@@ -318,7 +365,7 @@ procedure TfrmBrowse.spnWUMinChange(Sender: TObject);
 begin
   if spnWUMax.Value < spnWUMin.Value then
   begin
-  //bit broken, at 1000 it breaks
+    // bit broken, at 1000 it breaks
     spnWUMax.Value := spnWUMin.Value;
     spnWUMax.MinValue := spnWUMin.Value;
   end;

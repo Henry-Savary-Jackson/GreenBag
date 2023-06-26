@@ -141,78 +141,71 @@ object frmProfile: TfrmProfile
       AlignWithMargins = True
       Left = 9
       Top = 9
-      Width = 192
+      Width = 68
       Height = 13
       Align = alTop
       Alignment = taCenter
       Caption = 'Total Balance:'
-      ExplicitWidth = 68
     end
     object lblRevenueTotal: TLabel
       AlignWithMargins = True
       Left = 9
       Top = 123
-      Width = 192
+      Width = 74
       Height = 13
       Align = alTop
       Alignment = taCenter
       Caption = 'Total Revenue:'
-      ExplicitWidth = 74
     end
     object lblSales: TLabel
       AlignWithMargins = True
       Left = 9
       Top = 104
-      Width = 192
+      Width = 56
       Height = 13
       Align = alTop
       Alignment = taCenter
       Caption = 'Total Sales:'
-      ExplicitWidth = 56
     end
     object lblSpendingTotal: TLabel
       AlignWithMargins = True
       Left = 9
       Top = 28
-      Width = 192
+      Width = 75
       Height = 13
       Align = alTop
       Alignment = taCenter
       Caption = 'Total Spending:'
-      ExplicitWidth = 75
     end
     object lblTotalCF: TLabel
       AlignWithMargins = True
       Left = 9
       Top = 47
-      Width = 192
+      Width = 113
       Height = 13
       Align = alTop
       Alignment = taCenter
       Caption = 'Total Carbon Footprint:'
-      ExplicitWidth = 113
     end
     object lblTotalEU: TLabel
       AlignWithMargins = True
       Left = 9
       Top = 66
-      Width = 192
+      Width = 98
       Height = 13
       Align = alTop
       Alignment = taCenter
       Caption = 'Total Energy Usage:'
-      ExplicitWidth = 98
     end
     object lblTotalWU: TLabel
       AlignWithMargins = True
       Left = 9
       Top = 85
-      Width = 192
+      Width = 94
       Height = 13
       Align = alTop
       Alignment = taCenter
       Caption = 'Total Water Usage:'
-      ExplicitWidth = 94
     end
     object btnViewProducts: TButton
       AlignWithMargins = True

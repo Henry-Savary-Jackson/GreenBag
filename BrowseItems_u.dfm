@@ -74,6 +74,13 @@ object frmBrowse: TfrmBrowse
         Height = 13
         Caption = 'to'
       end
+      object lblMinRating: TLabel
+        Left = 485
+        Top = 3
+        Width = 78
+        Height = 13
+        Caption = 'Minimum rating: '
+      end
       object scrbxCategories: TScrollBox
         Left = 27
         Top = 64
@@ -108,6 +115,7 @@ object frmBrowse: TfrmBrowse
         Top = 39
         Width = 41
         Height = 22
+        Enabled = False
         MaxValue = 1000
         MinValue = 0
         TabOrder = 2
@@ -119,6 +127,7 @@ object frmBrowse: TfrmBrowse
         Top = 67
         Width = 41
         Height = 22
+        Enabled = False
         MaxValue = 1000
         MinValue = 0
         TabOrder = 3
@@ -130,6 +139,7 @@ object frmBrowse: TfrmBrowse
         Top = 95
         Width = 41
         Height = 22
+        Enabled = False
         MaxValue = 1000
         MinValue = 0
         TabOrder = 4
@@ -141,6 +151,7 @@ object frmBrowse: TfrmBrowse
         Top = 39
         Width = 41
         Height = 22
+        Enabled = False
         MaxValue = 1000
         MinValue = 0
         TabOrder = 5
@@ -151,6 +162,7 @@ object frmBrowse: TfrmBrowse
         Top = 67
         Width = 41
         Height = 22
+        Enabled = False
         MaxValue = 1000
         MinValue = 0
         TabOrder = 6
@@ -161,13 +173,14 @@ object frmBrowse: TfrmBrowse
         Top = 95
         Width = 41
         Height = 22
+        Enabled = False
         MaxValue = 1000
         MinValue = 0
         TabOrder = 7
         Value = 0
       end
       object chbCFEnable: TCheckBox
-        Left = 664
+        Left = 656
         Top = 38
         Width = 145
         Height = 17
@@ -182,7 +195,7 @@ object frmBrowse: TfrmBrowse
         Height = 17
         Caption = 'Enable'
         TabOrder = 9
-        OnClick = chbCFEnableClick
+        OnClick = chbEUEnableClick
       end
       object chbWUEnable: TCheckBox
         Left = 656
@@ -191,7 +204,27 @@ object frmBrowse: TfrmBrowse
         Height = 17
         Caption = 'Enable'
         TabOrder = 10
-        OnClick = chbCFEnableClick
+        OnClick = chbWUEnableClick
+      end
+      object chbRatingsEnable: TCheckBox
+        Left = 656
+        Top = 3
+        Width = 65
+        Height = 17
+        Caption = 'Enable'
+        TabOrder = 11
+        OnClick = chbRatingsEnableClick
+      end
+      object spnMinRating: TSpinEdit
+        Left = 585
+        Top = 11
+        Width = 41
+        Height = 22
+        Enabled = False
+        MaxValue = 5
+        MinValue = 0
+        TabOrder = 12
+        Value = 0
       end
     end
     object scrbxItems: TScrollBox

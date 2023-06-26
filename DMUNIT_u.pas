@@ -53,6 +53,8 @@ type
 
     function userInfo(userID: string): tADODataSet;
 
+    function hasUserBoughtItem(itemID, userID: string): boolean;
+
     function obtainStats(userID, statType: string;
       DateBegin, DateEnd: tDateTime): tADODataSet;
 
@@ -70,7 +72,7 @@ type
 
     function getCategories(): tADODataSet;
 
-    procedure sendRating(itemID: string; rating: integer);
+    procedure sendRating(userID, itemID: string; rating: integer);
 
     function getProducts(userID: string): tADODataSet;
 
@@ -729,13 +731,12 @@ var
   params: tObjectDictionary<string, Variant>;
   dsResult: tADODataSet;
 begin
-  sql := 'SELECT ItemTB.ItemID, Sales, Image, ItemName, Revenue '
-    + 'FROM ItemTB INNER JOIN '+
-    '( SELECT ItemID, '+
-    ' IIF(SUM(Cost) IS NULL, 0, SUM(Cost)) '+
-    ' AS Revenue FROM TransactionItemTB GROUP BY ItemID ) AS revenueTB ON revenueTB.ItemID = ItemTB.ItemID '+
-    ' WHERE SellerID = :SellerID AND Deleted = False '+
-    ' AND TransactionItemTB.ItemID = ItemTB.ItemID';
+  sql := 'SELECT ItemTB.ItemID, Sales, Image, ItemName, Revenue ' +
+    'FROM ItemTB LEFT JOIN ' + '( SELECT ItemID, ' +
+    ' IIF(SUM(Cost) IS NULL, 0, SUM(Cost)) ' +
+    ' AS Revenue FROM TransactionItemTB GROUP BY ItemID ) ' +
+    'AS revenueTB ON revenueTB.ItemID = ItemTB.ItemID ' +
+    ' WHERE SellerID = :SellerID AND Deleted = False ';
 
   params := tObjectDictionary<string, Variant>.Create();
   params.Add('SellerID', userID);
@@ -805,13 +806,16 @@ begin
 
   // sql statement and params
   // does not show deleted items
-  sql := 'SELECT ItemID, ItemName,  Cost, Image, ' +
+  sql := ' SELECT ItemTB.ItemID, ItemName, Cost, Image,' +
+    ' (SELECT IIF( Avg(RatingsTB.rating) IS NULL, 0, Avg(RatingsTB.rating) )' +
+    ' FROM RatingsTB WHERE RatingsTB.ItemID = ItemTB.ItemID ' +
+    ') as avgRating , ' +
     ' (CarbonFootprintProduction + CarbonFootprintUsage) AS CF, ' +
     ' ( EnergyUsageProduction + EnergyFootprintUsage ) AS EU,' +
     '(WaterUsageProduction + WaterFootprintUsage) AS WU, ' +
     ' UserTB.Username as SellerName, SellerID ' +
     'FROM ItemTB INNER JOIN UserTB ON UserTB.UserID = ItemTB.SellerID ' +
-    ' WHERE ItemName LIKE :SearchQuery AND Deleted = False ';
+    ' WHERE ItemName LIKE :SearchQuery AND (Deleted = False) ';
 
   params := tObjectDictionary<string, Variant>.Create();
   params.Add('SearchQuery', '%' + searchQuery + '%');
@@ -842,31 +846,30 @@ begin
     end;
   end;
 
+
+  // parameters are not used here because it bugs out and doesn't work
+  // ms access is terrible bugged software
+
   if length(CFRange) > 0 then
   begin
     sql := sql +
-      ' AND (CarbonFootprintProduction + CarbonFootprintUsage) > :CFMin AND (CarbonFootprintProduction + CarbonFootprintUsage) < :CFMax ';
-
-    params.Add('CFMin', CFRange[0]);
-    params.Add('CFMax', CFRange[1]);
+      ' AND ( (CarbonFootprintProduction + CarbonFootprintUsage) BETWEEN ' +
+      intToStr(CFRange[0]) + ' AND  ' + intToStr(CFRange[1]) + '  ) ';
   end;
 
   if length(EURange) > 0 then
   begin
     sql := sql +
-      ' AND ( EnergyUsageProduction + EnergyFootprintUsage ) > :EUMin AND  ( EnergyUsageProduction + EnergyFootprintUsage ) < :EUMax ';
+      ' AND (( EnergyUsageProduction + EnergyFootprintUsage ) BETWEEN ' +
+      intToStr(EURange[0]) + ' AND  ' + intToStr(EURange[1]) + '  ) ';
 
-    params.Add('EUMin', EURange[0]);
-    params.Add('EUMax', EURange[1]);
   end;
 
   if length(WURange) > 0 then
   begin
-    sql := sql +
-      ' AND (WaterUsageProduction + WaterFootprintUsage) > :WUMin AND (WaterUsageProduction + WaterFootprintUsage) < :WUMax ';
+    sql := sql + ' AND ( (WaterUsageProduction + WaterFootprintUsage) BETWEEN '
+      + intToStr(WURange[0]) + ' AND  ' + intToStr(WURange[1]) + '  ) ';
 
-    params.Add('WUMin', WURange[0]);
-    params.Add('WUMax', WURange[1]);
   end;
 
   try
@@ -875,6 +878,36 @@ begin
 
   finally
     params.Free;
+  end;
+
+end;
+
+function TDataModule1.hasUserBoughtItem(itemID, userID: string): boolean;
+var
+  sql: string;
+  params: tObjectDictionary<string, Variant>;
+  dsResult: tADODataSet;
+begin
+
+  sql := 'SELECT * FROM (SELECT TransactionItemTB.ItemID, BuyerID FROM TransactionTB '
+    + ' INNER JOIN TransactionItemTB ON TransactionItemTB.TransactionID ' +
+    ' = TransactionTB.TransactionID) WHERE ItemID = :ItemID AND BuyerID = :UserID ';
+  params := tObjectDictionary<string, Variant>.Create();
+  params.Add('ItemID', itemID);
+  params.Add('UserID', userID);
+
+  try
+    dsResult := runSQL(sql, params);
+
+    if dsResult.Fields.FindField('Status') <> nil then
+    begin
+      raise Exception.Create(dsResult['Status']);
+    end;
+
+    Result := not dsResult.IsEmpty;
+  finally
+    params.Free;
+    dsResult.Free;
   end;
 
 end;
@@ -1287,8 +1320,6 @@ function TDataModule1.runSQL(sql: string;
 var
   dsOutput: tADODataSet;
   Item: TPair<string, Variant>;
-  imageStream: tStream;
-  Image: tImage;
 begin
 
   // close previous query
@@ -1368,7 +1399,7 @@ end;
 // allows a user to send a rating from 1 to 5 on an item
 // todo : currently a user can send as many ratings as they want
 // pls fix this
-procedure TDataModule1.sendRating(itemID: string; rating: integer);
+procedure TDataModule1.sendRating(userID, itemID: string; rating: integer);
 var
   numRatings: integer;
   avgRatings: double;
@@ -1377,33 +1408,24 @@ var
   dsResult: tADODataSet;
 begin
 
-  sql := 'SELECT (Rating * RatingsAmount) AS totalRating , RatingsAmount FROM ItemTB WHERE ItemID = :ItemID';
+  if not hasUserBoughtItem(itemID, userID) then
+  begin
+    raise Exception.Create('User has not bought item yet.');
+  end;
+
+  sql := ' INSERT INTO RatingsTB (UserID, ItemID, rating) VALUES ( :UserID, :ItemID, :rating )';
   params := tObjectDictionary<string, Variant>.Create();
   params.Add('ItemID', itemID);
+  params.Add('UserID', userID);
+  params.Add('rating', rating);
 
   try
-    dsResult := runSQL(sql, params);
-
-    if dsResult.Fields.FindField('Status') <> nil then
-    begin
-      showMessage(dsResult['Status']);
-      exit;
-    end;
-
-    numRatings := dsResult['RatingsAmount'] + 1;
-
-    avgRatings := (dsResult['totalRating'] + rating) / numRatings;
-
-    sql := 'UPDATE ItemTB SET Rating = :Rating, RatingsAmount = :RatingsAmount WHERE ItemID = :ItemID ';
-
-    params.Add('Rating', avgRatings);
-    params.Add('RatingsAmount', numRatings);
-
     dsResult := runSQL(sql, params);
 
     if dsResult['Status'] <> 'Success' then
     begin
       showMessage(dsResult['Status']);
+      exit;
     end;
 
   finally
@@ -1687,7 +1709,6 @@ var
   sql: string;
   params: tObjectDictionary<string, Variant>;
   dsResult: tADODataSet;
-  dRevenue, dBalance, dTotalSpending, dTotalCF, dTotalEU, dTotalWU: double;
 begin
 
   // select user's current balance and type of user
@@ -1817,10 +1838,10 @@ var
   params: tObjectDictionary<string, Variant>;
   dsResult: tADODataSet;
 begin
-  sql := 'SELECT * , UserTB.Username AS SellerName FROM ItemTB ' +
-    'INNER JOIN UserTB ON ItemTb.SellerID = UserTB.UserID' +
-    ' WHERE ItemID = :ItemID ';
-
+  sql := 'SELECT *, UserTB.Username AS SellerName, ' +
+    '(SELECT IIF(Avg(rating) IS NULL, -1,Avg(rating) ) FROM RatingsTB WHERE RatingsTB.ItemID = ItemTB.ItemID ) AS avgRating FROM '
+    + 'ItemTB INNER JOIN UserTB ON ItemTb.SellerID = UserTB.UserID ' +
+    'WHERE ItemTB.ItemID = :ItemID';
   params := tObjectDictionary<string, Variant>.Create();
   params.Add('ItemID', itemID);
 
@@ -1830,7 +1851,6 @@ begin
     if dsResult.Fields.FindField('Status') <> nil then
     begin
       showMessage(dsResult['Status']);
-      exit;
     end;
 
     if dsResult.IsEmpty then
