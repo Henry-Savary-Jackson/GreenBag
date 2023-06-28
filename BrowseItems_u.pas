@@ -66,7 +66,6 @@ type
   public
     category: string;
     items: TObjectList<BrowseItem>;
-    // id of current shopping cart of user , create for every sessio
 
     { Public declarations }
 
@@ -216,7 +215,6 @@ procedure TfrmBrowse.OnClickCategory(Sender: TObject);
 var
   button: TButton;
 begin
-  //
   if Sender is TButton then
   begin
     button := TButton(Sender);
@@ -226,7 +224,6 @@ begin
       Exit;
     end;
     category := button.Caption;
-    // use the button's caption as category name
 
   end;
 end;
@@ -327,7 +324,7 @@ begin
       dsResult.Next;
       continue;
     end
-    else if not ( chbRatingsEnable.Enabled) then
+    else if not(chbRatingsEnable.Enabled) then
     begin
       dsResult.Next;
       continue;
@@ -344,31 +341,40 @@ end;
 
 procedure TfrmBrowse.spnCFMinChange(Sender: TObject);
 begin
-  //
+
+  spnCFMax.MinValue := spnCFMin.Value;
   if spnCFMax.Value < spnCFMin.Value then
   begin
     spnCFMax.Value := spnCFMin.Value;
-    spnCFMax.MinValue := spnCFMin.Value;
+
   end;
+  spnCFMax.Enabled := spnCFMax.MinValue <> spnCFMax.MaxValue
 end;
 
 procedure TfrmBrowse.spnEUMinChange(Sender: TObject);
 begin
+  spnEUMax.MinValue := spnEUMin.Value;
+
   if spnEUMax.Value < spnEUMin.Value then
   begin
     spnEUMax.Value := spnEUMin.Value;
-    spnEUMax.MinValue := spnEUMin.Value;
+
   end;
+  spnEUMax.Enabled := spnEUMax.MinValue <> spnEUMax.MaxValue
 end;
 
 procedure TfrmBrowse.spnWUMinChange(Sender: TObject);
 begin
+
+  spnWUMax.MinValue := spnWUMin.Value;
+
   if spnWUMax.Value < spnWUMin.Value then
   begin
     // bit broken, at 1000 it breaks
     spnWUMax.Value := spnWUMin.Value;
-    spnWUMax.MinValue := spnWUMin.Value;
   end;
+
+  spnWUMax.Enabled := spnWUMax.MinValue <> spnWUMax.MaxValue
 end;
 
 procedure TfrmBrowse.srchSearchItemsChange(Sender: TObject);

@@ -60,4 +60,28 @@ object DataModule1: TDataModule1
     Left = 496
     Top = 360
   end
+  object RatingsTB: TADOTable
+    Left = 312
+    Top = 216
+  end
+  object dsRatingsTB: TDataSource
+    Left = 408
+    Top = 48
+  end
+  object ShoppingCartTB: TADOTable
+    Left = 312
+    Top = 336
+  end
+  object dsShoppingCartTB: TDataSource
+    Left = 392
+    Top = 136
+  end
+  object ShoppingCartItemsTB: TADOTable
+    Left = 152
+    Top = 120
+  end
+  object dsShoppingCartItemsTB: TDataSource
+    Left = 328
+    Top = 40
+  end
 end

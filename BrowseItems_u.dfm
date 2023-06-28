@@ -75,8 +75,8 @@ object frmBrowse: TfrmBrowse
         Caption = 'to'
       end
       object lblMinRating: TLabel
-        Left = 485
-        Top = 3
+        Left = 501
+        Top = 20
         Width = 78
         Height = 13
         Caption = 'Minimum rating: '

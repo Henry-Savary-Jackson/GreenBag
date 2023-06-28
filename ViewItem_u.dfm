@@ -133,8 +133,8 @@ object frmViewItem: TfrmViewItem
   object lblMaxWithdraw: TLabel
     Left = 8
     Top = 222
-    Width = 204
-    Height = 26
+    Width = 234
+    Height = 13
     Caption = 'Maximum Stock you can withdraw at once:'
     WordWrap = True
   end

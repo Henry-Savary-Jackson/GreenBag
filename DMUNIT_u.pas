@@ -26,6 +26,12 @@ type
     dsTransactionTB: TDataSource;
     dsStatsTB: TDataSource;
     dsTransactionItemTB: TDataSource;
+    RatingsTB: TADOTable;
+    dsRatingsTB: TDataSource;
+    ShoppingCartTB: TADOTable;
+    dsShoppingCartTB: TDataSource;
+    ShoppingCartItemsTB: TADOTable;
+    dsShoppingCartItemsTB: TDataSource;
     procedure DataModuleCreate(Sender: TObject);
   private
     { Private declarations }
@@ -88,6 +94,12 @@ type
     procedure CancelCart(ShoppingCartID: string);
 
     procedure CheckoutCart(ShoppingCartID: string);
+
+    procedure updateSellerAndBuyer(ShoppingCartID: string);
+
+    procedure EraseCart(ShoppingCartID: string);
+
+    procedure StoreShoppingCart(ShoppingCartID: string);
 
     function addToCart(ShoppingCartID, itemID: string; quantity: integer;
       itemPrice: double): string;
@@ -301,25 +313,11 @@ begin
 
     end;
 
-    // deallocate memory for query result
-    dsResult.Free;
-
 
     // After you put back the stock, delete the records of
     // the user's current shopping cart from the database
 
-    sql := 'DELETE FROM ShoppingCartTB WHERE ShoppingCartID = :ShoppingCartID';
-    params.clear;
-
-    params.Add('ShoppingCartID', ShoppingCartID);
-
-    dsResult := runSQL(sql, params);
-
-    if dsResult['Status'] <> 'Success' then
-    begin
-      showMessage(dsResult['Status']);
-      exit;
-    end;
+    EraseCart(ShoppingCartID);
 
     // commit changes to db
     CommitTransaction;
@@ -341,193 +339,36 @@ end;
 
 // For when the users checks out the cart at the metaphorical "till"
 procedure TDataModule1.CheckoutCart(ShoppingCartID: string);
-var
-  sql, sqlUpdateBuyer, sqlUpdateItem, sqlUpdateSeller: string;
-  params: tObjectDictionary<string, Variant>;
-  dsResult, dsResultUpdateItem, dsResultUpdateSeller, dsResultUpdateBuyer
-    : tADODataSet;
-  BuyerID: string;
-  buyerBalance, itemPrice: double;
 begin
-
-  BeginTransaction;
-
-  // copy data of user's shopping cart TransactionTB and TransactionItemTB for record-keeping
-  // first do it for TRANSACTIONTB
-  sql := 'INSERT INTO TransactionTB (TransactionID, BuyerID) ' +
-    'SELECT ShoppingCartID, BuyerID FROM ShoppingCartTB WHERE ShoppingCartID = :ShoppingCartID';
-  params := tObjectDictionary<string, Variant>.Create();
-  params.Add('ShoppingCartID', ShoppingCartID);
-
   try
-    dsResult := runSQL(sql, params);
 
-    if dsResult['Status'] <> 'Success' then
-    begin
-      raise Exception.Create(dsResult['Status']);
-    end;
-    dsResult.Free;
+    BeginTransaction;
 
-    // Then for TransactionItemTB
-    sql := 'INSERT INTO TransactionItemTB (CartItemID, ItemID, Quantity, TransactionID, Cost) '
-      + 'SELECT ShoppingCartItemID, ItemID, Quantity, ShoppingCartID, Cost FROM ShoppingCartItemsTB WHERE ShoppingCartID  = :ShoppingCartID ';
+    // copy data of user's shopping cart TransactionTB and TransactionItemTB for record-keeping
 
-    dsResult := runSQL(sql, params);
+    StoreShoppingCart(ShoppingCartID);
 
-    if dsResult['Status'] <> 'Success' then
-    begin
-      raise Exception.Create(dsResult['Status']);
-    end;
-
-    dsResult.Free;
-
-    // Next, select user's id and balance
-
-    sql := 'SELECT BuyerID, UserTB.Balance FROM ShoppingCartTB' +
-      ' INNER JOIN UserTB ON UserTB.UserID = ShoppingCartTB.BuyerID ' +
-      'WHERE ShoppingCartID = :ShoppingCartID  ';
-
-    dsResult := runSQL(sql, params);
-
-    if dsResult.Fields.FindField('Status') <> nil then
-    begin
-      raise Exception.Create(dsResult['Status']);
-    end;
-
-    BuyerID := dsResult['BuyerID'];
-    buyerBalance := dsResult['Balance'];
-
-    // Select all relevant data on the items and Seller for each item in user's cart
-
-    sql := 'SELECT ShoppingCartItemsTB.Quantity, ShoppingCartItemsTB.ItemID, ShoppingCartItemsTB.Cost'
-      + ' , ItemTB.SellerID ' +
-      ' FROM ((ShoppingCartItemsTB INNER JOIN ShoppingCartTB ' +
-      'ON ShoppingCartItemsTB.ShoppingCartID = ShoppingCartTB.ShoppingCartID) '
-      + 'INNER JOIN ItemTB ON ItemTB.ItemID = ShoppingCartItemsTB.ItemID )' +
-      'WHERE ShoppingCartItemsTB.ShoppingCartID = :ShoppingCartID';
-
-    dsResult := runSQL(sql, params);
-
-    if dsResult.Fields.FindField('Status') <> nil then
-    begin
-      raise Exception.Create(dsResult['Status']);
-    end;
-
-    params.clear;
-
-    // Once you have all of the necessary data
-    // transfer money from buyer to sender
-
-    // update number of sales of each item
-    sqlUpdateItem :=
-      'UPDATE ItemTB SET Sales = Sales + :Sales WHERE ItemID = :ItemID';
-
-    // lower the user's balance
-    sqlUpdateBuyer :=
-      'UPDATE UserTB SET Balance = :Balance WHERE UserID = :UserID ';
-
-    // increase the seller's revenue
-    sqlUpdateSeller :=
-      'UPDATE SellerTB SET Revenue = Revenue + :Revenue WHERE UserID = :SellerID';
-
-    dsResult.First;
-
-    while not dsResult.Eof do
-    begin
-      // update buyer
-
-      itemPrice := dsResult['Cost'];
-      buyerBalance := buyerBalance - itemPrice;
-
-      if buyerBalance < 0 then
-      begin
-        // Rollback in case of insufficient funds from user
-        RollBack;
-        raise Exception.Create('Out of balance');
-      end;
-
-      // if sufficient funds remove from user's account
-      params.clear;
-      params.Add('Balance', buyerBalance);
-      params.Add('UserID', BuyerID);
-
-      dsResultUpdateBuyer := runSQL(sqlUpdateBuyer, params);
-
-      if dsResultUpdateBuyer['Status'] <> 'Success' then
-      begin
-        raise Exception.Create(dsResult['Status']);
-      end;
-
-      dsResultUpdateBuyer.Free;
-
-      // update item's number of units sold
-
-      params.clear;
-
-      params.Add('ItemID', dsResult['ItemID']);
-
-      params.Add('Sales', dsResult['Quantity']);
-      dsResultUpdateItem := runSQL(sqlUpdateItem, params);
-
-      if dsResultUpdateItem['Status'] <> 'Success' then
-      begin
-        raise Exception.Create(dsResult['Status']);
-      end;
-      dsResultUpdateItem.Free;
-
-
-      // update seller's revenue amount
-
-      params.clear;
-      params.Add('Revenue', itemPrice);
-      params.Add('SellerID', dsResult['SellerID']);
-
-      dsResultUpdateSeller := runSQL(sqlUpdateSeller, params);
-      if dsResultUpdateSeller['Status'] <> 'Success' then
-      begin
-        raise Exception.Create(dsResult['Status']);
-
-      end;
-
-      dsResultUpdateSeller.Free;
-
-      dsResult.Next;
-    end;
+    // transfer funds
+    updateSellerAndBuyer(ShoppingCartID);
 
     // update The user's  and buyers' statistics  based on these transactions
 
-    try
-      updateStats(ShoppingCartID);
-    except
-      on e: Exception do
-      begin
-        if Connection.InTransaction then
-          RollBack;
-        raise e;
-      end;
-    end;
+    updateStats(ShoppingCartID);
+
 
     // Now, Delete all temporary shopping cart records from the database
 
-    sql := 'DELETE FROM ShoppingCartTB WHERE ShoppingCartID = :ShoppingCartID';
-    params.clear;
-
-    params.Add('ShoppingCartID', ShoppingCartID);
-
-    dsResult := runSQL(sql, params);
-
-    if dsResult['Status'] <> 'Success' then
-    begin
-      raise Exception.Create(dsResult['Status']);
-    end;
-    // commit transaction
+    EraseCart(ShoppingCartID);
 
     CommitTransaction;
 
-  finally
-    if Assigned(dsResult) then
-      dsResult.Free;
-    params.Free;
+  except
+    on e: Exception do
+    begin
+      if Connection.InTransaction then
+        RollBack;
+      raise e;
+    end;
 
   end;
 
@@ -604,6 +445,9 @@ begin
   TransactionItemTB.Connection := Connection;
   TransactionTB.Connection := Connection;
   StatsTB.Connection := Connection;
+  RatingsTB.Connection := Connection;
+  ShoppingCartTB.Connection := Connection;
+  ShoppingCartItemsTB.Connection := Connection;
 
   // Each ADOTable is associated with each table name in access
   UserTB.TableName := 'UserTB'; // table name spelled as in in MS access
@@ -612,6 +456,9 @@ begin
   TransactionItemTB.TableName := 'TransactionItemTB';
   TransactionTB.TableName := 'TransactionTB';
   StatsTB.TableName := 'StatsTB';
+  RatingsTB.TableName := 'RatingsTB';
+  ShoppingCartTB.TableName := 'ShoppingCartTB';
+  ShoppingCartItemsTB.TableName := 'ShoppingCartItemsTB';
 
   // a data source is named DSTableName.
   // each data source must be associated with the correct ADOtable
@@ -621,8 +468,23 @@ begin
   dsTransactionItemTB.DataSet := TransactionItemTB;
   dsTransactionTB.DataSet := TransactionTB;
   dsStatsTB.DataSet := StatsTB;
+  dsRatingsTB.DataSet := RatingsTB;
+  dsShoppingCartTB.DataSet := ShoppingCartTB;
+  dsShoppingCartItemsTB.DataSet := ShoppingCartItemsTB;
 
   Query.Connection := Connection;
+
+  // open dataset
+  UserTB.Open;
+  SellerTB.Open;
+  ItemTB.Open;
+  TransactionItemTB.Open;
+  TransactionTB.Open;
+  StatsTB.Open;
+  RatingsTB.Open;
+  ShoppingCartTB.Open;
+  ShoppingCartItemsTB.Open;
+
 end;
 
 // Mark an item as deleted
@@ -632,7 +494,6 @@ procedure TDataModule1.deleteItem(itemID: string);
 begin
   with DataModule1 do
   begin
-    ItemTB.Open;
     ItemTB.First;
 
     ItemTB.Edit;
@@ -650,6 +511,37 @@ begin
     ItemTB.Post;
     ItemTB.Refresh;
     ItemTB.First;
+  end;
+end;
+
+// delete all record related to a shopping cart
+// this is simplified by setting the ON CASCADE DELETE to true in MS ACCESS
+procedure TDataModule1.EraseCart(ShoppingCartID: string);
+var
+  sql: string;
+  params: tObjectDictionary<string, Variant>;
+  dsResult: tADODataSet;
+begin
+  //
+  sql := 'DELETE FROM ShoppingCartTB WHERE ShoppingCartID = :ShoppingCartID';
+
+  params := tObjectDictionary<string, Variant>.Create();
+  params.Add('ShoppingCartID', ShoppingCartID);
+
+  try
+    dsResult := runSQL(sql, params);
+
+    if dsResult['Status'] <> 'Success' then
+    begin
+      raise Exception.Create(dsResult['Status']);
+    end;
+
+  finally
+
+    params.clear;
+    if Assigned(dsResult) then
+      dsResult.Free;
+
   end;
 end;
 
@@ -732,10 +624,11 @@ var
   dsResult: tADODataSet;
 begin
   sql := 'SELECT ItemTB.ItemID, Sales, Image, ItemName, Revenue ' +
-    'FROM ItemTB LEFT JOIN ' + '( SELECT ItemID, ' +
-    ' IIF(SUM(Cost) IS NULL, 0, SUM(Cost)) ' +
-    ' AS Revenue FROM TransactionItemTB GROUP BY ItemID ) ' +
-    'AS revenueTB ON revenueTB.ItemID = ItemTB.ItemID ' +
+    'FROM ItemTB LEFT JOIN ( SELECT ItemID, ' +
+    ' IIF(SUM(Cost) IS NULL, 0, SUM(Cost)) AS Revenue, ' +
+    ' IIF(SUM(Quantity) IS NULL, 0, SUM(Quantity)) AS Sales ' +
+    ' FROM TransactionItemTB GROUP BY ItemID ) AS revenueTB  ' +
+    ' ON revenueTB.ItemID = ItemTB.ItemID ' +
     ' WHERE SellerID = :SellerID AND Deleted = False ';
 
   params := tObjectDictionary<string, Variant>.Create();
@@ -979,7 +872,6 @@ procedure TDataModule1.insertItem(itemID, Name, SellerID, category,
 var
   memStream: TMemoryStream;
 begin
-
   ItemTB.Insert;
   ItemTB.Edit;
 
@@ -988,7 +880,6 @@ begin
   ItemTB['Cost'] := Price;
   ItemTB['CarbonFootprintProduction'] := CFProduce;
   ItemTB['WaterUsageProduction'] := WUProduce;
-
   ItemTB['EnergyUsageProduction'] := EUProduce;
   ItemTB['CarbonFootprintUsage'] := CF;
   ItemTB['WaterFootprintUsage'] := WU;
@@ -1538,7 +1429,6 @@ begin
 
         with SellerTB do
         begin
-          SellerTB.Open;
           SellerTB.Insert;
 
           SellerTB['UserID'] := userID;
@@ -1572,6 +1462,49 @@ begin
       sqlResult.Free;
   end;
 
+end;
+
+// copy the records for temporary ShoppingCartTB and ShoppingCartItemsTB
+// must be part of a transaction group so it can be rolled back in the case of errors
+procedure TDataModule1.StoreShoppingCart(ShoppingCartID: string);
+var
+  sql: string;
+  dsResult: tADODataSet;
+  params: tObjectDictionary<String, Variant>;
+begin
+
+  // copy fist into transactionTB
+  sql := 'INSERT INTO TransactionTB (TransactionID, BuyerID) ' +
+    'SELECT ShoppingCartID, BuyerID FROM ShoppingCartTB WHERE ShoppingCartID = :ShoppingCartID';
+
+  params := tObjectDictionary<String, Variant>.Create();
+  params.Add('ShoppingCartID', ShoppingCartID);
+  try
+    dsResult := runSQL(sql, params);
+
+    if dsResult['Status'] <> 'Success' then
+    begin
+      raise Exception.Create(dsResult['Status']);
+    end;
+
+    dsResult.Free;
+
+    // Then for TransactionItemTB
+    sql := 'INSERT INTO TransactionItemTB (CartItemID, ItemID, Quantity, TransactionID, Cost) '
+      + 'SELECT ShoppingCartItemID, ItemID, Quantity, ShoppingCartID, Cost FROM ShoppingCartItemsTB WHERE ShoppingCartID  = :ShoppingCartID ';
+
+    dsResult := runSQL(sql, params);
+
+    if dsResult['Status'] <> 'Success' then
+    begin
+      raise Exception.Create(dsResult['Status']);
+    end;
+
+  finally
+    params.Free;
+    if Assigned(dsResult) then
+      dsResult.Free;
+  end;
 end;
 
 procedure TDataModule1.updateItem(itemID, Name, SellerID, category,
@@ -1625,9 +1558,129 @@ begin
   ItemTB.Refresh;
 end;
 
+// bill the buyer for their shopping cart
+// and pay each of the sellers that the buyer bought from
+// must be done in a transaction group
+procedure TDataModule1.updateSellerAndBuyer(ShoppingCartID: string);
+var
+  sql, sqlUpdateBuyer, sqlUpdateItem, sqlUpdateSeller: string;
+  params: tObjectDictionary<string, Variant>;
+  dsResult, dsResultUpdateSeller, dsResultUpdateBuyer: tADODataSet;
+  BuyerID: string;
+  buyerBalance, itemPrice: double;
+begin
+  try
+    // select user's id and balance
+
+    sql := 'SELECT BuyerID, UserTB.Balance FROM ShoppingCartTB' +
+      ' INNER JOIN UserTB ON UserTB.UserID = ShoppingCartTB.BuyerID ' +
+      'WHERE ShoppingCartID = :ShoppingCartID  ';
+
+    params := tObjectDictionary<string, Variant>.Create();
+    params.Add('ShoppingCartID', ShoppingCartID);
+
+    dsResult := runSQL(sql, params);
+
+    if dsResult.Fields.FindField('Status') <> nil then
+    begin
+      raise Exception.Create(dsResult['Status']);
+    end;
+
+    BuyerID := dsResult['BuyerID'];
+    buyerBalance := dsResult['Balance'];
+
+    // Select all relevant data on the items and Seller for each item in user's cart
+
+    sql := 'SELECT ShoppingCartItemsTB.Quantity, ShoppingCartItemsTB.ItemID, ShoppingCartItemsTB.Cost'
+      + ' , ItemTB.SellerID ' +
+      ' FROM ((ShoppingCartItemsTB INNER JOIN ShoppingCartTB ' +
+      'ON ShoppingCartItemsTB.ShoppingCartID = ShoppingCartTB.ShoppingCartID) '
+      + 'INNER JOIN ItemTB ON ItemTB.ItemID = ShoppingCartItemsTB.ItemID )' +
+      'WHERE ShoppingCartItemsTB.ShoppingCartID = :ShoppingCartID';
+
+    dsResult := runSQL(sql, params);
+
+    if dsResult.Fields.FindField('Status') <> nil then
+    begin
+      raise Exception.Create(dsResult['Status']);
+    end;
+
+    params.clear;
+
+    // Once you have all of the necessary data
+    // transfer money from buyer to sender
+
+    // lower the user's balance
+    sqlUpdateBuyer :=
+      'UPDATE UserTB SET Balance = :Balance WHERE UserID = :UserID ';
+
+    // increase the seller's revenue
+    sqlUpdateSeller :=
+      'UPDATE SellerTB SET Revenue = Revenue + :Revenue WHERE UserID = :SellerID';
+
+    dsResult.First;
+
+    while not dsResult.Eof do
+    begin
+      // update buyer
+
+      itemPrice := dsResult['Cost'];
+      buyerBalance := buyerBalance - itemPrice;
+
+      if buyerBalance < 0 then
+      begin
+        // Rollback in case of insufficient funds from user
+        RollBack;
+        raise Exception.Create('Out of balance');
+      end;
+
+      // if sufficient funds remove from user's account
+      params.clear;
+      params.Add('Balance', buyerBalance);
+      params.Add('UserID', BuyerID);
+
+      dsResultUpdateBuyer := runSQL(sqlUpdateBuyer, params);
+
+      if dsResultUpdateBuyer['Status'] <> 'Success' then
+      begin
+        raise Exception.Create(dsResult['Status']);
+      end;
+
+      dsResultUpdateBuyer.Free;
+
+      // update seller's revenue amount
+
+      params.clear;
+      params.Add('Revenue', itemPrice);
+      params.Add('SellerID', dsResult['SellerID']);
+
+      dsResultUpdateSeller := runSQL(sqlUpdateSeller, params);
+      if dsResultUpdateSeller['Status'] <> 'Success' then
+      begin
+        raise Exception.Create(dsResult['Status']);
+
+      end;
+
+      dsResultUpdateSeller.Free;
+
+      dsResult.Next;
+    end;
+
+  finally
+
+    if Assigned(dsResult) then
+      dsResult.Free;
+
+    params.Free;
+
+  end;
+
+end;
+
 // used every time a user checksout a shopping cart
 // updates the statistics of the user and the sellers involved in all
 // the transactions
+
 procedure TDataModule1.updateStats(ShoppingCartID: string);
 var
   sql, BuyerID: string;
@@ -1779,7 +1832,12 @@ begin
       Result.Edit;
       Result['Revenue'] := dsResult['Revenue'];
 
-      sql := 'SELECT Sum(Sales) AS TotalSales from ItemTB WHERE SellerID = :UserID';
+      sql := 'SELECT IIF(SUM(Sales) IS NULL, 0, SUM(Sales) ) ' +
+        'AS TotalSales FROM ItemTB LEFT JOIN ' +
+        ' ( SELECT ItemID, IIF(SUM(Quantity) IS NULL, 0, SUM(Quantity)) AS Sales '
+        + 'FROM TransactionItemTB GROUP BY ItemID ) ' +
+        'as salesTB ON salesTB.ItemID = ItemTB.ItemID  ' +
+        'WHERE SellerID = :UserID';
 
       dsResult := runSQL(sql, params);
       Result.Edit;
