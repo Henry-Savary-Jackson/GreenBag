@@ -2,82 +2,53 @@ object frmLogin: TfrmLogin
   Left = 0
   Top = 0
   Caption = 'Login'
-  ClientHeight = 304
+  ClientHeight = 303
   ClientWidth = 312
   Color = clBtnFace
   Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Arial Narrow'
+  Font.Height = -16
+  Font.Name = 'Arial Rounded MT Bold'
   Font.Style = []
   OldCreateOrder = False
   OnClose = FormClose
+  OnCreate = FormCreate
   PixelsPerInch = 96
-  TextHeight = 15
+  TextHeight = 18
   object lblUsername: TLabel
     Left = 40
     Top = 43
-    Width = 48
-    Height = 13
+    Width = 82
+    Height = 18
     Caption = 'Username'
-    Font.Charset = ANSI_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Tahoma'
-    Font.Style = []
-    ParentFont = False
   end
   object lblPassword: TLabel
     Left = 40
     Top = 91
-    Width = 46
-    Height = 13
+    Width = 79
+    Height = 18
     Caption = 'Password'
-    Font.Charset = ANSI_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Tahoma'
-    Font.Style = []
-    ParentFont = False
   end
   object lblSignUp: TLabel
     Left = 55
     Top = 216
-    Width = 116
-    Height = 13
+    Width = 192
+    Height = 18
     Caption = 'Don'#39't have an account? '
-    Font.Charset = ANSI_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Tahoma'
-    Font.Style = []
-    ParentFont = False
   end
   object edtPassword: TEdit
-    Left = 128
+    Left = 136
     Top = 88
-    Width = 121
-    Height = 21
-    Font.Charset = ANSI_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Tahoma'
-    Font.Style = []
-    ParentFont = False
+    Width = 161
+    Height = 26
     TabOrder = 0
     Text = 'password1+'
   end
   object edtUsername: TEdit
     Left = 128
     Top = 40
-    Width = 121
-    Height = 21
-    Font.Charset = ANSI_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Tahoma'
-    Font.Style = []
-    ParentFont = False
+    Width = 169
+    Height = 26
     TabOrder = 1
     Text = 'User2'
   end
@@ -87,27 +58,15 @@ object frmLogin: TfrmLogin
     Width = 75
     Height = 25
     Caption = 'Sign In'
-    Font.Charset = ANSI_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Tahoma'
-    Font.Style = []
-    ParentFont = False
     TabOrder = 2
     OnClick = btnSignInClick
   end
   object btnSignUpScreen: TButton
-    Left = 177
-    Top = 211
+    Left = 113
+    Top = 240
     Width = 75
     Height = 25
     Caption = 'Sign Up'
-    Font.Charset = ANSI_CHARSET
-    Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Tahoma'
-    Font.Style = []
-    ParentFont = False
     TabOrder = 3
     OnClick = btnSignUpScreenClick
   end

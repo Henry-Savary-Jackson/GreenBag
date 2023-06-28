@@ -21,6 +21,7 @@ type
     procedure btnSignInClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnSignUpScreenClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
   private
     { Private declarations }
   public
@@ -57,19 +58,22 @@ begin
     Exit;
   end;
 
-  UserID :=DataModule1.Login(username, password);
+  try
+    userID := DataModule1.Login(userName, password);
 
-  if copy(userid,1,5) = 'Error' then
-  begin
-    showMessage( userID);
-    Exit;
+    DataModule1.dDate := StrToDate(inputbox('', 'Date:', ''));
+    frmLogin.Hide;
+    DataModule1.userID := userID;
+    DataModule1.CartID := DataModule1.CreateUserCart(DataModule1.userID);
+    frmBrowse.Show;
+
+  except
+    on e: Exception do
+    begin
+      showMessage(e.Message);
+    end;
+
   end;
-
-  DataModule1.dDate := StrToDate(inputbox('', 'Date:', ''));
-  frmLogin.Hide;
-  DataModule1.userID := userId;
-  DataModule1.CartID := DataModule1.CreateUserCart(DataModule1.userID);
-  frmBrowse.Show;
 end;
 
 procedure TfrmLogin.btnSignUpScreenClick(Sender: TObject);
@@ -81,6 +85,12 @@ end;
 procedure TfrmLogin.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   Application.Terminate;
+
+end;
+
+procedure TfrmLogin.FormCreate(Sender: TObject);
+begin
+  Application.MainFormOnTaskbar := False;
 end;
 
 end.

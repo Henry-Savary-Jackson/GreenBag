@@ -153,15 +153,16 @@ begin
 
     case verifyCertificationCode(certificationCode) of
       notInFile:
-      begin
-         showMessage('Your certification code doesn''t exist. Please correctly enter your code. If that doesn''t work, please ensure you have properly applied to be a seller.');
-         Exit;
+        begin
+          showMessage
+            ('Your certification code doesn''t exist. Please correctly enter your code. If that doesn''t work, please ensure you have properly applied to be a seller.');
+          Exit;
 
-      end;
+        end;
       invalidChar:
-      begin
-        showMessage('Your certification code must only consist of numbers.');
-      end;
+        begin
+          showMessage('Your certification code must only consist of numbers.');
+        end;
     end;
 
   end;
@@ -172,21 +173,30 @@ begin
     Exit;
   end;
 
-  UserId := DataModule1.SignUp(userName, password, userType, homeaddress,
-    certificationCode, imgPfp);
+  try
+    UserId := DataModule1.SignUp(userName, password, userType, homeaddress,
+      certificationCode, imgPfp);
 
-  if Copy(UserId, 1, 5) = 'Error' then
-  begin
-    MessageDlg('There was an error accessing the database :' + userId, mtConfirmation,
-      [mbOK], 0, mbOK);
-    Exit;
+    DataModule1.dDate := StrToDate(inputbox('', 'Date:', ''));
+    DataModule1.UserId := UserId;
+    DataModule1.CartID := DataModule1.CreateUserCart(DataModule1.UserId);
+    frmSignUp.Hide;
+    frmBrowse.Show;
+
+  except
+    on e: exception do
+    begin
+      // more user friendly
+      if e.Message = 'The changes you requested to the table were not successful because they would create duplicate value'
+      then
+      begin
+        showMessage('Username already in use.');
+        Exit;
+      end;
+      showMessage(e.Message);
+    end;
+
   end;
-
-  DataModule1.dDate := StrToDate(inputbox('', 'Date:', ''));
-  DataModule1.UserId := UserId;
-  DataModule1.CartID := DataModule1.CreateUserCart(DataModule1.userID);
-  frmSignUp.Hide;
-  frmBrowse.Show;
 
 end;
 

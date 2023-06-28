@@ -232,25 +232,25 @@ end;
 
 procedure TfrmProfile.showTotals(UserType: string);
 begin
-  lblBalance.Show;
-  lblSpendingTotal.Show;
-  lblTotalCF.Show;
-  lblTotalEU.Show;
-  lblTotalWU.Show;
 
   if UserType = 'SELLER' then
   begin
-    lblRevenueTotal.Show;
-    lblSales.Show;
     btnViewProducts.Show;
-
+    lblSales.Show;
+    lblRevenueTotal.Show;
   end
   else
   begin
-    lblRevenueTotal.Hide;
-    lblSales.Hide;
     btnViewProducts.Hide;
+    lblSales.Hide;
+    lblRevenueTotal.Hide;
+
   end;
+  lblTotalWU.Show;
+  lblTotalEU.Show;
+  lblTotalCF.Show;
+  lblSpendingTotal.Show;
+  lblBalance.Show;
 
 end;
 

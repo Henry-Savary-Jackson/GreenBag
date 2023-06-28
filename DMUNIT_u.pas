@@ -198,7 +198,7 @@ begin
 
 
     // update stock
-     // check if  there is enough stock to withdraw that quantity
+    // check if  there is enough stock to withdraw that quantity
 
     // TODO: DAFUCK IS UP WITH PARAMETERS NOT WORKING
 
@@ -489,7 +489,6 @@ end;
 // Mark an item as deleted
 // do not remove any actual records, we need to maintain referential integrity
 // between other tables
-
 
 procedure TDataModule1.deleteItem(itemID: string);
 begin
@@ -1034,52 +1033,51 @@ end;
 function TDataModule1.Login(Username, password: string): string;
 var
   sql: string;
-  sqlResult: tADODataSet;
-  Parameters: tObjectDictionary<string, Variant>;
+  dsResult: tADODataSet;
+  params: tObjectDictionary<string, Variant>;
   b: boolean;
 begin
 
   sql := 'SELECT UserID, Password, Salt FROM UserTB WHERE Username = :Username';
-  Parameters := tObjectDictionary<string, Variant>.Create();
-  Parameters.Add('Username', Username);
+  params := tObjectDictionary<string, Variant>.Create();
+  params.Add('Username', Username);
 
   try
-    sqlResult := runSQL(sql, Parameters);
+    dsResult := runSQL(sql, params);
 
     // handle error occuring whilst trying to access database
-    if sqlResult.Fields.FindField('Status') <> nil then
+    if dsResult.Fields.FindField('Status') <> nil then
     begin
-      Result := 'Error: ' + sqlResult['Status'];
-      showMessage(Result);
+      raise Exception.Create( dsResult['Status']);
       exit;
     end;
 
 
     // check if any users with matching username
 
-    if sqlResult.IsEmpty then
+    if dsResult.IsEmpty then
     begin
-      Result := 'Error: User does not Exist';
+      raise Exception.Create( 'User does not Exist');
       exit;
     end;
 
     // check password match
     b := False;
     if not tScrypt.CheckPassword(UpperCase(Username) + password +
-      sqlResult['Salt'], sqlResult['Password'], b) then
+      dsResult['Salt'], dsResult['Password'], b) then
     begin
-      Result := 'Error: Incorrect Password';
+      raise Exception.Create('Incorrect Password');
       exit;
     end;
 
     // return the corresponding user id of the user that the program can use
     // for functions
-    Result := sqlResult['UserID'];
+    Result := dsResult['UserID'];
 
   finally
-    if Assigned(sqlResult) then
-      sqlResult.Free;
-    Parameters.Free;
+    if Assigned(dsResult) then
+      dsResult.Free;
+    params.Free;
   end;
 
 end;
@@ -1365,7 +1363,7 @@ var
   userID, sql: string;
   params: tObjectDictionary<String, Variant>;
   i: integer;
-  sqlResult: tADODataSet;
+  dsResult: tADODataSet;
 begin
 
   // generate the random salt
@@ -1414,19 +1412,18 @@ begin
   params.Add('ProfileImage', ImageToVariant(imgPfp));
 
   try
-    sqlResult := runSQL(sql, params);
+    try
+      dsResult := runSQL(sql, params);
 
-    // handle errors
-    if sqlResult['status'] <> 'Success' then
-    begin
-      Result := 'Error: ' + sqlResult['status'];
-      exit;
-    end;
+      // handle errors
+      if dsResult['Status'] <> 'Success' then
+      begin
+        raise Exception.Create(dsResult['Status']);
+      end;
 
-    // if user is a seller, set up a corresponding record in seller tb as well
-    if usertype = 'SELLER' then
-    begin
-      try
+      // if user is a seller, set up a corresponding record in seller tb as well
+      if usertype = 'SELLER' then
+      begin
 
         with SellerTB do
         begin
@@ -1441,26 +1438,23 @@ begin
           SellerTB.First;
         end;
 
-      except
-        on e: EADOError do
-        begin
-          Result := 'Error: ' + e.Message;
-        end;
-        on e: EOleException do
-        begin
-          Result := 'Error: ' + e.Message;
-        end;
+      end;
 
+      Result := userID;
+
+    except
+
+      on e: Exception do
+      begin
+        raise Exception.Create(e.Message);
       end;
 
     end;
 
-    Result := userID;
-
   finally
     params.Free;
-    if Assigned(sqlResult) then
-      sqlResult.Free;
+    if Assigned(dsResult) then
+      dsResult.Free;
   end;
 
 end;
