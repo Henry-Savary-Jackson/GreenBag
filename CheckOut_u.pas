@@ -71,7 +71,6 @@ begin
     on e: exception do
     begin
       showMessage(e.Message);
-      showMessage('bitch');
     end;
 
   end;

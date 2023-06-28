@@ -198,8 +198,7 @@ begin
 
 
     // update stock
-
-    // check if  there is enough stock to withdraw that quantity
+     // check if  there is enough stock to withdraw that quantity
 
     // TODO: DAFUCK IS UP WITH PARAMETERS NOT WORKING
 
@@ -218,7 +217,7 @@ begin
       raise Exception.Create(dsResult['Status']);
     end;
 
-    if dsResult['Stock'] - quantity < 0 then
+    if dsResult['Stock'] - dsResult['Quantity'] < 0 then
     begin
       // if not enough stock
       // rollback changes
@@ -367,7 +366,7 @@ begin
     begin
       if Connection.InTransaction then
         RollBack;
-      raise e;
+      raise Exception.Create(e.Message);
     end;
 
   end;
@@ -490,6 +489,8 @@ end;
 // Mark an item as deleted
 // do not remove any actual records, we need to maintain referential integrity
 // between other tables
+
+
 procedure TDataModule1.deleteItem(itemID: string);
 begin
   with DataModule1 do

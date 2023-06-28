@@ -97,6 +97,8 @@ type
 
     procedure updateSellerAndBuyer(ShoppingCartID: string);
 
+    procedure decreaseStock(ShoppingCartItemID: string);
+
     procedure EraseCart(ShoppingCartID: string);
 
     procedure StoreShoppingCart(ShoppingCartID: string);
@@ -198,56 +200,7 @@ begin
 
 
     // update stock
-
-    // check if  there is enough stock to withdraw that quantity
-
-    // TODO: DAFUCK IS UP WITH PARAMETERS NOT WORKING
-
-    sql := 'SELECT ItemTB.Stock, ItemTB.MaxWithdrawableStock, ShoppingCartItemsTB.Quantity '
-      + 'FROM ShoppingCartItemsTB, ItemTB WHERE ItemTB.ItemID = :ItemID AND ' +
-      ' ShoppingCartItemID = "' + ShoppingCartItemID + '"';
-
-    params.clear;
-    params.Add('ItemID', itemID);
-
-    dsResult := runSQL(sql, params);
-
-    if dsResult.Fields.FindField('Status') <> nil then
-    begin
-
-      raise Exception.Create(dsResult['Status']);
-    end;
-
-    if dsResult['Stock'] - quantity < 0 then
-    begin
-      // if not enough stock
-      // rollback changes
-      showMessage(dsResult['Stock']);
-      RollBack;
-      raise Exception.Create('Not enough Stock for this item');
-    end
-    // if the amount of stock the user wishes to get is over the limit
-    // set by the buyer, rollback transaction
-    else if dsResult['MaxWithdrawableStock'] < dsResult['Quantity'] then
-    begin
-      RollBack;
-      raise Exception.Create
-        ('You are not permitted to withdraw more units at once.');
-    end;
-
-    // if all goes well, remove that withdrawn stock from the buyer
-    sql := 'UPDATE ItemTB SET Stock = Stock - :Quantity WHERE ItemID = :ItemID';
-    params.clear;
-    params.Add('Quantity', quantity);
-    params.Add('ItemID', itemID);
-    dsResult := runSQL(sql, params);
-
-    if dsResult['Status'] <> 'Success' then
-    begin
-
-      // raise exception
-      raise Exception.Create(dsResult['Status']);
-    end;
+    decreaseStock(ShoppingCartID, quantity );
 
     // commit changes to DB
     CommitTransaction;
@@ -339,7 +292,6 @@ end;
 
 // For when the users checks out the cart at the metaphorical "till"
 procedure TDataModule1.CheckoutCart(ShoppingCartID: string);
-
 begin
   try
 
@@ -368,7 +320,7 @@ begin
     begin
       if Connection.InTransaction then
         RollBack;
-      raise e;
+      raise Exception.Create(e.Message);
     end;
 
   end;
@@ -491,6 +443,78 @@ end;
 // Mark an item as deleted
 // do not remove any actual records, we need to maintain referential integrity
 // between other tables
+
+// decrease stock and check if it is possible
+// can only be used in a transaction groups
+procedure TDataModule1.decreaseStock(ShoppingCartItemID: string);
+var
+  sql, itemID: string;
+  params: tObjectDictionary<string, Variant>;
+  dsResult: tADODataSet;
+begin
+  //
+  // check if  there is enough stock to withdraw that quantity
+
+  // TODO: DAFUCK IS UP WITH PARAMETERS NOT WORKING
+
+  sql := 'SELECT ItemTB.ItemID, ItemTB.Stock, ItemTB.MaxWithdrawableStock, ' +
+    'ShoppingCartItemsTB.Quantity FROM ShoppingCartItemsTB ' +
+    ' INNER JOIN ItemTB ON ItemTB.ItemID ShoppingCartItemsTB.ItemID' +
+    ' WHERE ShoppingCartItemID = "' + ShoppingCartItemID + '"';
+
+  try
+    dsResult := runSQL(sql, params);
+
+    if dsResult.Fields.FindField('Status') <> nil then
+    begin
+
+      raise Exception.Create(dsResult['Status']);
+    end;
+
+    itemID := dsResult['ItemID'];
+
+    if dsResult['Stock'] - dsResult['Quantity'] < 0 then
+    begin
+      // if not enough stock
+      // rollback changes
+      showMessage(dsResult['Stock']);
+      RollBack;
+      raise Exception.Create('Not enough Stock for this item');
+    end
+
+    // if the amount of stock the user wishes to get is over the limit
+    // set by the buyer, rollback transaction
+    else if dsResult['MaxWithdrawableStock'] < dsResult['Quantity'] then
+    begin
+      RollBack;
+      raise Exception.Create
+        ('You are not permitted to withdraw more units at once.');
+    end;
+
+    // if all goes well, remove that withdrawn stock from the buyer
+    sql := 'UPDATE ItemTB SET Stock = Stock - :Quantity WHERE ItemID = :ItemID';
+    params := tObjectDictionary<string, Variant>.Create();
+    params.Add('Quantity', quantity);
+    params.Add('ItemID', itemID);
+    dsResult := runSQL(sql, params);
+
+    if dsResult['Status'] <> 'Success' then
+    begin
+
+      // raise exception
+      raise Exception.Create(dsResult['Status']);
+    end;
+
+  finally
+    if Assigned(params) then
+      params.Free;
+
+    if Assigned(dsResult) then
+      dsResult.Free;
+
+  end;
+end;
+
 procedure TDataModule1.deleteItem(itemID: string);
 begin
   with DataModule1 do
@@ -525,8 +549,8 @@ var
 begin
   //
   sql := 'DELETE FROM ShoppingCartTB WHERE ShoppingCartID = :ShoppingCartID';
-  params.clear;
 
+  params := tObjectDictionary<string, Variant>.Create();
   params.Add('ShoppingCartID', ShoppingCartID);
 
   try
@@ -1479,6 +1503,7 @@ begin
     'SELECT ShoppingCartID, BuyerID FROM ShoppingCartTB WHERE ShoppingCartID = :ShoppingCartID';
 
   params := tObjectDictionary<String, Variant>.Create();
+  params.Add('ShoppingCartID', ShoppingCartID);
   try
     dsResult := runSQL(sql, params);
 
@@ -1671,11 +1696,6 @@ begin
     if Assigned(dsResult) then
       dsResult.Free;
 
-    if Assigned(dsResultUpdateSeller) then
-      dsResultUpdateSeller.Free;
-
-    if Assigned(dsResultUpdateBuyer) then
-      dsResultUpdateBuyer.Free;
     params.Free;
 
   end;
