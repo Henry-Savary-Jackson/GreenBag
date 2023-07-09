@@ -3,18 +3,21 @@ unit Help_u;
 interface
 
 uses
-  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls;
 
 type
   TfrmHelp = class(TForm)
-    Memo1: TMemo;
+    memHelp: TMemo;
     btnBack: TButton;
+    procedure btnBackClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
   private
     { Private declarations }
   public
     { Public declarations }
+    frmPrevious: TForm;
   end;
 
 var
@@ -22,11 +25,35 @@ var
 
 implementation
 
+uses
+  DMUnit_u;
+
 {$R *.dfm}
+
+procedure TfrmHelp.btnBackClick(Sender: TObject);
+begin
+  self.Hide;
+  frmPrevious.Show;
+
+end;
 
 procedure TfrmHelp.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-Application.Terminate;
+  try
+    try
+      DataModule1.CancelCart(DataModule1.CartID);
+
+    except
+      on e: exception do
+      begin
+        showMessage(e.Message);
+      end;
+
+    end;
+
+  finally
+    Application.Terminate;
+  end;
 end;
 
 end.

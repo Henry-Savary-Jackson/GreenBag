@@ -120,7 +120,7 @@ begin
   btnViewItem.Parent := self;
   btnViewItem.Left := 45;
   btnViewItem.Top := 140;
-  btnViewItem.Width := 140;
+  btnViewItem.Width := 175;
   btnViewItem.Height := 50;
   btnViewItem.Caption := 'View Item';
   btnViewItem.TabOrder := 0;

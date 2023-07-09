@@ -42,6 +42,7 @@ type
     chbRatingsEnable: TCheckBox;
     lblMinRating: TLabel;
     spnMinRating: TSpinEdit;
+    btnHelp: TButton;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnLogoutClick(Sender: TObject);
     procedure btnProfileClick(Sender: TObject);
@@ -61,6 +62,7 @@ type
     procedure chbEUEnableClick(Sender: TObject);
     procedure chbWUEnableClick(Sender: TObject);
     procedure chbRatingsEnableClick(Sender: TObject);
+    procedure btnHelpClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -78,7 +80,7 @@ var
 implementation
 
 uses
-  Loginu, CheckOut_u, profile_u, ViewItem_u, Additem_u;
+  Loginu, CheckOut_u, profile_u, ViewItem_u, Additem_u, HelpScreen_u;
 
 {$R *.dfm}
 
@@ -86,6 +88,13 @@ procedure TfrmBrowse.btnCheckoutClick(Sender: TObject);
 begin
   frmBrowse.Hide;
   frmCheckout.Show;
+end;
+
+procedure TfrmBrowse.btnHelpClick(Sender: TObject);
+begin
+  frmHelp.frmPrevious := self;
+  self.Hide;
+  frmHelp.Show;
 end;
 
 procedure TfrmBrowse.btnLogoutClick(Sender: TObject);

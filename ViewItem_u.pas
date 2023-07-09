@@ -35,11 +35,15 @@ type
     lblWU: TLabel;
     lblStock: TLabel;
     lblMaxWithdraw: TLabel;
+    lbl5: TLabel;
+    lbl0: TLabel;
+    btnHelp: TButton;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnBackClick(Sender: TObject);
     procedure btnAddToCartClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure btnSendRatingClick(Sender: TObject);
+    procedure btnHelpClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -55,7 +59,7 @@ var
 implementation
 
 uses
-  BrowseItems_u;
+  BrowseItems_u, HelpScreen_u;
 
 {$R *.dfm}
 
@@ -93,6 +97,13 @@ begin
   frmBrowse.Show;
 end;
 
+procedure TfrmViewItem.btnHelpClick(Sender: TObject);
+begin
+  frmHelp.frmPrevious := self;
+  self.Hide;
+  frmHelp.Show;
+end;
+
 procedure TfrmViewItem.btnSendRatingClick(Sender: TObject);
 var
   rating: integer;
@@ -102,13 +113,16 @@ begin
   try
     DataModule1.sendRating(DataModule1.userID, itemID, rating);
 
+    showMessage('Your feedback has been sent.');
+
   except
     on e: exception do
     begin
+
       showMessage(e.Message);
+      Exit;
     end;
   end;
-  showMessage('Your feedback has been sent.');
 end;
 
 procedure TfrmViewItem.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -172,7 +186,14 @@ begin
   lblWUProduce.Caption := 'Water usage for production:' +
     floatToStrf(dsResult['WaterUsageProduction'], fffixed, 8, 2);
 
-  lblRating.Caption := 'Rating: ' + inttostr(dsResult['avgRating']);
+  if dsResult['avgRating'] = -1 then
+  begin
+    lblRating.Caption := 'Rating: No ratings';
+  end
+  else
+  begin
+    lblRating.Caption := 'Rating: ' + inttostr(dsResult['avgRating']);
+  end;
 
   lblCategory.Caption := 'Category: ' + dsResult['Category'];
 

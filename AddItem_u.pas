@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls,
-  Vcl.ExtCtrls, DMUnit_u, Data.Win.ADODB, PngImage,Vcl.Imaging.jpeg, Data.DB ;
+  Vcl.ExtCtrls, DMUnit_u, Data.Win.ADODB, PngImage, Vcl.Imaging.jpeg, Data.DB;
 
 type
   TfrmAddItem = class(TForm)
@@ -39,12 +39,14 @@ type
     edtStock: TEdit;
     lblMaxWithdrawStock: TLabel;
     edtMaxWithdrawStock: TEdit;
+    btnHelp: TButton;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure imgItemClick(Sender: TObject);
     procedure btnBackClick(Sender: TObject);
     procedure btnSaveChangesClick(Sender: TObject);
     function getFloatFromStr(s, valName: string): double;
     procedure FormShow(Sender: TObject);
+    procedure btnHelpClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -58,7 +60,7 @@ var
 implementation
 
 uses
-  Yourproducts_u;
+  Yourproducts_u, HelpScreen_u;
 
 {$R *.dfm}
 
@@ -66,6 +68,13 @@ procedure TfrmAddItem.btnBackClick(Sender: TObject);
 begin
   frmAddItem.Hide;
   DataModule1.lastForm.Show;
+end;
+
+procedure TfrmAddItem.btnHelpClick(Sender: TObject);
+begin
+  frmHelp.frmPrevious := self;
+  self.Hide;
+  frmHelp.Show;
 end;
 
 procedure TfrmAddItem.btnSaveChangesClick(Sender: TObject);
@@ -154,7 +163,7 @@ begin
 
       if itemID = '' then
       begin
-        itemID := UpperCase(DataModule1.userID[1] + sName[1]);
+        itemID := UpperCase(DataModule1.userID[2] + sName[1]);
 
         for I := 1 to 8 do
         begin
@@ -216,7 +225,7 @@ procedure TfrmAddItem.FormShow(Sender: TObject);
 var
   dsResult: tAdoDataset;
   dsCategories: tAdoDataset;
-  imageStream : tStream;
+  imageStream: tStream;
 begin
 
   cmbCategory.Items.Clear;
@@ -246,7 +255,15 @@ begin
     edtName.Text := dsResult['ItemName'];
 
     lblSeller.Caption := 'Seller: ' + dsResult['SellerName'];
-    lblRating.Caption := 'Rating: ' + intToStr(dsResult['avgRating']);
+
+    if dsResult['avgRating'] = -1 then
+    begin
+      lblRating.Caption := 'Rating: No ratings';
+    end
+    else
+    begin
+      lblRating.Caption := 'Rating: ' + intToStr(dsResult['avgRating']);
+    end;
 
     edtPrice.Text := floatTOStrf(dsResult['Cost'], ffFixed, 8, 2);
 
@@ -268,9 +285,10 @@ begin
 
     cmbCategory.ItemIndex := cmbCategory.Items.IndexOf(dsResult['Category']);
 
-    edtMaxWithdrawStock.Text := inttostr(dsResult['MaxWithdrawableStock']);
+    edtMaxWithdrawStock.Text := intToStr(dsResult['MaxWithdrawableStock']);
 
-    imageStream :=   dsResult.CreateBlobStream( dsResult.FieldByName('Image'), bmRead);
+    imageStream := dsResult.CreateBlobStream
+      (dsResult.FieldByName('Image'), bmRead);
     try
       imgItem.Picture.LoadFromStream(imageStream);
 

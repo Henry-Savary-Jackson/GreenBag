@@ -1,20 +1,21 @@
 object frmYourProducts: TfrmYourProducts
-  Left = 0
-  Top = 0
+  Left = 274
+  Top = 50
   Caption = 'Your Products'
   ClientHeight = 475
   ClientWidth = 490
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
+  Color = 11074992
+  Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
+  Font.Height = -16
+  Font.Name = 'Arial Rounded MT Bold'
   Font.Style = []
   OldCreateOrder = False
+  Position = poDesigned
   OnClose = FormClose
   OnShow = FormShow
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 18
   object btnAddItem: TButton
     Left = 189
     Top = 394
@@ -26,7 +27,7 @@ object frmYourProducts: TfrmYourProducts
   end
   object scrbxProducts: TScrollBox
     Left = 24
-    Top = 40
+    Top = 72
     Width = 425
     Height = 281
     VertScrollBar.Tracking = True
@@ -39,6 +40,8 @@ object frmYourProducts: TfrmYourProducts
       Align = alTop
       AutoSize = True
       TabOrder = 0
+      ExplicitLeft = -3
+      ExplicitTop = 3
     end
   end
   object btnBack: TButton
@@ -49,5 +52,14 @@ object frmYourProducts: TfrmYourProducts
     Caption = 'Back'
     TabOrder = 2
     OnClick = btnBackClick
+  end
+  object btnHelp: TButton
+    Left = 434
+    Top = 8
+    Width = 48
+    Height = 33
+    Caption = '?'
+    TabOrder = 3
+    OnClick = btnHelpClick
   end
 end

@@ -4,17 +4,17 @@ object frmProfile: TfrmProfile
   Caption = 'Your Profile'
   ClientHeight = 725
   ClientWidth = 627
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
+  Color = 11074992
+  Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
+  Font.Height = -16
+  Font.Name = 'Arial Rounded MT Bold'
   Font.Style = []
   OldCreateOrder = False
   OnClose = FormClose
   OnShow = FormShow
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 18
   object imgProfilePic: TImage
     Left = 224
     Top = 8
@@ -24,8 +24,8 @@ object frmProfile: TfrmProfile
     OnClick = imgProfilePicClick
   end
   object lblUsername: TLabel
-    Left = 246
-    Top = 136
+    Left = 238
+    Top = 119
     Width = 83
     Height = 20
     Caption = '(Username)'
@@ -126,10 +126,10 @@ object frmProfile: TfrmProfile
   end
   object pnlInfo: TPanel
     AlignWithMargins = True
-    Left = 175
-    Top = 176
+    Left = 171
+    Top = 149
     Width = 210
-    Height = 176
+    Height = 211
     AutoSize = True
     Padding.Left = 5
     Padding.Top = 5
@@ -142,88 +142,91 @@ object frmProfile: TfrmProfile
       Left = 9
       Top = 9
       Width = 192
-      Height = 13
+      Height = 18
       Align = alTop
       Alignment = taCenter
       Caption = 'Total Balance:'
-      ExplicitWidth = 68
+      ExplicitWidth = 115
     end
     object lblRevenueTotal: TLabel
       AlignWithMargins = True
       Left = 9
-      Top = 123
+      Top = 153
       Width = 192
-      Height = 13
+      Height = 18
       Align = alTop
       Alignment = taCenter
       Caption = 'Total Revenue:'
-      ExplicitWidth = 74
+      ExplicitTop = 138
+      ExplicitWidth = 120
     end
     object lblSales: TLabel
       AlignWithMargins = True
       Left = 9
-      Top = 104
+      Top = 129
       Width = 192
-      Height = 13
+      Height = 18
       Align = alTop
       Alignment = taCenter
       Caption = 'Total Sales:'
-      ExplicitWidth = 56
+      ExplicitTop = 117
+      ExplicitWidth = 93
     end
     object lblSpendingTotal: TLabel
       AlignWithMargins = True
       Left = 9
-      Top = 28
+      Top = 33
       Width = 192
-      Height = 13
+      Height = 18
       Align = alTop
       Alignment = taCenter
       Caption = 'Total Spending:'
-      ExplicitWidth = 75
+      ExplicitWidth = 124
     end
     object lblTotalCF: TLabel
       AlignWithMargins = True
       Left = 9
-      Top = 47
+      Top = 57
       Width = 192
-      Height = 13
+      Height = 18
       Align = alTop
       Alignment = taCenter
       Caption = 'Total Carbon Footprint:'
-      ExplicitWidth = 113
+      ExplicitWidth = 185
     end
     object lblTotalEU: TLabel
       AlignWithMargins = True
       Left = 9
-      Top = 66
+      Top = 81
       Width = 192
-      Height = 13
+      Height = 18
       Align = alTop
       Alignment = taCenter
       Caption = 'Total Energy Usage:'
-      ExplicitWidth = 98
+      ExplicitWidth = 161
     end
     object lblTotalWU: TLabel
       AlignWithMargins = True
       Left = 9
-      Top = 85
+      Top = 105
       Width = 192
-      Height = 13
+      Height = 18
       Align = alTop
       Alignment = taCenter
       Caption = 'Total Water Usage:'
-      ExplicitWidth = 94
+      ExplicitLeft = 0
     end
     object btnViewProducts: TButton
       AlignWithMargins = True
       Left = 9
-      Top = 142
+      Top = 177
       Width = 192
       Height = 25
       Align = alTop
       Caption = 'View your products'
       TabOrder = 0
       OnClick = btnViewProductsClick
+      ExplicitTop = 142
     end
   end
   object chrtStats: TChart
@@ -309,6 +312,7 @@ object frmProfile: TfrmProfile
     View3DOptions.Zoom = 80
     Zoom.MouseButton = mbMiddle
     BevelOuter = bvNone
+    Color = 11074992
     TabOrder = 3
     DefaultCanvas = 'TGDIPlusCanvas'
     PrintMargins = (
@@ -329,10 +333,11 @@ object frmProfile: TfrmProfile
       6144242
       10401629
       9300723
-      11842740)
+      11842740
+      11009707)
     object chrtLayoutStats: TChartLayout
-      Left = 593
-      Top = 14
+      Left = 583
+      Top = -34
       Width = 245
       Height = 356
       HorzScrollBar.Smooth = True
@@ -350,6 +355,7 @@ object frmProfile: TfrmProfile
       Marks.Visible = False
       Marks.DrawEvery = 5
       Marks.OnTop = True
+      SeriesColor = 7368816
       XValues.Name = 'X'
       XValues.Order = loAscending
       YValues.Name = 'Bar'
@@ -375,5 +381,23 @@ object frmProfile: TfrmProfile
     Caption = '>'
     TabOrder = 5
     OnClick = btnRightClick
+  end
+  object btnAddFunds: TButton
+    Left = 50
+    Top = 82
+    Width = 111
+    Height = 39
+    Caption = 'Add funds'
+    TabOrder = 6
+    OnClick = btnAddFundsClick
+  end
+  object btnHelp: TButton
+    Left = 571
+    Top = 8
+    Width = 48
+    Height = 33
+    Caption = '?'
+    TabOrder = 7
+    OnClick = btnHelpClick
   end
 end

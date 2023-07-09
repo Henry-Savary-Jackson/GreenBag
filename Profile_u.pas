@@ -35,6 +35,8 @@ type
     srsStats: TBarSeries;
     btnLeft: TButton;
     btnRight: TButton;
+    btnAddFunds: TButton;
+    btnHelp: TButton;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnViewProductsClick(Sender: TObject);
     procedure btnBackClick(Sender: TObject);
@@ -47,6 +49,8 @@ type
     procedure changeChartDateRange(direction: integer);
     procedure btnRightClick(Sender: TObject);
     procedure imgProfilePicClick(Sender: TObject);
+    procedure btnAddFundsClick(Sender: TObject);
+    procedure btnHelpClick(Sender: TObject);
   private
     { Private declarations }
     NameToCateg: TObjectDictionary<string, string>;
@@ -58,11 +62,12 @@ var
   frmProfile: TfrmProfile;
   dateRangeBegin, dateRangeEnd: tDateTime;
   sType: string;
+  balance: double;
 
 implementation
 
 uses
-  BrowseItems_u, YourProducts_u;
+  BrowseItems_u, YourProducts_u, HelpScreen_u;
 
 {$R *.dfm}
 
@@ -71,6 +76,13 @@ begin
   //
   frmProfile.Hide;
   frmBrowse.Show;
+end;
+
+procedure TfrmProfile.btnHelpClick(Sender: TObject);
+begin
+  frmHelp.frmPrevious := self;
+  frmHelp.Show;
+  self.Hide;
 end;
 
 procedure TfrmProfile.btnLeftClick(Sender: TObject);
@@ -90,6 +102,27 @@ procedure TfrmProfile.btnViewProductsClick(Sender: TObject);
 begin
   frmProfile.Hide;
   frmYourProducts.Show;
+end;
+
+procedure TfrmProfile.btnAddFundsClick(Sender: TObject);
+var
+  dExtra: double;
+begin
+  dExtra := strtofloat(InputBox('Funds', 'Add funds:', ''));
+
+  try
+    DataModule1.addFunds(DataModule1.userID, dExtra);
+    balance := balance + dExtra;
+
+    lblBalance.Caption := 'Current Balance: ' + floatToStrf(balance,
+      ffCurrency, 8, 2);
+
+  except
+    on e: exception do
+    begin
+      showMessage(e.Message);
+    end;
+  end;
 end;
 
 procedure TfrmProfile.categoryClickStats(Sender: TObject);
@@ -158,7 +191,9 @@ begin
 
   lblUsername.Caption := dsResult['Username'];
 
-  lblBalance.Caption := 'Current Balance: ' + floatToStrf(dsResult['Balance'],
+  balance := dsResult['Balance'];
+
+  lblBalance.Caption := 'Current Balance: ' + floatToStrf(balance,
     ffCurrency, 8, 2);
 
   lblSpendingTotal.Caption := 'Total Spending:' +

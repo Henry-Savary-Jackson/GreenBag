@@ -1,0 +1,27 @@
+unit HelpScreen_u;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs;
+
+type
+  TfrmHelp = class(TForm)
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+    { Public declarations }
+    frmPrevious: TForm;
+  end;
+
+
+var
+  frmHelp: TfrmHelp;
+
+implementation
+
+{$R *.dfm}
+
+end.

@@ -1,22 +1,22 @@
 object frmViewItem: TfrmViewItem
-  Left = 0
+  Left = 183
   Top = 0
   ActiveControl = spnQuantity
   Caption = 'View Item'
   ClientHeight = 742
   ClientWidth = 404
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
+  Color = 11074992
+  Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
+  Font.Height = -16
+  Font.Name = 'Arial Rounded MT Bold'
   Font.Style = []
   OldCreateOrder = False
   Position = poDesigned
   OnClose = FormClose
   OnShow = FormShow
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 18
   object imgItem: TImage
     Left = 152
     Top = 8
@@ -26,117 +26,143 @@ object frmViewItem: TfrmViewItem
     Stretch = True
   end
   object lblDesc: TLabel
-    Left = 64
-    Top = 434
-    Width = 57
-    Height = 13
+    Left = 30
+    Top = 442
+    Width = 97
+    Height = 18
     Caption = 'Description:'
   end
   object lblCategory: TLabel
     Left = 92
     Top = 400
-    Width = 49
-    Height = 13
+    Width = 79
+    Height = 18
     Caption = 'Category:'
   end
   object lblCFProduce: TLabel
-    Left = 136
-    Top = 259
-    Width = 141
-    Height = 13
+    Left = 63
+    Top = 269
+    Width = 232
+    Height = 18
     Caption = 'Carbon Footprint to produce:'
   end
   object lblEUProduce: TLabel
-    Left = 137
-    Top = 278
-    Width = 125
-    Height = 13
+    Left = 64
+    Top = 288
+    Width = 206
+    Height = 18
     Caption = 'Energy usage to produce:'
   end
   object lblWUProduce: TLabel
-    Left = 137
-    Top = 297
-    Width = 121
-    Height = 13
+    Left = 64
+    Top = 307
+    Width = 197
+    Height = 18
     Caption = 'Water usage to produce:'
   end
   object lblPrice: TLabel
-    Left = 185
+    Left = 124
     Top = 184
-    Width = 27
-    Height = 13
+    Width = 47
+    Height = 18
     Caption = 'Price:'
   end
   object lblName: TLabel
-    Left = 184
+    Left = 123
     Top = 143
-    Width = 31
-    Height = 13
+    Width = 51
+    Height = 18
     Caption = 'Name:'
   end
   object lblSeller: TLabel
-    Left = 185
+    Left = 124
     Top = 162
-    Width = 30
-    Height = 13
+    Width = 51
+    Height = 18
     Caption = 'Seller:'
   end
   object lblQuantity: TLabel
     Left = 95
     Top = 544
-    Width = 46
-    Height = 13
+    Width = 73
+    Height = 18
     Caption = 'Quantity:'
   end
   object lblRating: TLabel
     Left = 105
     Top = 575
-    Width = 38
-    Height = 13
+    Width = 61
+    Height = 18
     Caption = 'Rating: '
   end
   object lblYourRating: TLabel
-    Left = 101
-    Top = 608
-    Width = 60
-    Height = 13
+    Left = 63
+    Top = 604
+    Width = 98
+    Height = 18
     Caption = 'Your Rating:'
   end
   object lblCF: TLabel
-    Left = 117
+    Left = 45
     Top = 331
-    Width = 157
-    Height = 13
+    Width = 256
+    Height = 18
     Caption = 'Carbon footprint through usage:'
   end
   object lblEU: TLabel
-    Left = 102
+    Left = 30
     Top = 350
-    Width = 174
-    Height = 13
+    Width = 289
+    Height = 18
     Caption = 'Energy consumption through usage:'
   end
   object lblWU: TLabel
-    Left = 117
+    Left = 45
     Top = 369
-    Width = 170
-    Height = 13
+    Width = 280
+    Height = 18
     Caption = 'Water consumption through usage:'
   end
   object lblStock: TLabel
-    Left = 182
+    Left = 121
     Top = 203
-    Width = 30
-    Height = 13
+    Width = 51
+    Height = 18
     Caption = 'Stock:'
   end
   object lblMaxWithdraw: TLabel
-    Left = 8
-    Top = 222
-    Width = 234
-    Height = 13
+    Left = 106
+    Top = 227
+    Width = 228
+    Height = 36
     Caption = 'Maximum Stock you can withdraw at once:'
     WordWrap = True
+  end
+  object lbl5: TLabel
+    Left = 260
+    Top = 635
+    Width = 10
+    Height = 18
+    Caption = '5'
+    Color = 11074996
+    ParentColor = False
+  end
+  object lbl0: TLabel
+    Left = 175
+    Top = 635
+    Width = 10
+    Height = 18
+    Caption = '0'
+    Color = 11074998
+    ParentColor = False
+  end
+  object trcRating: TTrackBar
+    Left = 175
+    Top = 599
+    Width = 105
+    Height = 30
+    Max = 5
+    TabOrder = 4
   end
   object btnBack: TButton
     Left = 8
@@ -148,9 +174,9 @@ object frmViewItem: TfrmViewItem
     OnClick = btnBackClick
   end
   object btnAddToCart: TButton
-    Left = 136
+    Left = 121
     Top = 699
-    Width = 105
+    Width = 149
     Height = 35
     Caption = 'Add to Cart'
     TabOrder = 1
@@ -175,27 +201,28 @@ object frmViewItem: TfrmViewItem
     Left = 182
     Top = 541
     Width = 49
-    Height = 22
+    Height = 28
     MaxValue = 1000
     MinValue = 1
     TabOrder = 3
     Value = 1
   end
-  object trcRating: TTrackBar
-    Left = 184
-    Top = 604
-    Width = 105
-    Height = 37
-    Max = 5
-    TabOrder = 4
-  end
   object btnSendRating: TButton
-    Left = 151
-    Top = 647
-    Width = 91
-    Height = 25
+    Left = 120
+    Top = 659
+    Width = 150
+    Height = 34
     Caption = 'Send your Rating'
     TabOrder = 5
     OnClick = btnSendRatingClick
+  end
+  object btnHelp: TButton
+    Left = 348
+    Top = 8
+    Width = 48
+    Height = 33
+    Caption = '?'
+    TabOrder = 6
+    OnClick = btnHelpClick
   end
 end

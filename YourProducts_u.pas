@@ -16,19 +16,21 @@ type
     flpnlProducts: TFlowPanel;
     scrbxProducts: TScrollBox;
     btnBack: TButton;
+    btnHelp: TButton;
     procedure btnAddItemClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnBackClick(Sender: TObject);
     procedure btnViewItemClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure removeProcedure(itemID: string);
+    procedure btnHelpClick(Sender: TObject);
 
   private
     { Private declarations }
 
   public
     { Public declarations }
-    items: TObjectList<ProductItem>;
+    items: tObjectDictionary<string, ProductItem>;
     procedure updateItemsDisplay;
   end;
 
@@ -39,7 +41,7 @@ implementation
 
 uses
   Profile_u,
-  Additem_u;
+  Additem_u, HelpScreen_u;
 
 {$R *.dfm}
 
@@ -57,10 +59,17 @@ begin
   frmProfile.Show;
 end;
 
+procedure TfrmYourProducts.btnHelpClick(Sender: TObject);
+begin
+  frmHelp.frmPrevious := self;
+  self.Hide;
+  frmHelp.Show;
+end;
+
 procedure TfrmYourProducts.btnViewItemClick(Sender: TObject);
 begin
   frmYourProducts.Hide;
-  DataModule1.lastForm := self;
+  datamodule1.lastForm := self;
   frmAddItem.Show;
 end;
 
@@ -68,7 +77,7 @@ procedure TfrmYourProducts.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   try
     try
-      DataModule1.CancelCart(DataModule1.CartID);
+      datamodule1.CancelCart(datamodule1.CartID);
 
     except
       on e: exception do
@@ -89,12 +98,15 @@ begin
 end;
 
 procedure TfrmYourProducts.removeProcedure(itemID: string);
+var
+  itemToBeDeleted: ProductItem;
 begin
   if MessageDlg('Are you sure you want to delete this item?', mtConfirmation,
     [mbYes, mbNo], 0, mbNo) = mryes then
   begin
-    DataModule1.deleteItem(itemID);
-    self.updateItemsDisplay;
+    datamodule1.deleteItem(itemID);
+    items.TryGetValue(itemID, itemToBeDeleted);
+    itemToBeDeleted.Hide;
   end;
 
 end;
@@ -102,32 +114,40 @@ end;
 procedure TfrmYourProducts.updateItemsDisplay;
 var
   dsResult: tADODataSet;
+  currentItem: ProductItem;
 begin
   if items <> nil then
   begin
     items.Free;
   end;
 
-  items := TObjectList<ProductItem>.Create();
+  items := tObjectDictionary<string, ProductItem>.Create([doOwnsValues]);
 
-  dsResult := DataModule1.getProducts(DataModule1.userID);
+  try
 
-  if dsResult.Fields.FindField('Status') <> nil then
-  begin
-    showMessage(dsResult['Status']);
-    Exit;
+    dsResult := datamodule1.getProducts(datamodule1.userID);
+
+    if dsResult.Fields.FindField('Status') <> nil then
+    begin
+      showMessage(dsResult['Status']);
+      Exit;
+    end;
+
+    dsResult.First;
+
+    while not dsResult.Eof do
+    begin
+      currentItem := ProductItem.Create(self, flpnlProducts, dsResult,
+        self.removeProcedure);
+      items.add(currentItem.itemID, currentItem);
+      dsResult.Next;
+    end;
+
+  finally
+    if Assigned(dsResult) then
+      dsResult.Free;
+
   end;
-
-  dsResult.First;
-
-  while not dsResult.Eof do
-  begin
-    items.Add(ProductItem.Create(self, flpnlProducts, dsResult,
-      self.removeProcedure));
-    dsResult.Next;
-  end;
-
-  dsResult.Free;
 
 end;
 

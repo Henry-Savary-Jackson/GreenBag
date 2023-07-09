@@ -1,0 +1,38 @@
+object frmHelp: TfrmHelp
+  Left = 366
+  Top = 100
+  Caption = 'Help Screen'
+  ClientHeight = 290
+  ClientWidth = 418
+  Color = 11074994
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -11
+  Font.Name = 'Tahoma'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poDesigned
+  OnClose = FormClose
+  PixelsPerInch = 96
+  TextHeight = 13
+  object memHelp: TMemo
+    Left = 64
+    Top = 56
+    Width = 305
+    Height = 217
+    Color = 8118149
+    Lines.Strings = (
+      'Memo1')
+    ReadOnly = True
+    TabOrder = 0
+  end
+  object btnBack: TButton
+    Left = 8
+    Top = 8
+    Width = 75
+    Height = 25
+    Caption = 'Back'
+    TabOrder = 1
+    OnClick = btnBackClick
+  end
+end

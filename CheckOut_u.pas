@@ -20,10 +20,12 @@ type
     lblTotalCF: TLabel;
     lblTotalEU: TLabel;
     lblTotalWU: TLabel;
+    btnHelp: TButton;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnBackClick(Sender: TObject);
     procedure btnCheckoutClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
+    procedure btnHelpClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -43,7 +45,7 @@ var
 implementation
 
 uses
-  BrowseItems_u;
+  BrowseItems_u, HelpScreen_u;
 
 {$R *.dfm}
 
@@ -74,6 +76,13 @@ begin
     end;
 
   end;
+end;
+
+procedure TfrmCheckout.btnHelpClick(Sender: TObject);
+begin
+  frmHelp.frmPrevious := self;
+  self.Hide;
+  frmHelp.Show;
 end;
 
 procedure TfrmCheckout.FormClose(Sender: TObject; var Action: TCloseAction);

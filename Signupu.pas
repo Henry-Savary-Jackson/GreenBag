@@ -23,6 +23,7 @@ type
     lblHomeAddress: TLabel;
     redHomeAddress: TRichEdit;
     imgPfp: TImage;
+    btnHelp: TButton;
     procedure btnLoginScreenClick(Sender: TObject);
     procedure btnSignUpClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -30,6 +31,7 @@ type
     function securePassword(password: string): integer;
     function verifyCertificationCode(code: string): integer;
     procedure imgPfpClick(Sender: TObject);
+    procedure btnHelpClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -56,13 +58,19 @@ const
 implementation
 
 uses
-  Loginu, BrowseItems_u;
+  Loginu, BrowseItems_u, HelpScreen_u;
 
 {$R *.dfm}
 
+procedure TfrmSignUp.btnHelpClick(Sender: TObject);
+begin
+  frmHelp.frmPrevious := self;
+  self.Hide;
+  frmHelp.Show;
+end;
+
 procedure TfrmSignUp.btnLoginScreenClick(Sender: TObject);
 begin
-  //
   frmSignUp.Hide;
   frmLogin.Show;
 end;

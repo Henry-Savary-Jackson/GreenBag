@@ -15,7 +15,8 @@ uses
   ProductItem_u in 'ProductItem_u.pas',
   BrowseItemContainer_u in 'BrowseItemContainer_u.pas',
   ItemContainer_u in 'ItemContainer_u.pas',
-  SCrypt in 'SCrypt.pas';
+  SCrypt in 'SCrypt.pas',
+  HelpScreen_u in 'HelpScreen_u.pas' {frmHelp};
 
 {$R *.res}
 
@@ -31,5 +32,6 @@ begin
   Application.CreateForm(TfrmCheckout, frmCheckout);
   Application.CreateForm(TfrmProfile, frmProfile);
   Application.CreateForm(TfrmYourProducts, frmYourProducts);
+  Application.CreateForm(TfrmHelp, frmHelp);
   Application.Run;
 end.

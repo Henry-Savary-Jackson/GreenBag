@@ -4,43 +4,43 @@ object frmCheckout: TfrmCheckout
   Caption = 'Checkout'
   ClientHeight = 406
   ClientWidth = 632
-  Color = clBtnFace
-  Font.Charset = DEFAULT_CHARSET
+  Color = 11074992
+  Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
+  Font.Height = -16
+  Font.Name = 'Arial Rounded MT Bold'
   Font.Style = []
   OldCreateOrder = False
   OnClose = FormClose
   OnShow = FormShow
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 18
   object lblTotalCost: TLabel
-    Left = 30
-    Top = 342
-    Width = 53
-    Height = 13
+    Left = 182
+    Top = 318
+    Width = 86
+    Height = 18
     Caption = 'Total Cost:'
   end
   object lblTotalCF: TLabel
-    Left = 136
+    Left = 104
     Top = 342
-    Width = 113
-    Height = 13
+    Width = 185
+    Height = 18
     Caption = 'Total Carbon Footprint:'
   end
   object lblTotalWU: TLabel
-    Left = 441
-    Top = 342
-    Width = 94
-    Height = 13
+    Left = 354
+    Top = 318
+    Width = 152
+    Height = 18
     Caption = 'Total Water Usage:'
   end
   object lblTotalEU: TLabel
-    Left = 283
-    Top = 349
-    Width = 98
-    Height = 13
+    Left = 354
+    Top = 342
+    Width = 161
+    Height = 18
     Caption = 'Total Energy Usage:'
   end
   object btnBack: TButton
@@ -55,7 +55,7 @@ object frmCheckout: TfrmCheckout
   object btnCheckout: TButton
     Left = 283
     Top = 373
-    Width = 75
+    Width = 94
     Height = 25
     Caption = 'Check Out'
     TabOrder = 1
@@ -77,5 +77,14 @@ object frmCheckout: TfrmCheckout
       AutoSize = True
       TabOrder = 0
     end
+  end
+  object btnHelp: TButton
+    Left = 576
+    Top = 8
+    Width = 48
+    Height = 33
+    Caption = '?'
+    TabOrder = 3
+    OnClick = btnHelpClick
   end
 end

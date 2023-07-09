@@ -18,10 +18,12 @@ type
     btnSignIn: TButton;
     lblSignUp: TLabel;
     btnSignUpScreen: TButton;
+    btnHelp: TButton;
     procedure btnSignInClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnSignUpScreenClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
+    procedure btnHelpClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -34,10 +36,17 @@ var
 implementation
 
 uses
-  Browseitems_u,
+  Browseitems_u,HelpScreen_u,
   SignUpu;
 
 {$R *.dfm}
+
+procedure TfrmLogin.btnHelpClick(Sender: TObject);
+begin
+  frmHelp.frmPrevious := self ;
+  self.Hide;
+  frmHelp.Show;
+end;
 
 procedure TfrmLogin.btnSignInClick(Sender: TObject);
 var
@@ -90,7 +99,7 @@ end;
 
 procedure TfrmLogin.FormCreate(Sender: TObject);
 begin
-  Application.MainFormOnTaskbar := False;
+ Application.MainFormOnTaskbar := False;
 end;
 
 end.

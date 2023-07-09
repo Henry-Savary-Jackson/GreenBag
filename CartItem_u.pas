@@ -98,7 +98,7 @@ begin
   // lblQuantity's properties
   lblQuantity := TLabel.Create(self.Owner);
   lblQuantity.Parent := self;
-  lblQuantity.Left := 570;
+  lblQuantity.Left := 610;
   lblQuantity.Top := 100;
   lblQuantity.Width := 46;
   lblQuantity.Height := 13;
@@ -111,16 +111,15 @@ begin
 
   redItemInfo.Left := 40;
   redItemInfo.Top := 40;
-  redItemInfo.Width := 400;
+  redItemInfo.Width := 500;
   redItemInfo.Height := 180;
   redItemInfo.Margins.Right := 20;
   redItemInfo.AlignWithMargins := True;
   redItemInfo.Font.Charset := ANSI_CHARSET;
   redItemInfo.Font.Color := clWindowText;
-  redItemInfo.Font.Height := 12;
-  redItemInfo.Font.Name := 'Tahoma';
   redItemInfo.Font.Style := [];
   redItemInfo.ParentFont := True;
+  redItemInfo.Font.Size := 9;
   redItemInfo.TabOrder := 0;
   redItemInfo.Zoom := 100;
 
@@ -162,7 +161,7 @@ begin
 
   spnQuantity := TSpinEdit.Create(self.Owner);
   spnQuantity.Parent := self;
-  spnQuantity.Left := 680;
+  spnQuantity.Left := 750;
   spnQuantity.Top := 100;
   spnQuantity.Width := 80;
   spnQuantity.Height := 22;
@@ -199,7 +198,7 @@ begin
 
   self.itemTotalPrice := iQuantity * self.itemPrice;
 
-  self.itemTotalCF := self.itemCF  * iQuantity;
+  self.itemTotalCF := self.itemCF * iQuantity;
   self.itemTotalWU := self.itemWU * iQuantity;
   self.itemTotalEU := self.itemEU * iQuantity;
 

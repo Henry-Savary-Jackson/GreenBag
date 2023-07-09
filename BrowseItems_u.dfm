@@ -1,85 +1,142 @@
 object frmBrowse: TfrmBrowse
-  Left = 0
-  Top = 0
+  Left = 137
+  Top = 100
   Caption = 'Browse items'
   ClientHeight = 587
-  ClientWidth = 896
-  Color = clBtnFace
+  ClientWidth = 992
+  Color = 11074992
   Font.Charset = DEFAULT_CHARSET
-  Font.Color = clWindowText
-  Font.Height = -11
-  Font.Name = 'Tahoma'
+  Font.Color = 16384
+  Font.Height = -16
+  Font.Name = 'Arial Rounded MT Bold'
   Font.Style = []
   OldCreateOrder = False
+  Position = poDesigned
   OnClose = FormClose
   OnShow = FormShow
   PixelsPerInch = 96
-  TextHeight = 13
+  TextHeight = 18
   object grpMain: TGroupBox
     Left = 139
     Top = 0
-    Width = 757
+    Width = 853
     Height = 587
     Align = alClient
     TabOrder = 0
     object grpHeader: TGroupBox
       Left = 2
-      Top = 15
-      Width = 753
+      Top = 20
+      Width = 849
       Height = 131
       Align = alTop
       TabOrder = 0
       DesignSize = (
-        753
+        849
         131)
       object lblCFRange: TLabel
-        Left = 411
+        Left = 438
         Top = 39
-        Width = 105
-        Height = 13
+        Width = 171
+        Height = 18
         Caption = 'Carbon footprint from'
+        Color = 16384
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = 16384
+        Font.Height = -16
+        Font.Name = 'Arial Rounded MT Bold'
+        Font.Style = []
+        ParentColor = False
+        ParentFont = False
       end
       object lbWURange: TLabel
-        Left = 411
-        Top = 95
-        Width = 90
-        Height = 13
+        Left = 464
+        Top = 107
+        Width = 145
+        Height = 18
         Caption = 'Water usage from '
+        Color = 16384
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = 16384
+        Font.Height = -16
+        Font.Name = 'Arial Rounded MT Bold'
+        Font.Style = []
+        ParentColor = False
+        ParentFont = False
       end
       object lblEURange: TLabel
-        Left = 411
-        Top = 71
-        Width = 91
-        Height = 13
+        Left = 459
+        Top = 66
+        Width = 150
+        Height = 18
         Caption = 'Energy usage from'
+        Color = 16384
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = 16384
+        Font.Height = -16
+        Font.Name = 'Arial Rounded MT Bold'
+        Font.Style = []
+        ParentColor = False
+        ParentFont = False
       end
       object lblAndCF: TLabel
-        Left = 569
-        Top = 45
-        Width = 10
-        Height = 13
+        Left = 670
+        Top = 42
+        Width = 16
+        Height = 18
         Caption = 'to'
+        Color = 16384
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = 16384
+        Font.Height = -16
+        Font.Name = 'Arial Rounded MT Bold'
+        Font.Style = []
+        ParentColor = False
+        ParentFont = False
       end
       object lblToEU: TLabel
-        Left = 569
-        Top = 71
-        Width = 10
-        Height = 13
+        Left = 670
+        Top = 66
+        Width = 16
+        Height = 18
         Caption = 'to'
+        Color = 16384
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = 16384
+        Font.Height = -16
+        Font.Name = 'Arial Rounded MT Bold'
+        Font.Style = []
+        ParentColor = False
+        ParentFont = False
       end
       object lblToWU: TLabel
-        Left = 569
-        Top = 101
-        Width = 10
-        Height = 13
+        Left = 670
+        Top = 102
+        Width = 16
+        Height = 18
         Caption = 'to'
+        Color = 16384
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = 16384
+        Font.Height = -16
+        Font.Name = 'Arial Rounded MT Bold'
+        Font.Style = []
+        ParentColor = False
+        ParentFont = False
       end
       object lblMinRating: TLabel
         Left = 501
-        Top = 20
-        Width = 78
-        Height = 13
+        Top = 15
+        Width = 129
+        Height = 18
         Caption = 'Minimum rating: '
+        Color = 16384
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = 16384
+        Font.Height = -16
+        Font.Name = 'Arial Rounded MT Bold'
+        Font.Style = []
+        ParentColor = False
+        ParentFont = False
       end
       object scrbxCategories: TScrollBox
         Left = 27
@@ -87,6 +144,8 @@ object frmBrowse: TfrmBrowse
         Width = 368
         Height = 49
         HorzScrollBar.Tracking = True
+        Color = 7987076
+        ParentColor = False
         TabOrder = 0
         object flpnlCategories: TFlowPanel
           Left = 0
@@ -95,154 +154,228 @@ object frmBrowse: TfrmBrowse
           Height = 45
           Align = alLeft
           AutoSize = True
+          Color = 7987076
           FlowStyle = fsTopBottomLeftRight
           FullRepaint = False
+          ParentBackground = False
           TabOrder = 0
         end
       end
       object srchSearchItems: TSearchBox
-        Left = 27
+        Left = 54
         Top = 12
         Width = 368
-        Height = 21
+        Height = 26
         Anchors = []
+        Color = 5883392
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = 16384
+        Font.Height = -16
+        Font.Name = 'Arial Rounded MT Bold'
+        Font.Style = []
+        ParentFont = False
         TabOrder = 1
         OnChange = srchSearchItemsChange
         OnInvokeSearch = SearchItems
       end
       object spnCFMin: TSpinEdit
-        Left = 522
-        Top = 39
+        Left = 615
+        Top = 34
         Width = 41
-        Height = 22
+        Height = 28
+        Color = 5883392
         Enabled = False
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = 16384
+        Font.Height = -16
+        Font.Name = 'Arial Rounded MT Bold'
+        Font.Style = []
         MaxValue = 1000
         MinValue = 0
+        ParentFont = False
         TabOrder = 2
         Value = 0
         OnChange = spnCFMinChange
       end
       object spnEUMin: TSpinEdit
-        Left = 522
-        Top = 67
+        Left = 615
+        Top = 56
         Width = 41
-        Height = 22
+        Height = 28
+        Color = 5883392
         Enabled = False
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = 16384
+        Font.Height = -16
+        Font.Name = 'Arial Rounded MT Bold'
+        Font.Style = []
         MaxValue = 1000
         MinValue = 0
+        ParentFont = False
         TabOrder = 3
         Value = 0
         OnChange = spnEUMinChange
       end
       object spnWUMin: TSpinEdit
-        Left = 522
-        Top = 95
+        Left = 615
+        Top = 90
         Width = 41
-        Height = 22
+        Height = 28
+        Color = 5883392
         Enabled = False
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = 16384
+        Font.Height = -16
+        Font.Name = 'Arial Rounded MT Bold'
+        Font.Style = []
         MaxValue = 1000
         MinValue = 0
+        ParentFont = False
         TabOrder = 4
         Value = 0
         OnChange = spnWUMinChange
       end
       object spnCFMax: TSpinEdit
-        Left = 609
-        Top = 39
+        Left = 705
+        Top = 38
         Width = 41
-        Height = 22
+        Height = 28
+        Color = 5883392
         Enabled = False
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = 16384
+        Font.Height = -16
+        Font.Name = 'Arial Rounded MT Bold'
+        Font.Style = []
         MaxValue = 1000
         MinValue = 0
+        ParentFont = False
         TabOrder = 5
         Value = 0
       end
       object spnEUMax: TSpinEdit
-        Left = 609
-        Top = 67
+        Left = 705
+        Top = 63
         Width = 41
-        Height = 22
+        Height = 28
+        Color = 5883392
         Enabled = False
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = 16384
+        Font.Height = -16
+        Font.Name = 'Arial Rounded MT Bold'
+        Font.Style = []
         MaxValue = 1000
         MinValue = 0
+        ParentFont = False
         TabOrder = 6
         Value = 0
       end
       object spnWUMax: TSpinEdit
-        Left = 609
-        Top = 95
+        Left = 705
+        Top = 97
         Width = 41
-        Height = 22
+        Height = 28
+        Color = 5883392
         Enabled = False
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = 16384
+        Font.Height = -16
+        Font.Name = 'Arial Rounded MT Bold'
+        Font.Style = []
         MaxValue = 1000
         MinValue = 0
+        ParentFont = False
         TabOrder = 7
         Value = 0
       end
       object chbCFEnable: TCheckBox
-        Left = 656
+        Left = 752
         Top = 38
         Width = 145
         Height = 17
         Caption = 'Enable'
+        Color = 8139520
+        ParentColor = False
         TabOrder = 8
         OnClick = chbCFEnableClick
       end
       object chbEUEnable: TCheckBox
-        Left = 656
+        Left = 752
         Top = 69
         Width = 145
         Height = 17
         Caption = 'Enable'
+        Color = 8139520
+        ParentColor = False
         TabOrder = 9
         OnClick = chbEUEnableClick
       end
       object chbWUEnable: TCheckBox
-        Left = 656
-        Top = 92
+        Left = 752
+        Top = 108
         Width = 145
         Height = 17
         Caption = 'Enable'
+        Color = 8139520
+        ParentColor = False
         TabOrder = 10
         OnClick = chbWUEnableClick
       end
       object chbRatingsEnable: TCheckBox
-        Left = 656
-        Top = 3
-        Width = 65
+        Left = 696
+        Top = 15
+        Width = 73
         Height = 17
         Caption = 'Enable'
+        Color = 8139520
+        ParentColor = False
         TabOrder = 11
         OnClick = chbRatingsEnableClick
       end
       object spnMinRating: TSpinEdit
-        Left = 585
-        Top = 11
+        Left = 638
+        Top = 5
         Width = 41
-        Height = 22
+        Height = 28
+        Color = 5883392
         Enabled = False
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = 16384
+        Font.Height = -16
+        Font.Name = 'Arial Rounded MT Bold'
+        Font.Style = []
         MaxValue = 5
         MinValue = 0
+        ParentFont = False
         TabOrder = 12
         Value = 0
       end
     end
     object scrbxItems: TScrollBox
       Left = 2
-      Top = 146
-      Width = 753
-      Height = 439
+      Top = 151
+      Width = 849
+      Height = 434
       VertScrollBar.Tracking = True
       Align = alClient
       TabOrder = 1
       object flpnlItems: TFlowPanel
         Left = 0
         Top = 0
-        Width = 749
+        Width = 845
         Height = 252
         Align = alTop
         AutoSize = True
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = 16384
+        Font.Height = -16
+        Font.Name = 'Arial Rounded MT Bold'
+        Font.Style = []
+        ParentFont = False
         TabOrder = 0
+        ExplicitLeft = -80
+        ExplicitTop = -70
       end
     end
   end
@@ -276,14 +409,23 @@ object frmBrowse: TfrmBrowse
       Top = 122
       Width = 110
       Height = 144
+      Color = 7987076
+      ParentBackground = False
+      ParentColor = False
       TabOrder = 1
       OnClick = grpCheckoutClick
       object lblCheckout: TLabel
-        Left = 27
-        Top = 24
-        Width = 45
-        Height = 13
+        Left = 19
+        Top = 16
+        Width = 77
+        Height = 18
         Caption = 'Checkout'
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = 16384
+        Font.Height = -16
+        Font.Name = 'Arial Rounded MT Bold'
+        Font.Style = []
+        ParentFont = False
         OnClick = grpCheckoutClick
       end
       object Image3: TImage
@@ -437,5 +579,14 @@ object frmBrowse: TfrmBrowse
         OnClick = grpCheckoutClick
       end
     end
+  end
+  object btnHelp: TButton
+    Left = 936
+    Top = 0
+    Width = 48
+    Height = 33
+    Caption = '?'
+    TabOrder = 2
+    OnClick = btnHelpClick
   end
 end

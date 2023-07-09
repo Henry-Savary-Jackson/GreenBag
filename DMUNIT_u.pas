@@ -123,6 +123,11 @@ type
     procedure loadImageFromFile(img: tImage; window: TForm);
 
     function ImageToVariant(Image: tImage): Variant;
+
+    procedure addFunds(userID: string; amount: double);
+
+    procedure updateRating(userID, itemID: string; rating: integer);
+    procedure insertRating(userID, itemID: string; rating: integer);
   end;
 
 var
@@ -131,6 +136,32 @@ var
 implementation
 
 {$R *.dfm}
+
+procedure TDataModule1.addFunds(userID: string; amount: double);
+var
+  sql: string;
+  params: tObjectDictionary<string, Variant>;
+  dsResult: tADODataSet;
+begin
+  sql := 'UPDATE UserTB SET Balance = Balance + :Balance WHERE UserID = :UserID';
+  params := tObjectDictionary<string, Variant>.Create();
+  params.Add('Balance', amount);
+  params.Add('UserID', userID);
+
+  try
+    dsResult := runSQL(sql, params);
+
+    if dsResult['Status'] <> 'Success' then
+    begin
+      raise Exception.Create(dsResult['Status']);
+    end;
+
+  finally
+    if Assigned(dsResult) then
+      dsResult.Free;
+    params.Free;
+  end;
+end;
 
 function TDataModule1.addToCart(ShoppingCartID, itemID: string;
   quantity: integer; itemPrice: double): string;
@@ -217,11 +248,11 @@ begin
       raise Exception.Create(dsResult['Status']);
     end;
 
-    if dsResult['Stock'] - dsResult['Quantity'] < 0 then
+    // if retrieving more stock would be impossible
+    if dsResult['Stock'] - quantity < 0 then
     begin
       // if not enough stock
       // rollback changes
-      showMessage(dsResult['Stock']);
       RollBack;
       raise Exception.Create('Not enough Stock for this item');
     end
@@ -429,7 +460,7 @@ begin
   Connection.Close;
   // scroll to the right and add in your database name
   Connection.ConnectionString := 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source='
-    + ExtractFilePath(ParamStr(0)) + 'GreenBagTB.mdb' +
+    + ExtractFilePath(ParamStr(0)) + 'GreenBagDB.mdb' +
     ';Persist Security Info=False';
 
   Connection.LoginPrompt := False;
@@ -906,6 +937,38 @@ begin
 
 end;
 
+procedure TDataModule1.insertRating(userID, itemID: string; rating: integer);
+var
+  sql: string;
+  params: tObjectDictionary<string, Variant>;
+  dsResult: tADODataSet;
+begin
+
+  sql := ' INSERT INTO RatingsTB (UserID, ItemID, rating) VALUES ( :UserID, :ItemID, :rating ) ';
+  params := tObjectDictionary<string, Variant>.Create();
+
+  params := tObjectDictionary<string, Variant>.Create();
+  params.Add('ItemID', itemID);
+  params.Add('UserID', userID);
+  params.Add('rating', rating);
+
+  try
+    dsResult := runSQL(sql, params);
+
+    if dsResult['Status'] <> 'Success' then
+    begin
+      raise Exception.Create(dsResult['Status']);
+    end;
+
+  finally
+
+    params.Free;
+    if Assigned(dsResult) then
+      dsResult.Free;
+
+  end;
+end;
+
 procedure TDataModule1.insertStatData(userID: string; statDate: tDateTime;
   statType: string; value: double);
 var
@@ -969,12 +1032,12 @@ begin
 
   // generate all the parameters
   dParams := tObjectDictionary<string, Variant>.Create();
-  for i := 1 to length(pkValue) do
+  for i := 0 to length(pkValue)-1 do
   begin
     paramName := 'pkVal' + intToStr(i);
     dParams.Add(paramName, pkValue[i]);
     sql := sql + pkName[i] + ' = :' + paramName;
-    if not(i = length(pkName)) then
+    if not(i = length(pkName)-1) then
     begin
       sql := sql + ' AND ';
     end;
@@ -990,8 +1053,6 @@ begin
     begin
       raise Exception.Create(dsResult['Status']);
     end;
-
-    dParams.Free;
 
     Result := not dsResult.IsEmpty;
 
@@ -1048,7 +1109,7 @@ begin
     // handle error occuring whilst trying to access database
     if dsResult.Fields.FindField('Status') <> nil then
     begin
-      raise Exception.Create( dsResult['Status']);
+      raise Exception.Create(dsResult['Status']);
       exit;
     end;
 
@@ -1057,7 +1118,7 @@ begin
 
     if dsResult.IsEmpty then
     begin
-      raise Exception.Create( 'User does not Exist');
+      raise Exception.Create('User does not Exist');
       exit;
     end;
 
@@ -1287,41 +1348,33 @@ begin
 end;
 
 // allows a user to send a rating from 1 to 5 on an item
-// todo : currently a user can send as many ratings as they want
-// pls fix this
 procedure TDataModule1.sendRating(userID, itemID: string; rating: integer);
 var
-  numRatings: integer;
-  avgRatings: double;
-  sql: string;
-  params: tObjectDictionary<string, Variant>;
   dsResult: tADODataSet;
 begin
 
-  if not hasUserBoughtItem(itemID, userID) then
-  begin
-    raise Exception.Create('User has not bought item yet.');
-  end;
-
-  sql := ' INSERT INTO RatingsTB (UserID, ItemID, rating) VALUES ( :UserID, :ItemID, :rating )';
-  params := tObjectDictionary<string, Variant>.Create();
-  params.Add('ItemID', itemID);
-  params.Add('UserID', userID);
-  params.Add('rating', rating);
-
   try
-    dsResult := runSQL(sql, params);
 
-    if dsResult['Status'] <> 'Success' then
+    if not hasUserBoughtItem(itemID, userID) then
     begin
-      showMessage(dsResult['Status']);
-      exit;
+      raise Exception.Create('You must first buy an item before rating it!');
     end;
 
-  finally
-    params.Free;
-    if Assigned(dsResult) then
-      dsResult.Free;
+    if isInTable([userId, itemId],['UserID', 'ItemID'], 'RatingsTB') then
+    begin
+      updateRating(userID, itemID, rating);
+    end
+    else
+    begin
+      insertRating(userID, itemID, rating);
+    end;
+
+  except
+    on e: Exception do
+    begin
+      raise Exception.Create(e.Message);
+    end;
+
   end;
 
 end;
@@ -1551,6 +1604,36 @@ begin
 
   ItemTB.Post;
   ItemTB.Refresh;
+end;
+
+procedure TDataModule1.updateRating(userID, itemID: string; rating: integer);
+var
+  sql: string;
+  params: tObjectDictionary<string, Variant>;
+  dsResult: tADODataSet;
+begin
+
+  sql := ' UPDATE RatingsTB SET rating = :rating WHERE ItemID = :ItemID AND UserID = :UserID';
+
+  params := tObjectDictionary<string, Variant>.Create();
+  params.Add('ItemID', itemID);
+  params.Add('UserID', userID);
+  params.Add('rating', rating);
+
+  try
+    dsResult := runSQL(sql, params);
+
+    if dsResult['Status'] <> 'Success' then
+    begin
+      raise Exception.Create(dsResult['Status']);
+    end;
+  finally
+    params.Free;
+    if Assigned(dsResult) then
+      dsResult.Free;
+
+  end;
+
 end;
 
 // bill the buyer for their shopping cart

@@ -81,7 +81,7 @@ begin
   lblPrice := TLabel.Create(self.Owner);
   lblPrice.Parent := self;
 
-  lblPrice.Left := 140;
+  lblPrice.Left := 50;
   lblPrice.AlignWithMargins := true;
   lblPrice.Margins.Top := 10;
   lblPrice.Margins.Bottom := 10;
@@ -95,7 +95,7 @@ begin
   lblCF.Margins.Top := 10;
   lblCF.Margins.Bottom := 10;
   lblCF.Parent := self;
-  lblCF.Left := 140;
+  lblCF.Left := 50;
   lblCF.Top := 260;
   lblCF.Width := 82;
   lblCF.Height := 13;
@@ -106,7 +106,7 @@ begin
   lblWU.Margins.Top := 10;
   lblWU.Margins.Bottom := 10;
   lblWU.Parent := self;
-  lblWU.Left := 140;
+  lblWU.Left := 50;
   lblWU.Top := 300;
   lblWU.Width := 67;
   lblWU.Height := 13;
@@ -117,7 +117,7 @@ begin
   lblEU.Margins.Top := 10;
   lblEU.Margins.Bottom := 10;
   lblEU.Parent := self;
-  lblEU.Left := 140;
+  lblEU.Left := 50;
   lblEU.Top := 340;
   lblEU.Width := 71;
   lblEU.Height := 13;
@@ -128,9 +128,9 @@ begin
   imgItem.Center := true;
   imgItem.Parent := self;
   imgItem.Left := 150;
-  imgItem.Top := 30;
+  imgItem.Top := 40;
   imgItem.Width := 180;
-  imgItem.Height := 180;
+  imgItem.Height := 165;
   imgItem.Center := true;
   imgItem.Stretch := true;
 
@@ -145,7 +145,7 @@ begin
   btnViewItem.Parent := self;
   btnViewItem.Left := 150;
   btnViewItem.Top := 380;
-  btnViewItem.Width := 150;
+  btnViewItem.Width := 180;
   btnViewItem.Height := 50;
   btnViewItem.Caption := 'View Item';
   btnViewItem.TabOrder := 0;
