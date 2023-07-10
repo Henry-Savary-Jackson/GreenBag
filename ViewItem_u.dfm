@@ -61,22 +61,22 @@ object frmViewItem: TfrmViewItem
     Caption = 'Water usage to produce:'
   end
   object lblPrice: TLabel
-    Left = 124
-    Top = 184
+    Left = 106
+    Top = 168
     Width = 47
     Height = 18
     Caption = 'Price:'
   end
   object lblName: TLabel
-    Left = 123
-    Top = 143
+    Left = 105
+    Top = 127
     Width = 51
     Height = 18
     Caption = 'Name:'
   end
   object lblSeller: TLabel
-    Left = 124
-    Top = 162
+    Left = 106
+    Top = 146
     Width = 51
     Height = 18
     Caption = 'Seller:'
@@ -103,37 +103,37 @@ object frmViewItem: TfrmViewItem
     Caption = 'Your Rating:'
   end
   object lblCF: TLabel
-    Left = 45
-    Top = 331
+    Left = 44
+    Top = 339
     Width = 256
     Height = 18
     Caption = 'Carbon footprint through usage:'
   end
   object lblEU: TLabel
-    Left = 30
-    Top = 350
+    Left = 29
+    Top = 358
     Width = 289
     Height = 18
     Caption = 'Energy consumption through usage:'
   end
   object lblWU: TLabel
-    Left = 45
-    Top = 369
+    Left = 44
+    Top = 377
     Width = 280
     Height = 18
     Caption = 'Water consumption through usage:'
   end
   object lblStock: TLabel
-    Left = 121
-    Top = 203
+    Left = 103
+    Top = 187
     Width = 51
     Height = 18
     Caption = 'Stock:'
   end
   object lblMaxWithdraw: TLabel
-    Left = 106
-    Top = 227
-    Width = 228
+    Left = 76
+    Top = 211
+    Width = 194
     Height = 36
     Caption = 'Maximum Stock you can withdraw at once:'
     WordWrap = True
@@ -162,31 +162,14 @@ object frmViewItem: TfrmViewItem
     Width = 105
     Height = 30
     Max = 5
-    TabOrder = 4
-  end
-  object btnBack: TButton
-    Left = 8
-    Top = 8
-    Width = 75
-    Height = 25
-    Caption = 'back'
-    TabOrder = 0
-    OnClick = btnBackClick
-  end
-  object btnAddToCart: TButton
-    Left = 121
-    Top = 699
-    Width = 149
-    Height = 35
-    Caption = 'Add to Cart'
-    TabOrder = 1
-    OnClick = btnAddToCartClick
+    TabOrder = 2
   end
   object redDesc: TRichEdit
     Left = 150
     Top = 431
     Width = 185
     Height = 89
+    Color = 7987076
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
     Font.Height = -11
@@ -194,7 +177,7 @@ object frmViewItem: TfrmViewItem
     Font.Style = []
     ParentFont = False
     ReadOnly = True
-    TabOrder = 2
+    TabOrder = 0
     Zoom = 100
   end
   object spnQuantity: TSpinEdit
@@ -202,27 +185,98 @@ object frmViewItem: TfrmViewItem
     Top = 541
     Width = 49
     Height = 28
+    Color = 7987076
     MaxValue = 1000
     MinValue = 1
-    TabOrder = 3
+    TabOrder = 1
     Value = 1
   end
-  object btnSendRating: TButton
-    Left = 120
+  object pnlBack: TPanel
+    Left = 8
+    Top = 8
+    Width = 75
+    Height = 33
+    BorderWidth = 1
+    Color = 8118149
+    ParentBackground = False
+    TabOrder = 3
+    OnClick = btnBackClick
+    object btnBack: TSpeedButton
+      Left = 2
+      Top = 2
+      Width = 71
+      Height = 29
+      Align = alClient
+      Caption = 'Back'
+      Flat = True
+      OnClick = btnBackClick
+      ExplicitLeft = 4
+      ExplicitTop = 4
+    end
+  end
+  object pnlHelp: TPanel
+    Left = 336
+    Top = 8
+    Width = 60
+    Height = 33
+    BorderWidth = 1
+    Color = 8118149
+    ParentBackground = False
+    TabOrder = 4
+    OnClick = btnHelpClick
+    object spnHelp: TSpeedButton
+      Left = 2
+      Top = 2
+      Width = 56
+      Height = 29
+      Align = alClient
+      Caption = '?'
+      Flat = True
+      OnClick = btnHelpClick
+      ExplicitLeft = 9
+      ExplicitTop = 4
+    end
+  end
+  object pnlSendRating: TPanel
+    Left = 133
     Top = 659
-    Width = 150
-    Height = 34
-    Caption = 'Send your Rating'
+    Width = 185
+    Height = 29
+    Color = 7987076
+    ParentBackground = False
     TabOrder = 5
     OnClick = btnSendRatingClick
+    object btnSendRating: TSpeedButton
+      Left = 1
+      Top = 1
+      Width = 183
+      Height = 27
+      Align = alClient
+      Caption = 'Send your Rating'
+      Flat = True
+      ExplicitTop = 2
+      ExplicitHeight = 39
+    end
   end
-  object btnHelp: TButton
-    Left = 348
-    Top = 8
-    Width = 48
-    Height = 33
-    Caption = '?'
+  object pnlAddToCart: TPanel
+    Left = 132
+    Top = 698
+    Width = 185
+    Height = 31
+    Color = 7987076
+    ParentBackground = False
     TabOrder = 6
-    OnClick = btnHelpClick
+    object btnAddToCart: TSpeedButton
+      Left = 1
+      Top = 1
+      Width = 183
+      Height = 29
+      Align = alClient
+      Caption = 'Add to Cart'
+      Flat = True
+      OnClick = btnAddToCartClick
+      ExplicitLeft = 0
+      ExplicitHeight = 39
+    end
   end
 end

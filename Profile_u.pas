@@ -8,20 +8,14 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
   VclTee.TeeGDIPlus, VclTee.TeEngine, VclTee.TeeProcs, VclTee.Chart,
   VclTee.TeeChartLayout, VclTee.Series, DmUnit_u, Data.Win.ADODB,
-  System.Generics.Collections, DateUtils, Data.DB, Vcl.Grids, Vcl.DBGrids;
+  System.Generics.Collections, DateUtils, Data.DB, Vcl.Grids, Vcl.DBGrids,
+  Vcl.Buttons;
 
 type
   TfrmProfile = class(TForm)
-    btnBack: TButton;
     imgProfilePic: TImage;
     lblUsername: TLabel;
-    btnSalesCategory: TButton;
-    btnCFCategory: TButton;
-    btnWUCategory: TButton;
     flpnlCategories: TFlowPanel;
-    btnEUcategory: TButton;
-    btnSpendCategory: TButton;
-    btnViewProducts: TButton;
     lblBalance: TLabel;
     lblRevenueTotal: TLabel;
     lblSales: TLabel;
@@ -33,10 +27,30 @@ type
     chrtStats: TChart;
     chrtLayoutStats: TChartLayout;
     srsStats: TBarSeries;
-    btnLeft: TButton;
-    btnRight: TButton;
-    btnAddFunds: TButton;
-    btnHelp: TButton;
+    pnlBack: TPanel;
+    SpeedButton1: TSpeedButton;
+    pnlHelp: TPanel;
+    spnHelp: TSpeedButton;
+    pnlViewYourProducts: TPanel;
+    btnViewProducts: TSpeedButton;
+    pnlAddFunds: TPanel;
+    btnAddFunds: TSpeedButton;
+    pnlCF: TPanel;
+    btnCF: TSpeedButton;
+    pnlEu: TPanel;
+    btnEU: TSpeedButton;
+    pnlSales: TPanel;
+    btnSales: TSpeedButton;
+    pnlRevenue: TPanel;
+    btnRevenue: TSpeedButton;
+    pnlWU: TPanel;
+    btnWU: TSpeedButton;
+    pnlSpending: TPanel;
+    btnSpending: TSpeedButton;
+    pnlLeft: TPanel;
+    btnLeft: TSpeedButton;
+    pnlRight: TPanel;
+    btnRight: TSpeedButton;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnViewProductsClick(Sender: TObject);
     procedure btnBackClick(Sender: TObject);
@@ -51,6 +65,7 @@ type
     procedure imgProfilePicClick(Sender: TObject);
     procedure btnAddFundsClick(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
+    procedure ShowCategButtons(UserType: string);
   private
     { Private declarations }
     NameToCateg: TObjectDictionary<string, string>;
@@ -127,7 +142,7 @@ end;
 
 procedure TfrmProfile.categoryClickStats(Sender: TObject);
 begin
-  if Sender is TButton then
+  if Sender is TSpeedButton then
   begin
 
     // get the code for this category
@@ -182,12 +197,12 @@ begin
   NameToCateg.Add('Carbon Footprint', 'CF');
   NameToCateg.Add('Energy Usage', 'EU');
   NameToCateg.Add('Water Usage', 'WU');
-  NameToCateg.Add('Balance', 'BAL');
   NameToCateg.Add('Revenue', 'REV');
 
   dsResult := DataModule1.userInfo(DataModule1.userID);
 
   showTotals(dsResult['UserType']);
+  ShowCategButtons(dsResult['UserType']);
 
   lblUsername.Caption := dsResult['Username'];
 
@@ -265,18 +280,36 @@ begin
   //
 end;
 
+procedure TfrmProfile.ShowCategButtons(UserType: string);
+begin
+  if UserType = 'SELLER' then
+  begin
+    pnlSales.Show;
+    pnlRevenue.Show;
+  end
+  else
+  begin
+    pnlSales.Hide;
+    pnlRevenue.Hide;
+  end;
+
+  pnlCF.Show;
+  pnlEU.Show;
+  pnlWu.Show;
+end;
+
 procedure TfrmProfile.showTotals(UserType: string);
 begin
 
   if UserType = 'SELLER' then
   begin
-    btnViewProducts.Show;
+    pnlViewYourProducts.Show;
     lblSales.Show;
     lblRevenueTotal.Show;
   end
   else
   begin
-    btnViewProducts.Hide;
+    pnlViewYourProducts.Hide;
     lblSales.Hide;
     lblRevenueTotal.Hide;
 

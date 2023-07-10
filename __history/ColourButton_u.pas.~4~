@@ -1,0 +1,16 @@
+unit ColourButton_u;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Classes,
+  Vcl.Controls, Vcl.ExtCtrls, Vcl.Graphics, Vcl.Forms, Vcl.Dialogs,
+  Vcl.StdCtrls, Vcl.ComCtrls;
+
+type
+  tColourButton = class(tButton)   ;
+
+
+implementation
+
+end.

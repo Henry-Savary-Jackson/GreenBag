@@ -265,27 +265,19 @@ object frmAddItem: TfrmAddItem
     Caption = 'Maximum withdrawable stock per customer'
     WordWrap = True
   end
-  object btnBack: TButton
-    Left = 8
-    Top = 8
-    Width = 75
-    Height = 25
-    Caption = 'back'
-    TabOrder = 0
-    OnClick = btnBackClick
-  end
   object redDesc: TRichEdit
     Left = 188
     Top = 582
     Width = 185
     Height = 67
+    Color = 7987076
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
     Font.Height = -11
     Font.Name = 'Tahoma'
     Font.Style = []
     ParentFont = False
-    TabOrder = 1
+    TabOrder = 0
     Zoom = 100
   end
   object edtName: TEdit
@@ -293,7 +285,8 @@ object frmAddItem: TfrmAddItem
     Top = 171
     Width = 164
     Height = 25
-    TabOrder = 2
+    Color = 7987076
+    TabOrder = 1
     Text = 'another item'
   end
   object edtPrice: TEdit
@@ -301,7 +294,8 @@ object frmAddItem: TfrmAddItem
     Top = 220
     Width = 121
     Height = 25
-    TabOrder = 3
+    Color = 7987076
+    TabOrder = 2
     Text = '80.00'
   end
   object edtCF: TEdit
@@ -309,7 +303,8 @@ object frmAddItem: TfrmAddItem
     Top = 322
     Width = 121
     Height = 25
-    TabOrder = 4
+    Color = 7987076
+    TabOrder = 3
     Text = '100'
   end
   object edtEU: TEdit
@@ -317,7 +312,8 @@ object frmAddItem: TfrmAddItem
     Top = 349
     Width = 121
     Height = 25
-    TabOrder = 5
+    Color = 7987076
+    TabOrder = 4
     Text = '100'
   end
   object edtWU: TEdit
@@ -325,31 +321,25 @@ object frmAddItem: TfrmAddItem
     Top = 388
     Width = 121
     Height = 25
-    TabOrder = 6
+    Color = 7987076
+    TabOrder = 5
     Text = '100'
-  end
-  object btnSaveChanges: TButton
-    Left = 181
-    Top = 661
-    Width = 116
-    Height = 43
-    Caption = 'Save Changes'
-    TabOrder = 7
-    OnClick = btnSaveChangesClick
   end
   object cmbCategory: TComboBox
     Left = 261
     Top = 537
     Width = 121
     Height = 25
-    TabOrder = 8
+    Color = 7987076
+    TabOrder = 6
   end
   object edtCFProduce: TEdit
     Left = 261
     Top = 429
     Width = 121
     Height = 25
-    TabOrder = 9
+    Color = 7987076
+    TabOrder = 7
     Text = '100'
   end
   object edtEUProduce: TEdit
@@ -357,7 +347,8 @@ object frmAddItem: TfrmAddItem
     Top = 466
     Width = 121
     Height = 25
-    TabOrder = 10
+    Color = 7987076
+    TabOrder = 8
     Text = '100'
   end
   object edtWUProduce: TEdit
@@ -365,7 +356,8 @@ object frmAddItem: TfrmAddItem
     Top = 502
     Width = 121
     Height = 25
-    TabOrder = 11
+    Color = 7987076
+    TabOrder = 9
     Text = '100'
   end
   object edtStock: TEdit
@@ -373,7 +365,8 @@ object frmAddItem: TfrmAddItem
     Top = 252
     Width = 121
     Height = 25
-    TabOrder = 12
+    Color = 7987076
+    TabOrder = 10
     Text = '80'
   end
   object edtMaxWithdrawStock: TEdit
@@ -381,16 +374,76 @@ object frmAddItem: TfrmAddItem
     Top = 291
     Width = 121
     Height = 25
-    TabOrder = 13
+    Color = 7987076
+    TabOrder = 11
     Text = '10'
   end
-  object btnHelp: TButton
-    Left = 385
+  object pnlHelp: TPanel
+    Left = 365
     Top = 8
-    Width = 48
+    Width = 60
     Height = 33
-    Caption = '?'
-    TabOrder = 14
+    BorderWidth = 1
+    Color = 8118149
+    ParentBackground = False
+    TabOrder = 12
     OnClick = btnHelpClick
+    object spnHelp: TSpeedButton
+      Left = 2
+      Top = 2
+      Width = 56
+      Height = 29
+      Align = alClient
+      Caption = '?'
+      Flat = True
+      OnClick = btnHelpClick
+      ExplicitLeft = 9
+      ExplicitTop = 4
+    end
+  end
+  object pnlBack: TPanel
+    Left = 13
+    Top = 8
+    Width = 75
+    Height = 33
+    BorderWidth = 1
+    Color = 8118149
+    ParentBackground = False
+    TabOrder = 13
+    OnClick = btnBackClick
+    object SpeedButton1: TSpeedButton
+      Left = 2
+      Top = 2
+      Width = 71
+      Height = 29
+      Align = alClient
+      Caption = 'Back'
+      Flat = True
+      OnClick = btnBackClick
+      ExplicitLeft = 4
+      ExplicitTop = 4
+    end
+  end
+  object pnlSaveChanges: TPanel
+    Left = 145
+    Top = 670
+    Width = 131
+    Height = 34
+    Color = 7987076
+    ParentBackground = False
+    TabOrder = 14
+    object btnSaveChanges: TSpeedButton
+      Left = 1
+      Top = 1
+      Width = 129
+      Height = 32
+      Align = alClient
+      Caption = 'Save Changes'
+      Flat = True
+      OnClick = btnSaveChangesClick
+      ExplicitLeft = -38
+      ExplicitWidth = 183
+      ExplicitHeight = 39
+    end
   end
 end

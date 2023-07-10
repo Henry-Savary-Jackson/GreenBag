@@ -1,9 +1,9 @@
 object frmProfile: TfrmProfile
-  Left = 0
+  Left = 320
   Top = 0
   Caption = 'Your Profile'
   ClientHeight = 725
-  ClientWidth = 627
+  ClientWidth = 700
   Color = 11074992
   Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
@@ -11,172 +11,226 @@ object frmProfile: TfrmProfile
   Font.Name = 'Arial Rounded MT Bold'
   Font.Style = []
   OldCreateOrder = False
+  Position = poDesigned
   OnClose = FormClose
   OnShow = FormShow
   PixelsPerInch = 96
   TextHeight = 18
   object imgProfilePic: TImage
-    Left = 224
-    Top = 8
+    Left = 304
+    Top = 0
     Width = 105
     Height = 105
     Stretch = True
     OnClick = imgProfilePicClick
   end
   object lblUsername: TLabel
-    Left = 238
-    Top = 119
-    Width = 83
-    Height = 20
+    Left = 304
+    Top = 111
+    Width = 107
+    Height = 22
     Caption = '(Username)'
-    Font.Charset = DEFAULT_CHARSET
+    Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
-    Font.Height = 20
-    Font.Name = 'Tahoma'
+    Font.Height = -19
+    Font.Name = 'Arial Rounded MT Bold'
     Font.Style = []
     ParentFont = False
   end
-  object btnBack: TButton
-    Left = 8
-    Top = 8
-    Width = 75
-    Height = 25
-    Caption = 'back'
-    TabOrder = 0
-    OnClick = btnBackClick
-  end
   object flpnlCategories: TFlowPanel
-    Left = 64
-    Top = 366
-    Width = 443
-    Height = 43
+    Left = 14
+    Top = 410
+    Width = 678
+    Height = 34
     AutoSize = True
     AutoWrap = False
-    TabOrder = 1
-    object btnCFCategory: TButton
-      AlignWithMargins = True
-      Left = 6
-      Top = 9
-      Width = 91
-      Height = 25
-      Margins.Left = 5
-      Margins.Top = 8
-      Margins.Right = 5
-      Margins.Bottom = 8
-      Caption = 'Carbon Footprint'
+    TabOrder = 0
+    object pnlCF: TPanel
+      Left = 1
+      Top = 1
+      Width = 145
+      Height = 32
+      Color = 8118149
+      ParentBackground = False
       TabOrder = 0
-      OnClick = categoryClickStats
+      object btnCF: TSpeedButton
+        Left = 1
+        Top = 1
+        Width = 143
+        Height = 30
+        Align = alClient
+        Caption = 'Carbon Footprint'
+        Flat = True
+        OnClick = categoryClickStats
+        ExplicitLeft = 5
+        ExplicitTop = 8
+      end
     end
-    object btnEUcategory: TButton
-      AlignWithMargins = True
-      Left = 107
-      Top = 9
-      Width = 75
-      Height = 25
-      Margins.Left = 5
-      Margins.Top = 8
-      Margins.Right = 5
-      Margins.Bottom = 8
-      Caption = 'Energy Usage'
+    object pnlEu: TPanel
+      Left = 146
+      Top = 1
+      Width = 144
+      Height = 32
+      Color = 8249222
+      ParentBackground = False
       TabOrder = 1
-      OnClick = categoryClickStats
+      object btnEU: TSpeedButton
+        Left = 1
+        Top = 1
+        Width = 142
+        Height = 30
+        Align = alClient
+        Caption = 'Energy Usage'
+        Flat = True
+        OnClick = categoryClickStats
+        ExplicitLeft = 0
+        ExplicitWidth = 122
+        ExplicitHeight = 16
+      end
     end
-    object btnSalesCategory: TButton
-      AlignWithMargins = True
-      Left = 192
-      Top = 9
-      Width = 75
-      Height = 25
-      Margins.Left = 5
-      Margins.Top = 8
-      Margins.Right = 5
-      Margins.Bottom = 8
-      Caption = 'Sales'
+    object pnlRevenue: TPanel
+      Left = 290
+      Top = 1
+      Width = 92
+      Height = 32
+      Color = 8380296
+      ParentBackground = False
       TabOrder = 2
-      OnClick = categoryClickStats
+      object btnRevenue: TSpeedButton
+        Left = 1
+        Top = 1
+        Width = 90
+        Height = 30
+        Align = alClient
+        Caption = 'Revenue'
+        Flat = True
+        OnClick = categoryClickStats
+        ExplicitLeft = -3
+        ExplicitTop = 3
+        ExplicitHeight = 20
+      end
     end
-    object btnSpendCategory: TButton
-      AlignWithMargins = True
-      Left = 277
-      Top = 9
-      Width = 75
-      Height = 25
-      Margins.Left = 5
-      Margins.Top = 8
-      Margins.Right = 5
-      Margins.Bottom = 8
-      Caption = 'Spending'
+    object pnlSales: TPanel
+      Left = 382
+      Top = 1
+      Width = 74
+      Height = 32
+      Color = 8249222
+      ParentBackground = False
       TabOrder = 3
-      OnClick = categoryClickStats
+      object btnSales: TSpeedButton
+        Left = 1
+        Top = 1
+        Width = 72
+        Height = 30
+        Align = alClient
+        Caption = 'Sales'
+        Flat = True
+        OnClick = categoryClickStats
+        ExplicitLeft = -3
+        ExplicitTop = 3
+        ExplicitHeight = 20
+      end
     end
-    object btnWUCategory: TButton
-      AlignWithMargins = True
-      Left = 362
-      Top = 9
-      Width = 75
-      Height = 25
-      Margins.Left = 5
-      Margins.Top = 8
-      Margins.Right = 5
-      Margins.Bottom = 8
-      Caption = 'Water Usage'
+    object pnlSpending: TPanel
+      Left = 456
+      Top = 1
+      Width = 106
+      Height = 32
+      Color = 8446091
+      ParentBackground = False
       TabOrder = 4
-      OnClick = categoryClickStats
+      object btnSpending: TSpeedButton
+        Left = 1
+        Top = 1
+        Width = 104
+        Height = 30
+        Align = alClient
+        Caption = 'Spending'
+        Flat = True
+        OnClick = categoryClickStats
+        ExplicitLeft = 2
+        ExplicitTop = 0
+        ExplicitWidth = 162
+        ExplicitHeight = 40
+      end
+    end
+    object pnlWU: TPanel
+      Left = 562
+      Top = 1
+      Width = 115
+      Height = 32
+      Color = 8446091
+      ParentBackground = False
+      TabOrder = 5
+      object btnWU: TSpeedButton
+        Left = 1
+        Top = 1
+        Width = 113
+        Height = 30
+        Align = alClient
+        Caption = 'Water Usage'
+        Flat = True
+        OnClick = categoryClickStats
+        ExplicitLeft = 121
+        ExplicitTop = -46
+        ExplicitWidth = 162
+        ExplicitHeight = 40
+      end
     end
   end
   object pnlInfo: TPanel
     AlignWithMargins = True
-    Left = 171
-    Top = 149
-    Width = 210
-    Height = 211
-    AutoSize = True
+    Left = 169
+    Top = 147
+    Width = 360
+    Height = 261
     Padding.Left = 5
     Padding.Top = 5
     Padding.Right = 5
     Padding.Bottom = 5
-    TabOrder = 2
+    TabOrder = 1
     VerticalAlignment = taAlignTop
     object lblBalance: TLabel
       AlignWithMargins = True
       Left = 9
       Top = 9
-      Width = 192
+      Width = 342
       Height = 18
       Align = alTop
       Alignment = taCenter
       Caption = 'Total Balance:'
-      ExplicitWidth = 115
+      ExplicitLeft = -7
+      ExplicitTop = 50
+      ExplicitWidth = 231
     end
     object lblRevenueTotal: TLabel
       AlignWithMargins = True
       Left = 9
       Top = 153
-      Width = 192
+      Width = 342
       Height = 18
       Align = alTop
       Alignment = taCenter
       Caption = 'Total Revenue:'
-      ExplicitTop = 138
       ExplicitWidth = 120
     end
     object lblSales: TLabel
       AlignWithMargins = True
       Left = 9
       Top = 129
-      Width = 192
+      Width = 342
       Height = 18
       Align = alTop
       Alignment = taCenter
       Caption = 'Total Sales:'
-      ExplicitTop = 117
-      ExplicitWidth = 93
+      ExplicitWidth = 416
     end
     object lblSpendingTotal: TLabel
       AlignWithMargins = True
       Left = 9
       Top = 33
-      Width = 192
+      Width = 342
       Height = 18
       Align = alTop
       Alignment = taCenter
@@ -187,7 +241,7 @@ object frmProfile: TfrmProfile
       AlignWithMargins = True
       Left = 9
       Top = 57
-      Width = 192
+      Width = 342
       Height = 18
       Align = alTop
       Alignment = taCenter
@@ -198,40 +252,79 @@ object frmProfile: TfrmProfile
       AlignWithMargins = True
       Left = 9
       Top = 81
-      Width = 192
+      Width = 342
       Height = 18
       Align = alTop
       Alignment = taCenter
       Caption = 'Total Energy Usage:'
-      ExplicitWidth = 161
+      ExplicitLeft = 10
+      ExplicitWidth = 192
     end
     object lblTotalWU: TLabel
       AlignWithMargins = True
       Left = 9
       Top = 105
-      Width = 192
+      Width = 342
       Height = 18
       Align = alTop
       Alignment = taCenter
       Caption = 'Total Water Usage:'
-      ExplicitLeft = 0
+      ExplicitLeft = -42
+      ExplicitWidth = 561
     end
-    object btnViewProducts: TButton
-      AlignWithMargins = True
-      Left = 9
-      Top = 177
-      Width = 192
-      Height = 25
+    object pnlAddFunds: TPanel
+      Left = 6
+      Top = 174
+      Width = 348
+      Height = 41
+      Margins.Top = 10
+      Margins.Bottom = 10
       Align = alTop
-      Caption = 'View your products'
+      AutoSize = True
+      Color = 8118149
+      ParentBackground = False
       TabOrder = 0
-      OnClick = btnViewProductsClick
-      ExplicitTop = 142
+      ExplicitTop = 215
+      ExplicitWidth = 237
+      object btnAddFunds: TSpeedButton
+        Left = 1
+        Top = 1
+        Width = 346
+        Height = 39
+        Align = alClient
+        Caption = 'Add Funds'
+        Flat = True
+        OnClick = btnAddFundsClick
+        ExplicitTop = -3
+      end
+    end
+    object pnlViewYourProducts: TPanel
+      Left = 6
+      Top = 215
+      Width = 348
+      Height = 42
+      Align = alTop
+      Color = 7987076
+      ParentBackground = False
+      TabOrder = 1
+      ExplicitLeft = 7
+      object btnViewProducts: TSpeedButton
+        Left = 1
+        Top = 1
+        Width = 346
+        Height = 40
+        Align = alClient
+        Caption = 'View your products'
+        Flat = True
+        OnClick = btnViewProductsClick
+        ExplicitLeft = 3
+        ExplicitTop = 2
+      end
     end
   end
   object chrtStats: TChart
-    Left = 8
-    Top = 431
+    Left = 35
+    Top = 450
     Width = 625
     Height = 258
     Cursor = crArrow
@@ -312,8 +405,8 @@ object frmProfile: TfrmProfile
     View3DOptions.Zoom = 80
     Zoom.MouseButton = mbMiddle
     BevelOuter = bvNone
-    Color = 11074992
-    TabOrder = 3
+    ParentColor = True
+    TabOrder = 2
     DefaultCanvas = 'TGDIPlusCanvas'
     PrintMargins = (
       15
@@ -355,7 +448,6 @@ object frmProfile: TfrmProfile
       Marks.Visible = False
       Marks.DrawEvery = 5
       Marks.OnTop = True
-      SeriesColor = 7368816
       XValues.Name = 'X'
       XValues.Order = loAscending
       YValues.Name = 'Bar'
@@ -364,40 +456,95 @@ object frmProfile: TfrmProfile
       Detail = {0000000000}
     end
   end
-  object btnLeft: TButton
-    Left = 246
-    Top = 679
-    Width = 75
-    Height = 25
-    Caption = '<'
-    TabOrder = 4
-    OnClick = btnLeftClick
-  end
-  object btnRight: TButton
-    Left = 327
-    Top = 679
-    Width = 75
-    Height = 25
-    Caption = '>'
-    TabOrder = 5
-    OnClick = btnRightClick
-  end
-  object btnAddFunds: TButton
-    Left = 50
-    Top = 82
-    Width = 111
-    Height = 39
-    Caption = 'Add funds'
-    TabOrder = 6
-    OnClick = btnAddFundsClick
-  end
-  object btnHelp: TButton
-    Left = 571
+  object pnlBack: TPanel
+    Left = 13
     Top = 8
-    Width = 48
+    Width = 75
     Height = 33
-    Caption = '?'
-    TabOrder = 7
+    BorderWidth = 1
+    Color = 8118149
+    ParentBackground = False
+    TabOrder = 3
+    OnClick = btnBackClick
+    object SpeedButton1: TSpeedButton
+      Left = 2
+      Top = 2
+      Width = 71
+      Height = 29
+      Align = alClient
+      Caption = 'Back'
+      Flat = True
+      OnClick = btnBackClick
+      ExplicitLeft = 4
+      ExplicitTop = 4
+    end
+  end
+  object pnlHelp: TPanel
+    Left = 618
+    Top = 8
+    Width = 60
+    Height = 33
+    BorderWidth = 1
+    Color = 8118149
+    ParentBackground = False
+    TabOrder = 4
     OnClick = btnHelpClick
+    object spnHelp: TSpeedButton
+      Left = 2
+      Top = 2
+      Width = 56
+      Height = 29
+      Align = alClient
+      Caption = '?'
+      Flat = True
+      OnClick = btnHelpClick
+      ExplicitLeft = -6
+      ExplicitTop = 4
+    end
+  end
+  object pnlLeft: TPanel
+    Left = 262
+    Top = 694
+    Width = 75
+    Height = 33
+    BorderWidth = 1
+    Color = 8249222
+    ParentBackground = False
+    TabOrder = 5
+    OnClick = btnHelpClick
+    object btnLeft: TSpeedButton
+      Left = 2
+      Top = 2
+      Width = 71
+      Height = 29
+      Align = alClient
+      Caption = '<'
+      Flat = True
+      OnClick = btnLeftClick
+      ExplicitLeft = 10
+      ExplicitTop = 10
+    end
+  end
+  object pnlRight: TPanel
+    Left = 378
+    Top = 696
+    Width = 75
+    Height = 33
+    BorderWidth = 1
+    Color = 8380296
+    ParentBackground = False
+    TabOrder = 6
+    OnClick = btnHelpClick
+    object btnRight: TSpeedButton
+      Left = 2
+      Top = 2
+      Width = 71
+      Height = 29
+      Align = alClient
+      Caption = '>'
+      Flat = True
+      OnClick = btnRightClick
+      ExplicitLeft = -6
+    end
   end
 end

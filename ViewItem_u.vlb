@@ -13,9 +13,6 @@ Coordinates=407,282,83,36
 [lblRating]
 Coordinates=379,146,65,58
 
-[btnBack]
-Coordinates=114,214,61,58
-
 [redDesc]
 Coordinates=335,282,62,36
 
@@ -24,12 +21,6 @@ Coordinates=405,214,92,58
 
 [lblDesc]
 Coordinates=185,214,57,58
-
-[btnSendRating]
-Coordinates=77,78,100,58
-
-[btnAddToCart]
-Coordinates=10,214,94,58
 
 [lblCategory]
 Coordinates=335,78,80,58
@@ -47,7 +38,7 @@ Coordinates=507,214,92,58
 Coordinates=10,146,62,58
 
 []
-Coordinates=78,365,91,36
+Coordinates=10,214,94,58
 
 [lblWUProduce]
 Coordinates=270,146,99,58

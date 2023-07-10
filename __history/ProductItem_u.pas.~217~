@@ -1,0 +1,167 @@
+unit ProductItem_u;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Buttons, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
+  System.ImageList, DMunit_u, Data.Win.ADODB, Vcl.ImgList, Vcl.Imaging.pngimage,
+  ItemContainer_u, addItem_u, System.Generics.Collections, Data.DB;
+
+type
+  tRemoveProcedure = procedure(itemID: string) of object;
+
+type
+  ProductItem = class(ItemContainer)
+
+  private
+    imgItem, imgRemoveProduct: TImage;
+    pnlViewItem : tPanel;
+    btnViewItem: TSpeedButton;
+    lblSales, lblName, lblRevenue: TLabel;
+    revenue: double;
+    Sales: integer;
+    name: string;
+    // any code that needs to be executed by the parent screen
+    // when a delete button is clicked is linked to the varaible
+    removeProcedure: tRemoveProcedure;
+    imageStream: TStream;
+
+  public
+    Constructor Create(Owner: tForm; Parent: TWinControl;
+      productData: tAdoDataset; removeProcedure: tRemoveProcedure);
+    procedure createDesign(); override;
+    procedure viewItem(Sender: tObject);
+    // event handling code for the remove button
+    procedure onRemoveClick(Sender: tObject);
+
+  end;
+
+implementation
+
+Constructor ProductItem.Create(Owner: tForm; Parent: TWinControl;
+  productData: tAdoDataset; removeProcedure: tRemoveProcedure);
+
+begin
+  self.removeProcedure := removeProcedure;
+
+  itemID := productData['ItemID'];
+  Name := productData['ItemName'];
+  Sales := productData['Sales'];
+  // calculate revenue
+
+  imageStream := productData.CreateBlobStream
+    (productData.FieldByName('Image'), bmRead);
+
+  revenue := productData['Revenue'];
+
+  Inherited Create(Owner, Parent, itemID);
+
+end;
+
+procedure ProductItem.createDesign();
+begin
+  //
+  AlignWithMargins := True;
+  Left := 11;
+  Top := 11;
+  Width := 790;
+  Height := 190;
+  Margins.Left := 10;
+  Margins.Top := 10;
+  Margins.Right := 10;
+  Margins.Bottom := 10;
+  Align := alTop;
+  TabOrder := 0;
+
+  imgItem := TImage.Create(self.Owner);
+  imgItem.Parent := self;
+  imgItem.Picture.LoadFromFile('cross.png');
+  imgItem.Center := True;
+  imgItem.Left := 70;
+  imgItem.Top := 20;
+  imgItem.Width := 110;
+  imgItem.Height := 110;
+  imgItem.Stretch := True;
+
+  try
+    imgItem.Picture.LoadFromStream(imageStream);
+
+  finally
+    imageStream.Free;
+  end;
+
+  lblName := TLabel.Create(self.Owner);
+  lblName.Parent := self;
+  lblName.Left := 280;
+  lblName.Top := 15;
+  lblName.Width := 31;
+  lblName.Height := 13;
+  lblName.Caption := 'Name: ' + name;
+
+  lblRevenue := TLabel.Create(self.Owner);
+  lblRevenue.Parent := self;
+  lblRevenue.Left := 280;
+  lblRevenue.Top := 75;
+  lblRevenue.Width := 47;
+  lblRevenue.Height := 13;
+  lblRevenue.Caption := 'Revenue: ' + floatToStrf(revenue, ffCurrency, 8, 2);
+
+  lblSales := TLabel.Create(self.Owner);
+  lblSales.Parent := self;
+  lblSales.Left := 280;
+  lblSales.Top := 135;
+  lblSales.Width := 29;
+  lblSales.Height := 13;
+  lblSales.Caption := 'Sales: ' + intToStr(Sales);
+
+
+  pnlViewItem := TPanel.Create(self.Owner);
+  pnlViewItem.Parent := pnlViewItem;
+  pnlViewItem.Left := 45;
+  pnlViewItem.Top := 140;
+  pnlViewItem.Width := 175;
+  pnlViewItem.Height := 50;
+
+  btnViewItem := TSpeedButton.Create(self.Owner);
+  btnViewItem.Parent := pnlViewItem;
+  btnViewItem.Flat := true;
+  btnViewItem.Align := alClient;
+  btnViewItem.Caption := 'View Item';
+  btnViewItem.OnClick := self.viewItem;
+
+
+
+  imgRemoveProduct := TImage.Create(self.Owner);
+  imgRemoveProduct.Parent := self;
+  imgRemoveProduct.AlignWithMargins := True;
+  imgRemoveProduct.Width := 120;
+  imgRemoveProduct.Height := 120;
+  imgRemoveProduct.Margins.Left := 20;
+  imgRemoveProduct.Margins.Top := 0;
+  imgRemoveProduct.Margins.Right := 20;
+  imgRemoveProduct.Margins.Bottom := 0;
+  imgRemoveProduct.Align := alRight;
+  imgRemoveProduct.Picture.LoadFromFile('cross.png');
+  imgRemoveProduct.Center := True;
+  imgRemoveProduct.OnClick := self.onRemoveClick;
+
+end;
+
+procedure ProductItem.onRemoveClick(Sender: tObject);
+begin
+  self.removeProcedure(self.itemID);
+end;
+
+procedure ProductItem.viewItem(Sender: tObject);
+begin
+  //
+  self.Owner.Hide;
+  DataModule1.lastForm := self.Owner;
+  frmAddItem.itemID := itemID;
+  frmAddItem.Show;
+
+end;
+
+end.

@@ -7,7 +7,7 @@ uses
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Data.DB, Vcl.Grids, Vcl.DBGrids,
   DMUNIT_u,
-  Vcl.Mask, Vcl.StdCtrls, Vcl.ExtCtrls;
+  Vcl.Mask, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Buttons;
 
 type
   TfrmLogin = class(TForm)
@@ -15,10 +15,13 @@ type
     edtUsername: TEdit;
     lblUsername: TLabel;
     lblPassword: TLabel;
-    btnSignIn: TButton;
     lblSignUp: TLabel;
-    btnSignUpScreen: TButton;
-    btnHelp: TButton;
+    pnlHelp: TPanel;
+    Panel1: TPanel;
+    sbtnSignIn: TSpeedButton;
+    Panel2: TPanel;
+    sbtnSignUp: TSpeedButton;
+    spnHelp: TSpeedButton;
     procedure btnSignInClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnSignUpScreenClick(Sender: TObject);

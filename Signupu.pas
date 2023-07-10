@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics,
   Vcl.Controls, DMUnit_u, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
-  Vcl.ComCtrls, Vcl.Imaging.pngimage;
+  Vcl.ComCtrls, Vcl.Imaging.pngimage, Vcl.Buttons;
 
 type
   TfrmSignUp = class(TForm)
@@ -17,13 +17,16 @@ type
     lblPassword: TLabel;
     edtCertification: TEdit;
     lblLogin: TLabel;
-    btnLoginScreen: TButton;
     lblCertificationCode: TLabel;
-    btnSignUp: TButton;
     lblHomeAddress: TLabel;
     redHomeAddress: TRichEdit;
     imgPfp: TImage;
-    btnHelp: TButton;
+    pnlHelp: TPanel;
+    spnHelp: TSpeedButton;
+    pnlLogin: TPanel;
+    btnSignIn: TSpeedButton;
+    pnlSignUp: TPanel;
+    btnSignUp: TSpeedButton;
     procedure btnLoginScreenClick(Sender: TObject);
     procedure btnSignUpClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);

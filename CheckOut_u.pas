@@ -8,19 +8,22 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls,
   Vcl.ExtCtrls, Data.win.ADODB,
   Vcl.Samples.Spin, Vcl.Imaging.pngimage, CartItem_u,
-  System.Generics.Collections, ItemContainer_u, DMUnit_u;
+  System.Generics.Collections, ItemContainer_u, DMUnit_u, Vcl.Buttons;
 
 type
   TfrmCheckout = class(TForm)
-    btnBack: TButton;
     flpnlItems: TFlowPanel;
-    btnCheckout: TButton;
     scrbxItems: TScrollBox;
     lblTotalCost: TLabel;
     lblTotalCF: TLabel;
     lblTotalEU: TLabel;
     lblTotalWU: TLabel;
-    btnHelp: TButton;
+    pnlBack: TPanel;
+    pnlHelp: TPanel;
+    spnHelp: TSpeedButton;
+    SpeedButton1: TSpeedButton;
+    btnCheckout: TSpeedButton;
+    pnlCheckout: TPanel;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnBackClick(Sender: TObject);
     procedure btnCheckoutClick(Sender: TObject);

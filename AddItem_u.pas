@@ -6,7 +6,8 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls,
-  Vcl.ExtCtrls, DMUnit_u, Data.Win.ADODB, PngImage, Vcl.Imaging.jpeg, Data.DB;
+  Vcl.ExtCtrls, DMUnit_u, Data.Win.ADODB, PngImage, Vcl.Imaging.jpeg, Data.DB,
+  Vcl.Buttons;
 
 type
   TfrmAddItem = class(TForm)
@@ -19,14 +20,12 @@ type
     lblPrice: TLabel;
     lblName: TLabel;
     lblSeller: TLabel;
-    btnBack: TButton;
     redDesc: TRichEdit;
     edtName: TEdit;
     edtPrice: TEdit;
     edtCF: TEdit;
     edtEU: TEdit;
     edtWU: TEdit;
-    btnSaveChanges: TButton;
     cmbCategory: TComboBox;
     lblRating: TLabel;
     lblCFProduce: TLabel;
@@ -39,7 +38,12 @@ type
     edtStock: TEdit;
     lblMaxWithdrawStock: TLabel;
     edtMaxWithdrawStock: TEdit;
-    btnHelp: TButton;
+    pnlHelp: TPanel;
+    spnHelp: TSpeedButton;
+    pnlBack: TPanel;
+    SpeedButton1: TSpeedButton;
+    pnlSaveChanges: TPanel;
+    btnSaveChanges: TSpeedButton;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure imgItemClick(Sender: TObject);
     procedure btnBackClick(Sender: TObject);

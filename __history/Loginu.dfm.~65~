@@ -1,0 +1,149 @@
+object frmLogin: TfrmLogin
+  Left = 0
+  Top = 0
+  BorderWidth = 3
+  Caption = 'Login'
+  ClientHeight = 315
+  ClientWidth = 322
+  Color = 11074992
+  Font.Charset = ANSI_CHARSET
+  Font.Color = 16384
+  Font.Height = -16
+  Font.Name = 'Arial Rounded MT Bold'
+  Font.Style = []
+  OldCreateOrder = False
+  OnClose = FormClose
+  OnCreate = FormCreate
+  PixelsPerInch = 96
+  TextHeight = 18
+  object lblUsername: TLabel
+    Left = 24
+    Top = 59
+    Width = 82
+    Height = 18
+    Caption = 'Username'
+    Color = 16384
+    Font.Charset = ANSI_CHARSET
+    Font.Color = 16384
+    Font.Height = -16
+    Font.Name = 'Arial Rounded MT Bold'
+    Font.Style = []
+    ParentColor = False
+    ParentFont = False
+  end
+  object lblPassword: TLabel
+    Left = 24
+    Top = 107
+    Width = 79
+    Height = 18
+    Caption = 'Password'
+    Color = 16384
+    Font.Charset = ANSI_CHARSET
+    Font.Color = 16384
+    Font.Height = -16
+    Font.Name = 'Arial Rounded MT Bold'
+    Font.Style = []
+    ParentColor = False
+    ParentFont = False
+  end
+  object lblSignUp: TLabel
+    Left = 55
+    Top = 216
+    Width = 192
+    Height = 18
+    Caption = 'Don'#39't have an account? '
+    Color = 16384
+    Font.Charset = ANSI_CHARSET
+    Font.Color = 16384
+    Font.Height = -16
+    Font.Name = 'Arial Rounded MT Bold'
+    Font.Style = []
+    ParentColor = False
+    ParentFont = False
+  end
+  object edtPassword: TEdit
+    Left = 109
+    Top = 104
+    Width = 172
+    Height = 26
+    Color = 7987076
+    TabOrder = 0
+    Text = 'password1+'
+  end
+  object edtUsername: TEdit
+    Left = 112
+    Top = 56
+    Width = 169
+    Height = 26
+    Color = 7987076
+    TabOrder = 1
+    Text = 'User2'
+  end
+  object pnlHelp: TPanel
+    Left = 254
+    Top = 0
+    Width = 60
+    Height = 33
+    BorderWidth = 1
+    Color = 8118149
+    ParentBackground = False
+    TabOrder = 2
+    OnClick = btnHelpClick
+    object spnHelp: TSpeedButton
+      Left = 2
+      Top = 2
+      Width = 56
+      Height = 29
+      Align = alClient
+      Caption = '?'
+      Flat = True
+      OnClick = btnHelpClick
+      ExplicitLeft = 4
+      ExplicitTop = 4
+    end
+  end
+  object Panel1: TPanel
+    Left = 113
+    Top = 161
+    Width = 81
+    Height = 33
+    BorderWidth = 1
+    Color = 8118149
+    ParentBackground = False
+    TabOrder = 3
+    OnClick = btnHelpClick
+    object sbtnSignIn: TSpeedButton
+      Left = 2
+      Top = 2
+      Width = 77
+      Height = 29
+      Align = alClient
+      Caption = 'Sign In'
+      Flat = True
+      OnClick = btnSignInClick
+      ExplicitTop = 4
+    end
+  end
+  object Panel2: TPanel
+    Left = 107
+    Top = 264
+    Width = 81
+    Height = 33
+    BorderWidth = 1
+    Color = 8118149
+    ParentBackground = False
+    TabOrder = 4
+    OnClick = btnHelpClick
+    object sbtnSignUp: TSpeedButton
+      Left = 2
+      Top = 2
+      Width = 77
+      Height = 29
+      Align = alClient
+      Caption = 'Sign Up'
+      Flat = True
+      OnClick = btnSignUpScreenClick
+      ExplicitTop = 4
+    end
+  end
+end

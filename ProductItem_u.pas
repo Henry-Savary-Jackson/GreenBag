@@ -5,7 +5,7 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
+  Vcl.Controls, Vcl.Forms, Vcl.Buttons, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
   System.ImageList, DMunit_u, Data.Win.ADODB, Vcl.ImgList, Vcl.Imaging.pngimage,
   ItemContainer_u, addItem_u, System.Generics.Collections, Data.DB;
 
@@ -17,8 +17,8 @@ type
 
   private
     imgItem, imgRemoveProduct: TImage;
-    grpRemoveProduct: TGroupBox;
-    btnViewItem: TButton;
+    pnlViewItem : tPanel;
+    btnViewItem: TSpeedButton;
     lblSales, lblName, lblRevenue: TLabel;
     revenue: double;
     Sales: integer;
@@ -116,41 +116,35 @@ begin
   lblSales.Height := 13;
   lblSales.Caption := 'Sales: ' + intToStr(Sales);
 
-  btnViewItem := TButton.Create(self.Owner);
-  btnViewItem.Parent := self;
-  btnViewItem.Left := 45;
-  btnViewItem.Top := 140;
-  btnViewItem.Width := 175;
-  btnViewItem.Height := 50;
+
+  pnlViewItem := TPanel.Create(self.Owner);
+  pnlViewItem.Parent := self;
+  pnlViewItem.Left := 45;
+  pnlViewItem.Top := 135;
+  pnlViewItem.Width := 175;
+  pnlViewItem.Height := 50;
+  pnlViewItem.Color := $007BDF85;
+  pnlViewItem.ParentBackground := false;
+  pnlViewItem.ParentColor := false;
+
+  btnViewItem := TSpeedButton.Create(self.Owner);
+  btnViewItem.Parent := pnlViewItem;
+  btnViewItem.Flat := true ;
+  btnViewItem.Align := alClient;
   btnViewItem.Caption := 'View Item';
-  btnViewItem.TabOrder := 0;
   btnViewItem.OnClick := self.viewItem;
 
-  grpRemoveProduct := TGroupBox.Create(self.Owner);
-  grpRemoveProduct.Parent := self;
-  grpRemoveProduct.AlignWithMargins := True;
-  grpRemoveProduct.Width := 120;
-  grpRemoveProduct.Margins.Left := 20;
-  grpRemoveProduct.Margins.Top := 10;
-  grpRemoveProduct.Margins.Right := 20;
-  grpRemoveProduct.Margins.Bottom := 20;
-  grpRemoveProduct.Align := alRight;
-  grpRemoveProduct.Color := clScrollBar;
-  grpRemoveProduct.ParentBackground := False;
-  grpRemoveProduct.ParentColor := False;
-  grpRemoveProduct.TabOrder := 1;
-  grpRemoveProduct.OnClick := self.onRemoveClick;
-
   imgRemoveProduct := TImage.Create(self.Owner);
-  imgRemoveProduct.Parent := grpRemoveProduct;
-  imgRemoveProduct.Center := True;
-  imgRemoveProduct.Picture.LoadFromFile('cross.png');
+  imgRemoveProduct.Parent := self;
   imgRemoveProduct.AlignWithMargins := True;
-  imgRemoveProduct.Margins.Left := 5;
+  imgRemoveProduct.Width := 120;
+  imgRemoveProduct.Height := 120;
+  imgRemoveProduct.Margins.Left := 20;
   imgRemoveProduct.Margins.Top := 0;
-  imgRemoveProduct.Margins.Right := 5;
-  imgRemoveProduct.Margins.Bottom := 5;
-  imgRemoveProduct.Align := alClient;
+  imgRemoveProduct.Margins.Right := 20;
+  imgRemoveProduct.Margins.Bottom := 0;
+  imgRemoveProduct.Align := alRight;
+  imgRemoveProduct.Picture.LoadFromFile('cross.png');
   imgRemoveProduct.Center := True;
   imgRemoveProduct.OnClick := self.onRemoveClick;
 

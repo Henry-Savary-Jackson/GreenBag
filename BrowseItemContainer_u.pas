@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
-  System.Classes, Vcl.Graphics,
+  System.Classes, Vcl.Graphics,Vcl.buttons,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
   System.ImageList, Data.Win.ADODB, DMUnit_u, Vcl.ImgList,
   System.Generics.Collections, Vcl.Imaging.pngimage, ItemContainer_u, Data.DB;
@@ -25,7 +25,8 @@ type
     lblWU: TLabel;
     lblEU: TLabel;
     imgItem: TImage;
-    btnViewItem: TButton;
+    btnViewItem: tSpeedButton;
+    pnlViewItem : tPanel;
 
     // user id of seller of this item
     sellerID: string;
@@ -141,14 +142,22 @@ begin
     imageStream.Free;
   end;
 
-  btnViewItem := TButton.Create(self.Owner);
-  btnViewItem.Parent := self;
-  btnViewItem.Left := 150;
-  btnViewItem.Top := 380;
-  btnViewItem.Width := 180;
-  btnViewItem.Height := 50;
+  pnlViewItem := TPanel.Create(self.Owner);
+  pnlViewItem.ParentBackground := false;
+  pnlViewItem.ParentColor := false;
+  pnlViewItem.Parent := self;
+
+  pnlViewItem.Color := $0079DF84;
+  pnlViewItem.Left := 150;
+  pnlViewItem.Top := 380;
+  pnlViewItem.Width := 180;
+  pnlViewItem.Height := 50;
+
+  btnViewItem := TSpeedButton.Create(self.Owner);
+  btnViewItem.Parent := pnlViewItem;
+  btnViewItem.Align := alClient;
+  btnViewItem.Flat := true;
   btnViewItem.Caption := 'View Item';
-  btnViewItem.TabOrder := 0;
   btnViewItem.OnClick := self.onViewItem;
 
 end;

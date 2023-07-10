@@ -4,9 +4,6 @@ Coordinates=355,146,74,58
 [scrbxItems]
 Coordinates=330,282,77,36
 
-[btnBack]
-Coordinates=217,146,61,58
-
 [lblTotalCF]
 Coordinates=166,10,74,58
 
@@ -19,10 +16,7 @@ Coordinates=99,78,83,58
 [flpnlItems]
 Coordinates=308,78,70,58
 
-[btnCheckout]
-Coordinates=73,214,87,58
-
 []
-Coordinates=338,10,58,58
+Coordinates=73,214,87,58
 Visible=True
 

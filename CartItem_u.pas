@@ -20,7 +20,6 @@ type
   CartItem = class(ItemContainer)
 
   private
-    grpRemoveItem: TGroupBox;
     imgRemoveItem: TImage;
     lblQuantity: TLabel;
     redItemInfo: TRichEdit;
@@ -126,38 +125,23 @@ begin
   self.UpdateRedInfo;
 
   // grpRemoveItem's properties
-
-  grpRemoveItem := TGroupBox.Create(self.Owner);
-  grpRemoveItem.Parent := self;
-  grpRemoveItem.AlignWithMargins := True;
-  grpRemoveItem.Left := 480;
-  grpRemoveItem.Top := 25;
-  grpRemoveItem.Width := 180;
-  grpRemoveItem.Margins.Left := 20;
-  grpRemoveItem.Margins.Top := 10;
-  grpRemoveItem.Margins.Right := 20;
-  grpRemoveItem.Margins.Bottom := 20;
-  grpRemoveItem.Align := alRight;
-  grpRemoveItem.Color := clScrollBar;
-  grpRemoveItem.ParentBackground := False;
-  grpRemoveItem.ParentColor := False;
-  grpRemoveItem.TabOrder := 2;
-  grpRemoveItem.OnClick := self.onRemoveClick;
-
   // imgRemoveItem's properties
   imgRemoveItem := TImage.Create(self.Owner);
-  imgRemoveItem.Parent := grpRemoveItem;
+  imgRemoveItem.Parent := self;
+
   imgRemoveItem.AlignWithMargins := True;
-  imgRemoveItem.Left := 7;
-  imgRemoveItem.Top := 15;
-  imgRemoveItem.Margins.Left := 5;
-  imgRemoveItem.Margins.Top := 0;
-  imgRemoveItem.Margins.Right := 5;
-  imgRemoveItem.Margins.Bottom := 5;
+  imgRemoveItem.Left := 480;
+  imgRemoveItem.Top := 25;
+  imgRemoveItem.Width := 180;
+  imgRemoveItem.Margins.Left := 20;
+  imgRemoveItem.Margins.Top := 10;
+  imgRemoveItem.Margins.Right := 20;
+  imgRemoveItem.Margins.Bottom := 20;
+  imgRemoveItem.Align := alRight;
+  imgRemoveItem.OnClick := self.onRemoveClick;
   imgRemoveItem.Align := alClient;
   imgRemoveItem.Center := True;
   imgRemoveItem.Picture.LoadFromFile('cross.png');
-  imgRemoveItem.OnClick := self.onRemoveClick;
 
   spnQuantity := TSpinEdit.Create(self.Owner);
   spnQuantity.Parent := self;

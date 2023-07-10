@@ -1,9 +1,10 @@
 object frmLogin: TfrmLogin
   Left = 0
   Top = 0
+  BorderWidth = 3
   Caption = 'Login'
-  ClientHeight = 303
-  ClientWidth = 312
+  ClientHeight = 319
+  ClientWidth = 326
   Color = 11074992
   Font.Charset = ANSI_CHARSET
   Font.Color = 16384
@@ -16,8 +17,8 @@ object frmLogin: TfrmLogin
   PixelsPerInch = 96
   TextHeight = 18
   object lblUsername: TLabel
-    Left = 24
-    Top = 59
+    Left = 31
+    Top = 67
     Width = 82
     Height = 18
     Caption = 'Username'
@@ -31,8 +32,8 @@ object frmLogin: TfrmLogin
     ParentFont = False
   end
   object lblPassword: TLabel
-    Left = 24
-    Top = 107
+    Left = 31
+    Top = 115
     Width = 79
     Height = 18
     Caption = 'Password'
@@ -46,8 +47,8 @@ object frmLogin: TfrmLogin
     ParentFont = False
   end
   object lblSignUp: TLabel
-    Left = 55
-    Top = 216
+    Left = 62
+    Top = 224
     Width = 192
     Height = 18
     Caption = 'Don'#39't have an account? '
@@ -61,48 +62,88 @@ object frmLogin: TfrmLogin
     ParentFont = False
   end
   object edtPassword: TEdit
-    Left = 109
-    Top = 104
+    Left = 116
+    Top = 112
     Width = 172
     Height = 26
-    Color = 5883392
+    Color = 7987076
     TabOrder = 0
     Text = 'password1+'
   end
   object edtUsername: TEdit
-    Left = 112
-    Top = 56
+    Left = 119
+    Top = 64
     Width = 169
     Height = 26
-    Color = 5883392
+    Color = 7987076
     TabOrder = 1
     Text = 'User2'
   end
-  object btnSignIn: TButton
-    Left = 113
-    Top = 160
-    Width = 75
-    Height = 27
-    Caption = 'Sign In'
-    TabOrder = 2
-    OnClick = btnSignInClick
-  end
-  object btnSignUpScreen: TButton
-    Left = 113
-    Top = 240
-    Width = 75
-    Height = 25
-    Caption = 'Sign Up'
-    TabOrder = 3
-    OnClick = btnSignUpScreenClick
-  end
-  object btnHelp: TButton
-    Left = 256
-    Top = 8
-    Width = 48
+  object pnlHelp: TPanel
+    Left = 230
+    Top = 0
+    Width = 60
     Height = 33
-    Caption = '?'
+    BorderWidth = 1
+    Color = 8118149
+    ParentBackground = False
+    TabOrder = 2
+    OnClick = btnHelpClick
+    object spnHelp: TSpeedButton
+      Left = 2
+      Top = 2
+      Width = 56
+      Height = 29
+      Align = alClient
+      Caption = '?'
+      Flat = True
+      OnClick = btnHelpClick
+      ExplicitLeft = 4
+      ExplicitTop = 4
+    end
+  end
+  object Panel1: TPanel
+    Left = 120
+    Top = 169
+    Width = 81
+    Height = 33
+    BorderWidth = 1
+    Color = 8118149
+    ParentBackground = False
+    TabOrder = 3
+    OnClick = btnHelpClick
+    object sbtnSignIn: TSpeedButton
+      Left = 2
+      Top = 2
+      Width = 77
+      Height = 29
+      Align = alClient
+      Caption = 'Sign In'
+      Flat = True
+      OnClick = btnSignInClick
+      ExplicitTop = 4
+    end
+  end
+  object Panel2: TPanel
+    Left = 114
+    Top = 272
+    Width = 81
+    Height = 33
+    BorderWidth = 1
+    Color = 8118149
+    ParentBackground = False
     TabOrder = 4
     OnClick = btnHelpClick
+    object sbtnSignUp: TSpeedButton
+      Left = 2
+      Top = 2
+      Width = 77
+      Height = 29
+      Align = alClient
+      Caption = 'Sign Up'
+      Flat = True
+      OnClick = btnSignUpScreenClick
+      ExplicitTop = 4
+    end
   end
 end

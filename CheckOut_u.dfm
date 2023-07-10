@@ -2,7 +2,7 @@ object frmCheckout: TfrmCheckout
   Left = 0
   Top = 0
   Caption = 'Checkout'
-  ClientHeight = 406
+  ClientHeight = 415
   ClientWidth = 632
   Color = 11074992
   Font.Charset = ANSI_CHARSET
@@ -43,32 +43,14 @@ object frmCheckout: TfrmCheckout
     Height = 18
     Caption = 'Total Energy Usage:'
   end
-  object btnBack: TButton
-    Left = 8
-    Top = 8
-    Width = 75
-    Height = 25
-    Caption = 'back'
-    TabOrder = 0
-    OnClick = btnBackClick
-  end
-  object btnCheckout: TButton
-    Left = 283
-    Top = 373
-    Width = 94
-    Height = 25
-    Caption = 'Check Out'
-    TabOrder = 1
-    OnClick = btnCheckoutClick
-  end
   object scrbxItems: TScrollBox
     Left = 8
-    Top = 56
+    Top = 45
     Width = 616
     Height = 258
     HorzScrollBar.Tracking = True
     VertScrollBar.Tracking = True
-    TabOrder = 2
+    TabOrder = 0
     object flpnlItems: TFlowPanel
       Left = 3
       Top = 3
@@ -78,13 +60,71 @@ object frmCheckout: TfrmCheckout
       TabOrder = 0
     end
   end
-  object btnHelp: TButton
-    Left = 576
+  object pnlBack: TPanel
+    Left = 13
     Top = 8
-    Width = 48
+    Width = 75
     Height = 33
-    Caption = '?'
-    TabOrder = 3
+    BorderWidth = 1
+    Color = 8118149
+    ParentBackground = False
+    TabOrder = 1
+    OnClick = btnBackClick
+    object SpeedButton1: TSpeedButton
+      Left = 2
+      Top = 2
+      Width = 71
+      Height = 29
+      Align = alClient
+      Caption = 'Back'
+      Flat = True
+      OnClick = btnBackClick
+      ExplicitLeft = 4
+      ExplicitTop = 4
+    end
+  end
+  object pnlHelp: TPanel
+    Left = 551
+    Top = 8
+    Width = 60
+    Height = 33
+    BorderWidth = 1
+    Color = 8249222
+    ParentBackground = False
+    TabOrder = 2
     OnClick = btnHelpClick
+    object spnHelp: TSpeedButton
+      Left = 2
+      Top = 2
+      Width = 56
+      Height = 29
+      Align = alClient
+      Caption = '?'
+      Flat = True
+      OnClick = btnHelpClick
+      ExplicitTop = 0
+    end
+  end
+  object pnlCheckout: TPanel
+    Left = 263
+    Top = 366
+    Width = 106
+    Height = 41
+    Color = 8118149
+    ParentBackground = False
+    TabOrder = 3
+    object btnCheckout: TSpeedButton
+      Left = 1
+      Top = 1
+      Width = 104
+      Height = 39
+      Align = alClient
+      Caption = 'Check Out'
+      Flat = True
+      OnClick = btnCheckoutClick
+      ExplicitLeft = -23
+      ExplicitTop = 0
+      ExplicitWidth = 183
+    end
   end
 end

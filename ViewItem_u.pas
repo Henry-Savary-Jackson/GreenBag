@@ -8,13 +8,11 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls,
   Vcl.ExtCtrls,
   Vcl.Samples.Spin, DMUnit_u, System.Generics.Collections, Data.Win.ADODB,
-  Vcl.Imaging.pngimage, Data.DB;
+  Vcl.Imaging.pngimage, Data.DB, Vcl.Buttons;
 
 type
   TfrmViewItem = class(TForm)
-    btnBack: TButton;
     imgItem: TImage;
-    btnAddToCart: TButton;
     redDesc: TRichEdit;
     lblDesc: TLabel;
     lblCategory: TLabel;
@@ -29,7 +27,6 @@ type
     lblRating: TLabel;
     trcRating: TTrackBar;
     lblYourRating: TLabel;
-    btnSendRating: TButton;
     lblCF: TLabel;
     lblEU: TLabel;
     lblWU: TLabel;
@@ -37,7 +34,14 @@ type
     lblMaxWithdraw: TLabel;
     lbl5: TLabel;
     lbl0: TLabel;
-    btnHelp: TButton;
+    pnlBack: TPanel;
+    pnlHelp: TPanel;
+    spnHelp: TSpeedButton;
+    pnlSendRating: TPanel;
+    pnlAddToCart: TPanel;
+    btnAddToCart: TSpeedButton;
+    btnSendRating: TSpeedButton;
+    btnBack: TSpeedButton;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnBackClick(Sender: TObject);
     procedure btnAddToCartClick(Sender: TObject);
