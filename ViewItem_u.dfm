@@ -4,7 +4,7 @@ object frmViewItem: TfrmViewItem
   ActiveControl = spnQuantity
   Caption = 'View Item'
   ClientHeight = 742
-  ClientWidth = 404
+  ClientWidth = 448
   Color = 11074992
   Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
@@ -18,7 +18,7 @@ object frmViewItem: TfrmViewItem
   PixelsPerInch = 96
   TextHeight = 18
   object imgItem: TImage
-    Left = 152
+    Left = 175
     Top = 8
     Width = 105
     Height = 105
@@ -172,8 +172,8 @@ object frmViewItem: TfrmViewItem
     Color = 7987076
     Font.Charset = ANSI_CHARSET
     Font.Color = clWindowText
-    Font.Height = -11
-    Font.Name = 'Tahoma'
+    Font.Height = -13
+    Font.Name = 'Arial Rounded MT Bold'
     Font.Style = []
     ParentFont = False
     ReadOnly = True
@@ -215,7 +215,7 @@ object frmViewItem: TfrmViewItem
     end
   end
   object pnlHelp: TPanel
-    Left = 336
+    Left = 380
     Top = 8
     Width = 60
     Height = 33
@@ -233,8 +233,7 @@ object frmViewItem: TfrmViewItem
       Caption = '?'
       Flat = True
       OnClick = btnHelpClick
-      ExplicitLeft = 9
-      ExplicitTop = 4
+      ExplicitLeft = 34
     end
   end
   object pnlSendRating: TPanel
@@ -254,6 +253,7 @@ object frmViewItem: TfrmViewItem
       Align = alClient
       Caption = 'Send your Rating'
       Flat = True
+      OnClick = btnSendRatingClick
       ExplicitTop = 2
       ExplicitHeight = 39
     end

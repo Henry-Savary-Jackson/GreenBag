@@ -68,7 +68,7 @@ end;
 procedure BrowseItem.createDesign();
 begin
 
-  Width := 470;
+  Width := 550;
   Height := 470;
   self.AlignWithMargins := true;
   Margins.Left := 10;
@@ -82,7 +82,7 @@ begin
   lblPrice := TLabel.Create(self.Owner);
   lblPrice.Parent := self;
 
-  lblPrice.Left := 50;
+  lblPrice.Left := 30;
   lblPrice.AlignWithMargins := true;
   lblPrice.Margins.Top := 10;
   lblPrice.Margins.Bottom := 10;
@@ -96,33 +96,33 @@ begin
   lblCF.Margins.Top := 10;
   lblCF.Margins.Bottom := 10;
   lblCF.Parent := self;
-  lblCF.Left := 50;
+  lblCF.Left := 30;
   lblCF.Top := 260;
   lblCF.Width := 82;
   lblCF.Height := 13;
-  lblCF.Caption := 'Carbon Footprint:' + floattoStrf(itemCF, fffixed, 8, 2);
+  lblCF.Caption := 'Carbon Footprint:' + floattoStrf(itemCF, fffixed, 8, 2) + ' t/unit';
 
   lblWU := TLabel.Create(self.Owner);
   lblWU.AlignWithMargins := true;
   lblWU.Margins.Top := 10;
   lblWU.Margins.Bottom := 10;
   lblWU.Parent := self;
-  lblWU.Left := 50;
+  lblWU.Left := 30;
   lblWU.Top := 300;
   lblWU.Width := 67;
   lblWU.Height := 13;
-  lblWU.Caption := 'Water Usage:' + floattoStrf(itemWU, fffixed, 8, 2);;
+  lblWU.Caption := 'Water Usage:' + floattoStrf(itemWU, fffixed, 8, 2)+ ' L/unit';
 
   lblEU := TLabel.Create(self.Owner);
   lblEU.AlignWithMargins := true;
   lblEU.Margins.Top := 10;
   lblEU.Margins.Bottom := 10;
   lblEU.Parent := self;
-  lblEU.Left := 50;
+  lblEU.Left := 30;
   lblEU.Top := 340;
   lblEU.Width := 71;
   lblEU.Height := 13;
-  lblEU.Caption := 'Energy Usage:' + floattoStrf(itemEU, fffixed, 8, 2);;
+  lblEU.Caption := 'Energy Usage:' + floattoStrf(itemEU, fffixed, 8, 2) + ' kWh/unit';
 
   imgItem := TImage.Create(self.Owner);
   imgItem.Picture.LoadFromFile('cross.png');

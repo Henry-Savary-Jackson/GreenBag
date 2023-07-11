@@ -69,18 +69,20 @@ object frmLogin: TfrmLogin
     Color = 7987076
     TabOrder = 0
     Text = 'password1+'
+    OnKeyDown = edtPasswordKeyDown
   end
   object edtUsername: TEdit
     Left = 119
     Top = 64
     Width = 169
     Height = 26
-    Color = 7987076
+    Color = 8118149
     TabOrder = 1
     Text = 'User2'
+    OnKeyDown = edtPasswordKeyDown
   end
   object pnlHelp: TPanel
-    Left = 230
+    Left = 258
     Top = 0
     Width = 60
     Height = 33
@@ -98,17 +100,17 @@ object frmLogin: TfrmLogin
       Caption = '?'
       Flat = True
       OnClick = btnHelpClick
-      ExplicitLeft = 4
+      ExplicitLeft = 10
       ExplicitTop = 4
     end
   end
-  object Panel1: TPanel
+  object pnlLogin: TPanel
     Left = 120
     Top = 169
     Width = 81
     Height = 33
     BorderWidth = 1
-    Color = 8118149
+    Color = 8249222
     ParentBackground = False
     TabOrder = 3
     OnClick = btnHelpClick
@@ -124,13 +126,13 @@ object frmLogin: TfrmLogin
       ExplicitTop = 4
     end
   end
-  object Panel2: TPanel
+  object pnlSignup: TPanel
     Left = 114
     Top = 272
     Width = 81
     Height = 33
     BorderWidth = 1
-    Color = 8118149
+    Color = 8380296
     ParentBackground = False
     TabOrder = 4
     OnClick = btnHelpClick

@@ -3,7 +3,7 @@ object frmBrowse: TfrmBrowse
   Top = 100
   Caption = 'Browse items'
   ClientHeight = 587
-  ClientWidth = 992
+  ClientWidth = 1051
   Color = 11074992
   Font.Charset = DEFAULT_CHARSET
   Font.Color = 16384
@@ -19,23 +19,24 @@ object frmBrowse: TfrmBrowse
   object grpMain: TGroupBox
     Left = 139
     Top = 0
-    Width = 853
+    Width = 912
     Height = 587
     Align = alClient
     TabOrder = 0
+    ExplicitLeft = 145
     object grpHeader: TGroupBox
       Left = 2
       Top = 20
-      Width = 849
-      Height = 129
+      Width = 908
+      Height = 121
       Margins.Top = 0
       Align = alTop
       TabOrder = 0
-      ExplicitLeft = 6
+      ExplicitLeft = 1
       ExplicitTop = 16
       DesignSize = (
-        849
-        129)
+        908
+        121)
       object lblCFRange: TLabel
         Left = 438
         Top = 39
@@ -53,7 +54,7 @@ object frmBrowse: TfrmBrowse
       end
       object lbWURange: TLabel
         Left = 464
-        Top = 107
+        Top = 90
         Width = 145
         Height = 18
         Caption = 'Water usage from '
@@ -141,6 +142,51 @@ object frmBrowse: TfrmBrowse
         ParentColor = False
         ParentFont = False
       end
+      object lblCFUnit: TLabel
+        Left = 752
+        Top = 39
+        Width = 40
+        Height = 18
+        Caption = 't/unit'
+        Color = 16384
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = 16384
+        Font.Height = -16
+        Font.Name = 'Arial Rounded MT Bold'
+        Font.Style = []
+        ParentColor = False
+        ParentFont = False
+      end
+      object Label1: TLabel
+        Left = 752
+        Top = 97
+        Width = 44
+        Height = 18
+        Caption = 'L/unit'
+        Color = 16384
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = 16384
+        Font.Height = -16
+        Font.Name = 'Arial Rounded MT Bold'
+        Font.Style = []
+        ParentColor = False
+        ParentFont = False
+      end
+      object lblEuUnit: TLabel
+        Left = 752
+        Top = 74
+        Width = 68
+        Height = 18
+        Caption = 'kWh/unit'
+        Color = 16384
+        Font.Charset = DEFAULT_CHARSET
+        Font.Color = 16384
+        Font.Height = -16
+        Font.Name = 'Arial Rounded MT Bold'
+        Font.Style = []
+        ParentColor = False
+        ParentFont = False
+      end
       object scrbxCategories: TScrollBox
         Left = 29
         Top = 64
@@ -167,8 +213,8 @@ object frmBrowse: TfrmBrowse
         end
       end
       object srchSearchItems: TSearchBox
-        Left = 29
-        Top = 32
+        Left = 44
+        Top = 29
         Width = 368
         Height = 26
         Anchors = []
@@ -180,8 +226,9 @@ object frmBrowse: TfrmBrowse
         Font.Style = []
         ParentFont = False
         TabOrder = 1
-        OnChange = srchSearchItemsChange
         OnInvokeSearch = SearchItems
+        ExplicitLeft = 29
+        ExplicitTop = 32
       end
       object spnCFMin: TSpinEdit
         Left = 615
@@ -278,7 +325,7 @@ object frmBrowse: TfrmBrowse
       end
       object spnWUMax: TSpinEdit
         Left = 705
-        Top = 97
+        Top = 95
         Width = 41
         Height = 28
         Color = 7987076
@@ -295,8 +342,8 @@ object frmBrowse: TfrmBrowse
         Value = 0
       end
       object chbCFEnable: TCheckBox
-        Left = 752
-        Top = 38
+        Left = 832
+        Top = 36
         Width = 145
         Height = 17
         Caption = 'Enable'
@@ -306,8 +353,8 @@ object frmBrowse: TfrmBrowse
         OnClick = chbCFEnableClick
       end
       object chbEUEnable: TCheckBox
-        Left = 752
-        Top = 69
+        Left = 826
+        Top = 67
         Width = 145
         Height = 17
         Caption = 'Enable'
@@ -317,8 +364,8 @@ object frmBrowse: TfrmBrowse
         OnClick = chbEUEnableClick
       end
       object chbWUEnable: TCheckBox
-        Left = 752
-        Top = 108
+        Left = 824
+        Top = 106
         Width = 145
         Height = 17
         Caption = 'Enable'
@@ -356,19 +403,45 @@ object frmBrowse: TfrmBrowse
         TabOrder = 12
         Value = 0
       end
+      object pnlHelp: TPanel
+        Left = 848
+        Top = 0
+        Width = 60
+        Height = 33
+        BorderWidth = 1
+        Color = 8118149
+        ParentBackground = False
+        TabOrder = 13
+        OnClick = btnHelpClick
+        object spnHelp: TSpeedButton
+          Left = 2
+          Top = 2
+          Width = 56
+          Height = 29
+          Align = alClient
+          Caption = '?'
+          Flat = True
+          OnClick = btnHelpClick
+          ExplicitLeft = 26
+          ExplicitTop = 4
+        end
+      end
     end
     object scrbxItems: TScrollBox
       Left = 2
-      Top = 149
-      Width = 849
-      Height = 436
+      Top = 141
+      Width = 908
+      Height = 444
       VertScrollBar.Tracking = True
       Align = alClient
       TabOrder = 1
+      ExplicitTop = 149
+      ExplicitWidth = 849
+      ExplicitHeight = 436
       object flpnlItems: TFlowPanel
         Left = 0
         Top = 0
-        Width = 845
+        Width = 904
         Height = 252
         Align = alTop
         AutoSize = True
@@ -381,7 +454,7 @@ object frmBrowse: TfrmBrowse
         ParentBackground = False
         ParentFont = False
         TabOrder = 0
-        ExplicitLeft = 2
+        ExplicitWidth = 845
       end
     end
   end
@@ -595,29 +668,6 @@ object frmBrowse: TfrmBrowse
         OnClick = btnLogoutClick
         ExplicitLeft = 0
       end
-    end
-  end
-  object pnlHelp: TPanel
-    Left = 916
-    Top = 0
-    Width = 60
-    Height = 33
-    BorderWidth = 1
-    Color = 8118149
-    ParentBackground = False
-    TabOrder = 2
-    OnClick = btnHelpClick
-    object spnHelp: TSpeedButton
-      Left = 2
-      Top = 2
-      Width = 56
-      Height = 29
-      Align = alClient
-      Caption = '?'
-      Flat = True
-      OnClick = btnHelpClick
-      ExplicitLeft = 26
-      ExplicitTop = 0
     end
   end
 end

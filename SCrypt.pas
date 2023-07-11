@@ -1027,6 +1027,7 @@ var
 	t1, t2, freq: Int64;
 	duration: Real;
 	preparedPassword: UnicodeString;
+  expS, actS :  string;
 const
 	SCouldNotParsePassword = 'Could not parse expected password hash';
 begin
@@ -1056,6 +1057,8 @@ begin
 			QueryPerformanceCounter(t1);
 			actual := scrypt.DeriveBytes(preparedPassword, salt, costFactor, blockSizeFactor, parallelizationFactor, Length(expected));
 			QueryPerformanceCounter(t2);
+      actS := (WideStringOf(actual));
+      expS := (WideStringOf(expected));
 
 			if Length(actual) <> Length(expected) then
 				Exit;

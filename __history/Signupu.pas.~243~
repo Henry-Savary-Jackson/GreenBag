@@ -1,0 +1,433 @@
+unit Signupu;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics,
+  Vcl.Controls, DMUnit_u, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
+  Vcl.ComCtrls, Vcl.Imaging.pngimage, Vcl.Buttons, System.generics.collections;
+
+type
+  TfrmSignUp = class(TForm)
+    rgpUser: TRadioGroup;
+    edtPassword: TEdit;
+    edtUsername: TEdit;
+    lblUsername: TLabel;
+    lblPassword: TLabel;
+    edtCertification: TEdit;
+    lblLogin: TLabel;
+    lblCertificationCode: TLabel;
+    lblHomeAddress: TLabel;
+    redHomeAddress: TRichEdit;
+    imgPfp: TImage;
+    pnlHelp: TPanel;
+    spnHelp: TSpeedButton;
+    pnlLogin: TPanel;
+    btnSignIn: TSpeedButton;
+    pnlSignUp: TPanel;
+    btnSignUp: TSpeedButton;
+    Button1: TButton;
+    procedure btnLoginScreenClick(Sender: TObject);
+    procedure btnSignUpClick(Sender: TObject);
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure rgpUserClick(Sender: TObject);
+    function securePassword(password: string): integer;
+    function verifyCertificationCode(code: string): integer;
+    procedure imgPfpClick(Sender: TObject);
+    procedure btnHelpClick(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  frmSignUp: TfrmSignUp;
+
+const
+  success = 1;
+  // const for passwords
+
+  tooShort = 4;
+  noSpecial = 2;
+  noNums = 3;
+  // consts for cert code
+  invalidChar = 5;
+  notInFile = 6;
+
+  nums = '0123456789';
+  special = '!@#$%^&*()-+=.,<>?\/|';
+
+implementation
+
+uses
+  Loginu, BrowseItems_u, HelpScreen_u;
+
+{$R *.dfm}
+
+procedure TfrmSignUp.btnHelpClick(Sender: TObject);
+begin
+  frmHelp.frmPrevious := self;
+  self.Hide;
+  frmHelp.Show;
+end;
+
+procedure TfrmSignUp.btnLoginScreenClick(Sender: TObject);
+begin
+  frmSignUp.Hide;
+  frmLogin.Show;
+end;
+
+procedure TfrmSignUp.btnSignUpClick(Sender: TObject);
+var
+  UserId, userName, password, homeaddress, userType, certificationCode: string;
+
+begin
+
+  userName := edtUsername.Text;
+  if userName = '' then
+  begin
+    showMessage('Please enter a Username.');
+    Exit;
+  end;
+
+  if length(userName) > 30 then
+  begin
+    showMessage('Username must be less than 30 characters.');
+    Exit;
+  end;
+
+  password := edtPassword.Text;
+  if password = '' then
+  begin
+    showMessage('Please enter a password.');
+    Exit;
+  end;
+
+  case securePassword(password) of
+    noSpecial:
+      begin
+        showMessage('Your password must have atleast one special character.');
+        Exit;
+
+      end;
+    noNums:
+      begin
+        showMessage('Your password must have atleast one number.');
+        Exit;
+
+      end;
+    tooShort:
+      begin
+        showMessage('Your password must have be atleast 8 characters long.');
+        Exit;
+
+      end;
+  end;
+
+  homeaddress := redHomeAddress.Text;
+
+  if homeaddress = '' then
+  begin
+    showMessage('Please enter a Home Address.');
+    Exit;
+  end;
+
+  if rgpUser.ItemIndex = -1 then
+  begin
+    showMessage('Please select your user type.');
+    Exit;
+  end;
+
+  case rgpUser.ItemIndex of
+    0:
+      userType := 'SELLER';
+    1:
+      userType := 'BUYER';
+  end;
+
+  certificationCode := edtCertification.Text;
+
+  if rgpUser.ItemIndex = 0 then
+  begin
+    if certificationCode = '' then
+    begin
+      showMessage('Please enter a certification code.');
+      Exit;
+    end;
+
+    if not(length(certificationCode) = 10) then
+    begin
+      showMessage('Certificaiton Code must be less than 10 characters.');
+      Exit;
+    end;
+
+    case verifyCertificationCode(certificationCode) of
+      notInFile:
+        begin
+          showMessage
+            ('Your certification code doesn''t exist. Please correctly enter your code. If that doesn''t work, please ensure you have properly applied to be a seller.');
+          Exit;
+
+        end;
+      invalidChar:
+        begin
+          showMessage('Your certification code must only consist of numbers.');
+        end;
+    end;
+
+  end;
+
+  if imgPfp.Picture.Graphic = Nil then
+  begin
+    showMessage('Please choose a profile picture');
+    Exit;
+  end;
+
+  try
+    UserId := DataModule1.SignUp(userName, password, userType, homeaddress,
+      certificationCode, imgPfp);
+
+    DataModule1.dDate := StrToDate(inputbox('', 'Date:', ''));
+    DataModule1.UserId := UserId;
+    DataModule1.CartID := DataModule1.CreateUserCart(DataModule1.UserId);
+    frmSignUp.Hide;
+    frmBrowse.Show;
+
+  except
+    on e: exception do
+    begin
+      // more user friendly
+      if e.Message = 'The changes you requested to the table were not successful because they would create duplicate value'
+      then
+      begin
+        showMessage('Username already in use.');
+        Exit;
+      end;
+      showMessage(e.Message);
+    end;
+
+  end;
+
+end;
+
+procedure TfrmSignUp.Button1Click(Sender: TObject);
+var
+  fFile: textfile;
+  code, userName, userType, address, password, sLine: string;
+  i, j: integer;
+  words, codes: tList<string>;
+
+begin
+  // get all seller verification codes
+  words := tList<string>.Create();
+
+  if fileExists('words.txt') then
+  begin
+
+    AssignFile(fFile, 'words.txt');
+    reset(fFile);
+
+    while not eof(fFile) do
+    begin
+      readln(fFile, sLine);
+      words.Add(sLine);
+    end;
+
+    CloseFile(fFile);
+  end
+  else
+  begin
+    showMessage('no file lol');
+  end;
+
+  codes := Tlist<string>.create();
+  if fileExists('SellerCertificationCodes.txt') then
+  begin
+    AssignFile(fFile, 'SellerCertificationCodes.txt');
+    reset(fFile);
+
+    while not eof(fFile) do
+    begin
+      readln(fFile, sLine);
+      codes.Add(sLine);
+    end;
+
+    CloseFile(fFile);
+  end
+  else
+  begin
+    showMessage('no codes file lol');
+  end;
+
+  try
+
+    AssignFile(fFile, 'log.txt');
+
+    ReWrite(fFile);
+
+    for j := 1 to 1000 do
+    begin
+
+      password := '';
+      for i := 1 to 8 do
+      begin
+        password := password + chr(random(26) + ord('a'))
+
+      end;
+
+      for i := 1 to 2 do
+      begin
+        password := password + special[random(length(special)) + 1];
+        password := password + nums[random(length(special)) + 1];
+      end;
+
+      userName := words.Items[random(length(words.ToArray))] +
+        inttostr(random(11));
+
+      code := codes.Items[random(length(codes.ToArray))];
+
+      address := 'somehwere';
+
+      case random(10) of
+
+        8, 9, 1:
+          begin
+            userType := 'SELLER';
+
+          end
+      else
+        begin
+          userType := 'BUYER';
+        end;
+
+      end;
+
+      try
+        DataModule1.SignUp(userName, password, userType, address, code, imgPfp);
+        writeln(fFile, format('%s, %s, %s, %s', [username, password, usertype, code]))
+      except
+        on e: exception do
+        begin
+          showMessage(e.Message);
+        end;
+
+      end;
+
+    end;
+
+  finally
+
+    CloseFile(fFile);
+
+  end;
+
+end;
+
+procedure TfrmSignUp.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+  Application.Terminate;
+end;
+
+procedure TfrmSignUp.imgPfpClick(Sender: TObject);
+begin
+  DataModule1.loadImageFromFile(imgPfp, self);
+
+end;
+
+procedure TfrmSignUp.rgpUserClick(Sender: TObject);
+begin
+  edtCertification.Enabled := rgpUser.ItemIndex = 0
+end;
+
+function TfrmSignUp.securePassword(password: string): integer;
+var
+  i: integer;
+
+begin
+
+  if length(password) < 8 then
+  begin
+    Result := tooShort;
+    Exit;
+  end;
+
+  Result := noNums;
+
+  for i := 1 to length(password) do
+  begin
+    if not(pos(password[i], nums) = 0) then
+    begin
+      Result := success
+    end;
+
+  end;
+
+  if Result = noNums then
+  begin
+    Exit;
+  end;
+
+  Result := noSpecial;
+
+  for i := 1 to length(password) do
+  begin
+    if not(pos(password[i], special) = 0) then
+    begin
+      Result := success
+    end;
+
+  end;
+end;
+
+function TfrmSignUp.verifyCertificationCode(code: string): integer;
+var
+  i: integer;
+  fFile: textfile;
+  sLine: string;
+begin
+
+  for i := 1 to 10 do
+  begin
+    if pos(code[i], nums) = 0 then
+    begin
+      Result := invalidChar;
+      Exit;
+    end;
+  end;
+
+  Result := notInFile;
+
+  if fileExists('SellerCertificationCodes.txt') then
+  begin
+    AssignFile(fFile, 'SellerCertificationCodes.txt');
+    reset(fFile);
+
+    while not eof(fFile) do
+    begin
+      readln(fFile, sLine);
+      if sLine = code then
+      begin
+        Result := success;
+        CloseFile(fFile);
+        Exit;
+      end;
+
+    end;
+
+    CloseFile(fFile);
+
+  end
+  else
+  begin;
+    AssignFile(fFile, 'SellerCertificationCodes.txt');
+    ReWrite(fFile);
+    CloseFile(fFile);
+
+  end;
+
+end;
+
+end.

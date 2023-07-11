@@ -97,7 +97,7 @@ begin
   // lblQuantity's properties
   lblQuantity := TLabel.Create(self.Owner);
   lblQuantity.Parent := self;
-  lblQuantity.Left := 610;
+  lblQuantity.Left := 670;
   lblQuantity.Top := 100;
   lblQuantity.Width := 46;
   lblQuantity.Height := 13;
@@ -110,7 +110,7 @@ begin
 
   redItemInfo.Left := 40;
   redItemInfo.Top := 40;
-  redItemInfo.Width := 500;
+  redItemInfo.Width := 600;
   redItemInfo.Height := 180;
   redItemInfo.Margins.Right := 20;
   redItemInfo.AlignWithMargins := True;
@@ -124,30 +124,26 @@ begin
 
   self.UpdateRedInfo;
 
-  // grpRemoveItem's properties
   // imgRemoveItem's properties
   imgRemoveItem := TImage.Create(self.Owner);
   imgRemoveItem.Parent := self;
-
   imgRemoveItem.AlignWithMargins := True;
-  imgRemoveItem.Left := 480;
+  imgRemoveItem.Left := 960;
   imgRemoveItem.Top := 25;
   imgRemoveItem.Width := 180;
   imgRemoveItem.Margins.Left := 20;
   imgRemoveItem.Margins.Top := 10;
   imgRemoveItem.Margins.Right := 20;
   imgRemoveItem.Margins.Bottom := 20;
-  imgRemoveItem.Align := alRight;
   imgRemoveItem.OnClick := self.onRemoveClick;
-  imgRemoveItem.Align := alClient;
   imgRemoveItem.Center := True;
   imgRemoveItem.Picture.LoadFromFile('cross.png');
 
   spnQuantity := TSpinEdit.Create(self.Owner);
   spnQuantity.Parent := self;
-  spnQuantity.Left := 750;
+  spnQuantity.Left := 810;
   spnQuantity.Top := 100;
-  spnQuantity.Width := 80;
+  spnQuantity.Width := 140;
   spnQuantity.Height := 22;
   spnQuantity.MaxValue := self.maxwithdraw;
   spnQuantity.MinValue := 1;
@@ -197,11 +193,14 @@ begin
   redItemInfo.Lines.Add('Total Cost of order : ' + FloatToStrF(itemTotalPrice,
     ffCurrency, 8, 2));
   redItemInfo.Lines.Add('Total Carbon footprint of order : ' +
-    FloatToStrF(itemTotalCF, ffFixed, 8, 2));
+    FloatToStrF(itemTotalCF, ffFixed, 8, 2)
+    + ' t/unit');
   redItemInfo.Lines.Add('Total Water usage of order : ' +
-    FloatToStrF(itemTotalWU, ffFixed, 8, 2));
+    FloatToStrF(itemTotalWU, ffFixed, 8, 2)
+    + ' L/unit');
   redItemInfo.Lines.Add('Total Energy usage of order : ' +
-    FloatToStrF(itemTotalEU, ffFixed, 8, 2));
+    FloatToStrF(itemTotalEU, ffFixed, 8, 2)
+    + ' kWh/unit');
 end;
 
 end.

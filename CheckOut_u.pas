@@ -198,11 +198,11 @@ begin
   lblTotalCost.Caption := 'Total Cost: ' + floatTOStrf(PriceOrderTotal,
     ffCurrency, 8, 2);
   lblTotalCF.Caption := 'Total Carbon Footprint: ' + floatTOStrf(CFOrderTotal,
-    fffixed, 8, 2);
+    fffixed, 8, 2) + ' t/unit';
   lblTotalEU.Caption := 'Total Energy Usage: ' + floatTOStrf(EUOrderTotal,
-    fffixed, 8, 2);
+    fffixed, 8, 2) + ' kWh/unit';
   lblTotalWU.Caption := 'Total Water Usage: ' + floatTOStrf(WUOrderTotal,
-    fffixed, 8, 2);
+    fffixed, 8, 2) + ' L/unit';
 end;
 
 end.

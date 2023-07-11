@@ -3,7 +3,7 @@ object frmCheckout: TfrmCheckout
   Top = 0
   Caption = 'Checkout'
   ClientHeight = 415
-  ClientWidth = 632
+  ClientWidth = 700
   Color = 11074992
   Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
@@ -16,38 +16,38 @@ object frmCheckout: TfrmCheckout
   PixelsPerInch = 96
   TextHeight = 18
   object lblTotalCost: TLabel
-    Left = 182
+    Left = 128
     Top = 318
     Width = 86
     Height = 18
     Caption = 'Total Cost:'
   end
   object lblTotalCF: TLabel
-    Left = 104
+    Left = 56
     Top = 342
     Width = 185
     Height = 18
     Caption = 'Total Carbon Footprint:'
   end
   object lblTotalWU: TLabel
-    Left = 354
+    Left = 424
     Top = 318
     Width = 152
     Height = 18
     Caption = 'Total Water Usage:'
   end
   object lblTotalEU: TLabel
-    Left = 354
+    Left = 415
     Top = 342
     Width = 161
     Height = 18
     Caption = 'Total Energy Usage:'
   end
   object scrbxItems: TScrollBox
-    Left = 8
+    Left = 32
     Top = 45
     Width = 616
-    Height = 258
+    Height = 276
     HorzScrollBar.Tracking = True
     VertScrollBar.Tracking = True
     TabOrder = 0
@@ -84,8 +84,8 @@ object frmCheckout: TfrmCheckout
     end
   end
   object pnlHelp: TPanel
-    Left = 551
-    Top = 8
+    Left = 632
+    Top = 6
     Width = 60
     Height = 33
     BorderWidth = 1
@@ -106,7 +106,7 @@ object frmCheckout: TfrmCheckout
     end
   end
   object pnlCheckout: TPanel
-    Left = 263
+    Left = 287
     Top = 366
     Width = 106
     Height = 41
@@ -122,9 +122,8 @@ object frmCheckout: TfrmCheckout
       Caption = 'Check Out'
       Flat = True
       OnClick = btnCheckoutClick
-      ExplicitLeft = -23
-      ExplicitTop = 0
-      ExplicitWidth = 183
+      ExplicitLeft = 9
+      ExplicitTop = 9
     end
   end
 end

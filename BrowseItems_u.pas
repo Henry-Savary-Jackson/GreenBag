@@ -46,6 +46,9 @@ type
     spnHelp: TSpeedButton;
     pnlLogout: TPanel;
     sbtnLogout: TSpeedButton;
+    lblCFUnit: TLabel;
+    Label1: TLabel;
+    lblEuUnit: TLabel;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnLogoutClick(Sender: TObject);
     procedure btnProfileClick(Sender: TObject);
@@ -57,7 +60,6 @@ type
     procedure OnClickCategory(Sender: TObject);
     procedure SearchItems(Sender: TObject);
     procedure ViewItem(sellerID, itemID: string);
-    procedure srchSearchItemsChange(Sender: TObject);
     procedure chbCFEnableClick(Sender: TObject);
     procedure spnCFMinChange(Sender: TObject);
     procedure spnEUMinChange(Sender: TObject);
@@ -66,6 +68,7 @@ type
     procedure chbWUEnableClick(Sender: TObject);
     procedure chbRatingsEnableClick(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
+
   private
     { Private declarations }
   public
@@ -383,17 +386,14 @@ begin
 
   if spnWUMax.Value < spnWUMin.Value then
   begin
-    // bit broken, at 1000 it breaks
+    // TODO : bit broken, at 1000 it breaks
     spnWUMax.Value := spnWUMin.Value;
   end;
 
   spnWUMax.Enabled := spnWUMax.MinValue <> spnWUMax.MaxValue
 end;
 
-procedure TfrmBrowse.srchSearchItemsChange(Sender: TObject);
-begin
 
-end;
 
 // procedure given to all browse item containers
 // if the user is the object's seller, rather show them the screen that allows them to edit

@@ -3,10 +3,10 @@ object frmAddItem: TfrmAddItem
   Top = 0
   Caption = 'Add Item'
   ClientHeight = 712
-  ClientWidth = 433
+  ClientWidth = 454
   Color = 11074992
   Font.Charset = ANSI_CHARSET
-  Font.Color = clWindowText
+  Font.Color = 16384
   Font.Height = -15
   Font.Name = 'Arial Rounded MT Bold'
   Font.Style = []
@@ -202,9 +202,9 @@ object frmAddItem: TfrmAddItem
     Caption = 'Water Usage of its use:'
   end
   object lblPrice: TLabel
-    Left = 123
-    Top = 223
-    Width = 44
+    Left = 118
+    Top = 216
+    Width = 47
     Height = 17
     Caption = 'Price:'
   end
@@ -214,13 +214,6 @@ object frmAddItem: TfrmAddItem
     Width = 47
     Height = 17
     Caption = 'Name:'
-  end
-  object lblSeller: TLabel
-    Left = 145
-    Top = 201
-    Width = 48
-    Height = 17
-    Caption = 'Seller:'
   end
   object lblRating: TLabel
     Left = 130
@@ -265,6 +258,141 @@ object frmAddItem: TfrmAddItem
     Caption = 'Maximum withdrawable stock per customer'
     WordWrap = True
   end
+  object lblCFUnit: TLabel
+    Left = 385
+    Top = 325
+    Width = 36
+    Height = 17
+    Caption = 't/unit'
+    Color = 16384
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = 16384
+    Font.Height = -15
+    Font.Name = 'Arial Rounded MT Bold'
+    Font.Style = []
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label1: TLabel
+    Left = 388
+    Top = 432
+    Width = 36
+    Height = 17
+    Caption = 't/unit'
+    Color = 16384
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = 16384
+    Font.Height = -15
+    Font.Name = 'Arial Rounded MT Bold'
+    Font.Style = []
+    ParentColor = False
+    ParentFont = False
+  end
+  object lblEuUnit: TLabel
+    Left = 388
+    Top = 348
+    Width = 63
+    Height = 17
+    Caption = 'kWh/unit'
+    Color = 16384
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = 16384
+    Font.Height = -15
+    Font.Name = 'Arial Rounded MT Bold'
+    Font.Style = []
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label2: TLabel
+    Left = 388
+    Top = 468
+    Width = 63
+    Height = 17
+    Caption = 'kWh/unit'
+    Color = 16384
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = 16384
+    Font.Height = -15
+    Font.Name = 'Arial Rounded MT Bold'
+    Font.Style = []
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label3: TLabel
+    Left = 388
+    Top = 390
+    Width = 40
+    Height = 17
+    Caption = 'L/unit'
+    Color = 16384
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = 16384
+    Font.Height = -15
+    Font.Name = 'Arial Rounded MT Bold'
+    Font.Style = []
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label4: TLabel
+    Left = 388
+    Top = 497
+    Width = 40
+    Height = 17
+    Caption = 'L/unit'
+    Color = 16384
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = 16384
+    Font.Height = -15
+    Font.Name = 'Arial Rounded MT Bold'
+    Font.Style = []
+    ParentColor = False
+    ParentFont = False
+  end
+  object lblmaxwithdrawstockunits: TLabel
+    Left = 358
+    Top = 299
+    Width = 35
+    Height = 17
+    Caption = 'units'
+    Color = 16384
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = 16384
+    Font.Height = -15
+    Font.Name = 'Arial Rounded MT Bold'
+    Font.Style = []
+    ParentColor = False
+    ParentFont = False
+  end
+  object lblStockUnits: TLabel
+    Left = 308
+    Top = 255
+    Width = 35
+    Height = 17
+    Caption = 'units'
+    Color = 16384
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = 16384
+    Font.Height = -15
+    Font.Name = 'Arial Rounded MT Bold'
+    Font.Style = []
+    ParentColor = False
+    ParentFont = False
+  end
+  object label67: TLabel
+    Left = 182
+    Top = 216
+    Width = 11
+    Height = 17
+    Caption = 'R'
+    Color = 16384
+    Font.Charset = DEFAULT_CHARSET
+    Font.Color = 16384
+    Font.Height = -15
+    Font.Name = 'Arial Rounded MT Bold'
+    Font.Style = []
+    ParentColor = False
+    ParentFont = False
+  end
   object redDesc: TRichEdit
     Left = 188
     Top = 582
@@ -290,8 +418,8 @@ object frmAddItem: TfrmAddItem
     Text = 'another item'
   end
   object edtPrice: TEdit
-    Left = 176
-    Top = 220
+    Left = 199
+    Top = 213
     Width = 121
     Height = 25
     Color = 7987076
@@ -379,7 +507,7 @@ object frmAddItem: TfrmAddItem
     Text = '10'
   end
   object pnlHelp: TPanel
-    Left = 365
+    Left = 386
     Top = 8
     Width = 60
     Height = 33
@@ -397,8 +525,7 @@ object frmAddItem: TfrmAddItem
       Caption = '?'
       Flat = True
       OnClick = btnHelpClick
-      ExplicitLeft = 9
-      ExplicitTop = 4
+      ExplicitLeft = 34
     end
   end
   object pnlBack: TPanel

@@ -17,9 +17,9 @@ type
     lblPassword: TLabel;
     lblSignUp: TLabel;
     pnlHelp: TPanel;
-    Panel1: TPanel;
+    pnlLogin: TPanel;
     sbtnSignIn: TSpeedButton;
-    Panel2: TPanel;
+    pnlSignup: TPanel;
     sbtnSignUp: TSpeedButton;
     spnHelp: TSpeedButton;
     procedure btnSignInClick(Sender: TObject);
@@ -27,6 +27,9 @@ type
     procedure btnSignUpScreenClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
+    procedure edtPasswordKeyDown(Sender: TObject; var Key: Word;
+      Shift: TShiftState);
+
   private
     { Private declarations }
   public
@@ -39,14 +42,14 @@ var
 implementation
 
 uses
-  Browseitems_u,HelpScreen_u,
+  Browseitems_u, HelpScreen_u,
   SignUpu;
 
 {$R *.dfm}
 
 procedure TfrmLogin.btnHelpClick(Sender: TObject);
 begin
-  frmHelp.frmPrevious := self ;
+  frmHelp.frmPrevious := self;
   self.Hide;
   frmHelp.Show;
 end;
@@ -94,6 +97,17 @@ begin
   frmSignUp.Show;
 end;
 
+
+
+procedure TfrmLogin.edtPasswordKeyDown(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  if key = VK_RETURN then
+  begin
+    sbtnSignIn.Click;
+  end;
+end;
+
 procedure TfrmLogin.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   Application.Terminate;
@@ -102,7 +116,7 @@ end;
 
 procedure TfrmLogin.FormCreate(Sender: TObject);
 begin
- Application.MainFormOnTaskbar := False;
+  Application.MainFormOnTaskbar := False;
 end;
 
 end.

@@ -8,7 +8,7 @@ uses
   Vcl.ComCtrls,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.ExtCtrls, PngImage,
   System.Win.ComObj,
-  dateutils;
+  dateutils, stdctrls, ClipBrd;
 
 type
   TDataModule1 = class(TDataModule)
@@ -128,6 +128,7 @@ type
 
     procedure updateRating(userID, itemID: string; rating: integer);
     procedure insertRating(userID, itemID: string; rating: integer);
+
   end;
 
 var
@@ -923,6 +924,7 @@ begin
   ItemTB['Deleted'] := False;
   memStream := TMemoryStream.Create;
   try
+    Image.Picture.Graphic.SetSize(128, 128);
     Image.Picture.Graphic.SaveToStream(memStream);
     memStream.Position := 0;
     ItemTB.Edit;
@@ -1032,12 +1034,12 @@ begin
 
   // generate all the parameters
   dParams := tObjectDictionary<string, Variant>.Create();
-  for i := 0 to length(pkValue)-1 do
+  for i := 0 to length(pkValue) - 1 do
   begin
     paramName := 'pkVal' + intToStr(i);
     dParams.Add(paramName, pkValue[i]);
     sql := sql + pkName[i] + ' = :' + paramName;
-    if not(i = length(pkName)-1) then
+    if not(i = length(pkName) - 1) then
     begin
       sql := sql + ' AND ';
     end;
@@ -1360,7 +1362,7 @@ begin
       raise Exception.Create('You must first buy an item before rating it!');
     end;
 
-    if isInTable([userId, itemId],['UserID', 'ItemID'], 'RatingsTB') then
+    if isInTable([userID, itemID], ['UserID', 'ItemID'], 'RatingsTB') then
     begin
       updateRating(userID, itemID, rating);
     end
@@ -1592,6 +1594,7 @@ begin
 
   memStream := TMemoryStream.Create;
   try
+
     Image.Picture.Graphic.SaveToStream(memStream);
     memStream.Position := 0;
     ItemTB.Edit;

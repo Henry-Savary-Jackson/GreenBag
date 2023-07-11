@@ -171,24 +171,34 @@ begin
   price := dsResult['Cost'];
 
   lblStock.Caption := 'Stock: ' + inttostr(dsResult['Stock']);
+  if dsResult['Stock'] = 1 then
+  begin
+    lblStock.Caption := lblStock.Caption + ' unit'
+  end
+  else
+  begin
+    lblStock.Caption := lblStock.Caption + ' units'
+  end;
+
   stock := dsResult['Stock'];
   lblCF.Caption := 'Carbon footprint through usage: ' +
-    floatToStrf(dsResult['CarbonFootprintUsage'], fffixed, 8, 2);
+    floatToStrf(dsResult['CarbonFootprintUsage'], fffixed, 8, 2) + ' t/unit';
 
   lblEU.Caption := 'Energy consumption through usage: ' +
-    floatToStrf(dsResult['EnergyFootprintUsage'], fffixed, 8, 2);
+    floatToStrf(dsResult['EnergyFootprintUsage'], fffixed, 8, 2) + ' kWh/unit';
 
   lblWU.Caption := 'Water consumption through usage:' +
-    floatToStrf(dsResult['WaterFootprintUsage'], fffixed, 8, 2);
+    floatToStrf(dsResult['WaterFootprintUsage'], fffixed, 8, 2) + ' L/unit';
 
   lblCFProduce.Caption := 'Carbon footprint for production: ' +
-    floatToStrf(dsResult['CarbonFootprintProduction'], fffixed, 8, 2);
+    floatToStrf(dsResult['CarbonFootprintProduction'], fffixed, 8, 2) +
+    't/unit';
 
   lblEUProduce.Caption := 'Energy usage for production: ' +
-    floatToStrf(dsResult['EnergyUsageProduction'], fffixed, 8, 2);
+    floatToStrf(dsResult['EnergyUsageProduction'], fffixed, 8, 2) + ' kWh/unit';
 
   lblWUProduce.Caption := 'Water usage for production:' +
-    floatToStrf(dsResult['WaterUsageProduction'], fffixed, 8, 2);
+    floatToStrf(dsResult['WaterUsageProduction'], fffixed, 8, 2) + ' L/unit';
 
   if dsResult['avgRating'] = -1 then
   begin
@@ -203,6 +213,15 @@ begin
 
   lblMaxWithdraw.Caption := 'Maximum Stock you can withdraw at once: ' +
     inttostr(dsResult['MaxWithdrawableStock']);
+
+  if dsResult['MaxWithdrawableStock'] = 1 then
+  begin
+    lblMaxWithdraw.Caption := lblMaxWithdraw.Caption + ' unit'
+  end
+  else
+  begin
+    lblMaxWithdraw.Caption := lblMaxWithdraw.Caption + ' units'
+  end;
 
   if dsResult['Description'] <> NULL then
     redDesc.Lines.Add(dsResult['Description']);
@@ -221,6 +240,7 @@ begin
   btnAddToCart.Enabled := dsResult['SellerID'] <> DataModule1.userID;
 
   spnQuantity.Value := 1;
+  trcRating.Position := 0;
 
 end;
 

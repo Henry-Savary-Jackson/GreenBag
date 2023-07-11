@@ -19,7 +19,6 @@ type
     lblWaterUsage: TLabel;
     lblPrice: TLabel;
     lblName: TLabel;
-    lblSeller: TLabel;
     redDesc: TRichEdit;
     edtName: TEdit;
     edtPrice: TEdit;
@@ -44,6 +43,15 @@ type
     SpeedButton1: TSpeedButton;
     pnlSaveChanges: TPanel;
     btnSaveChanges: TSpeedButton;
+    lblCFUnit: TLabel;
+    Label1: TLabel;
+    lblEuUnit: TLabel;
+    Label2: TLabel;
+    Label3: TLabel;
+    Label4: TLabel;
+    lblmaxwithdrawstockunits: TLabel;
+    lblStockUnits: TLabel;
+    label67: TLabel;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure imgItemClick(Sender: TObject);
     procedure btnBackClick(Sender: TObject);
@@ -258,8 +266,6 @@ begin
 
     edtName.Text := dsResult['ItemName'];
 
-    lblSeller.Caption := 'Seller: ' + dsResult['SellerName'];
-
     if dsResult['avgRating'] = -1 then
     begin
       lblRating.Caption := 'Rating: No ratings';
@@ -271,16 +277,18 @@ begin
 
     edtPrice.Text := floatTOStrf(dsResult['Cost'], ffFixed, 8, 2);
 
-    edtStock.Text := intToStr(dsResult['Stock']);
+    edtStock.Text := intToStr(dsResult['Stock']) ;
+    if dsResult['Stock'] = 1 then
+      lblStockUnits.Caption := 'unit';
 
-    edtCF.Text := floatTOStrf(dsResult['CarbonFootprintUsage'], ffFixed, 8, 2);
+    edtCF.Text := floatTOStrf(dsResult['CarbonFootprintUsage'], ffFixed, 8, 2) ;
     edtEU.Text := floatTOStrf(dsResult['EnergyFootprintUsage'], ffFixed, 8, 2);
     edtWU.Text := floatTOStrf(dsResult['WaterFootprintUsage'], ffFixed, 8, 2);
 
     edtCFProduce.Text := floatTOStrf(dsResult['CarbonFootprintUsage'],
       ffFixed, 8, 2);
     edtEUProduce.Text := floatTOStrf(dsResult['EnergyFootprintUsage'],
-      ffFixed, 8, 2);
+      ffFixed, 8, 2) ;
     edtWUProduce.Text := floatTOStrf(dsResult['WaterFootprintUsage'],
       ffFixed, 8, 2);
 
@@ -289,7 +297,13 @@ begin
 
     cmbCategory.ItemIndex := cmbCategory.Items.IndexOf(dsResult['Category']);
 
-    edtMaxWithdrawStock.Text := intToStr(dsResult['MaxWithdrawableStock']);
+    edtMaxWithdrawStock.Text := intToStr(dsResult['MaxWithdrawableStock']) ;
+
+    if dsResult['MaxWithdrawableStock'] = 1 then
+    begin
+      lblmaxwithdrawstockunits.Caption := 'unit';
+
+    end;
 
     imageStream := dsResult.CreateBlobStream
       (dsResult.FieldByName('Image'), bmRead);
@@ -329,6 +343,7 @@ procedure TfrmAddItem.imgItemClick(Sender: TObject);
 var
   fileChooser: tOpenDialog;
   sImagePath: string;
+  png : tPngimage;
 begin
   // open filchooser
   fileChooser := tOpenDialog.Create(self);
@@ -340,6 +355,14 @@ begin
     begin
       sImagePath := fileChooser.FileName;
       imgItem.Picture.LoadFromFile(sImagePath);
+
+      // reduce the size of the image that is shown to save storage
+      png := TPngImage.Create;
+      png.Assign(imgItem.Picture.Graphic);
+      png.Resize(128,128);
+      png.Canvas.StretchDraw(Rect(0,0,128,128), imgItem.Picture.Graphic);
+      imgItem.Picture.Graphic.Assign(png);
+      png.Free;
     end
     else
     begin
