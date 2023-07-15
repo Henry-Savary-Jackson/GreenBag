@@ -689,15 +689,23 @@ begin
     Result.First;
     for i := 1 to iMin do
     begin
-
+      Result.Delete;
     end;
 
     for i := 1 to iMax - iMin - 1 do
     begin
-
+      Result.Next;
     end;
 
-    while
+    lastitemId := Result['ItemID'];
+    Result.Last;
+
+    while not (lastItemID = Result['ItemID']) do
+    begin
+      Result.Delete;
+    end;
+
+    Result.First;
 
   finally
     params.Free;

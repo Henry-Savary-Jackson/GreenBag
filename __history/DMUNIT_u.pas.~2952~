@@ -689,16 +689,32 @@ begin
     Result.First;
     for i := 1 to iMin do
     begin
-
+      Result.Delete;
     end;
 
     for i := 1 to iMax - iMin - 1 do
     begin
-
+      Result.Next;
     end;
 
     lastitemId := Result['ItemID'];
-    while
+    Result.Last;
+
+    while not (lastItemID = Result['ItemID']) do
+    begin
+      try
+      Result.Delete;
+
+      finally
+        on e: EAccessViolation do
+        begin
+          showMEssage(Result['ItemID']);
+        end;
+
+      end;
+    end;
+
+    Result.First;
 
   finally
     params.Free;

@@ -111,8 +111,14 @@ begin
   if items <> nil then
   begin
     items.Free;
+    items := nil;
+  end;
+
+  if items = nil then
+  begin
     items := tObjectDictionary<string, ProductItem>.Create([doOwnsValues]);
   end;
+
   scrollRangeMin := 0;
   scrollRangeMax := 10;
   updateItemsDisplay;

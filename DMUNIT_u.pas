@@ -697,12 +697,13 @@ begin
       Result.Next;
     end;
 
-    lastitemId := Result['ItemID'];
+    lastItemId := Result['ItemID'];
     Result.Last;
 
-    while not (lastItemID = Result['ItemID']) do
+    while not(lastItemId = Result['ItemID']) do
     begin
-      Result.Delete;
+        Result.Delete;
+
     end;
 
     Result.First;
