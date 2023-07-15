@@ -23,7 +23,6 @@ object frmBrowse: TfrmBrowse
     Height = 587
     Align = alClient
     TabOrder = 0
-    ExplicitLeft = 145
     object grpHeader: TGroupBox
       Left = 2
       Top = 20
@@ -32,8 +31,6 @@ object frmBrowse: TfrmBrowse
       Margins.Top = 0
       Align = alTop
       TabOrder = 0
-      ExplicitLeft = 1
-      ExplicitTop = 16
       DesignSize = (
         908
         121)
@@ -226,9 +223,7 @@ object frmBrowse: TfrmBrowse
         Font.Style = []
         ParentFont = False
         TabOrder = 1
-        OnInvokeSearch = SearchItems
-        ExplicitLeft = 29
-        ExplicitTop = 32
+        OnInvokeSearch = onSearchBoxClick
       end
       object spnCFMin: TSpinEdit
         Left = 615
@@ -435,9 +430,6 @@ object frmBrowse: TfrmBrowse
       VertScrollBar.Tracking = True
       Align = alClient
       TabOrder = 1
-      ExplicitTop = 149
-      ExplicitWidth = 849
-      ExplicitHeight = 436
       object flpnlItems: TFlowPanel
         Left = 0
         Top = 0
@@ -454,7 +446,6 @@ object frmBrowse: TfrmBrowse
         ParentBackground = False
         ParentFont = False
         TabOrder = 0
-        ExplicitWidth = 845
       end
     end
   end

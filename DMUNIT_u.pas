@@ -7,8 +7,8 @@ uses
   sCrypt, System.Generics.Collections, Datasnap.Provider, Vcl.dialogs,
   Vcl.ComCtrls,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.ExtCtrls, PngImage,
-  System.Win.ComObj,
-  dateutils, stdctrls, ClipBrd;
+  System.Win.ComObj, ADOInt,
+  dateutils, stdctrls;
 
 type
   TDataModule1 = class(TDataModule)
@@ -80,10 +80,10 @@ type
 
     procedure sendRating(userID, itemID: string; rating: integer);
 
-    function getProducts(userID: string): tADODataSet;
+    function getProducts(userID: string; iMin, iMax: integer): tADODataSet;
 
     function getSearchResults(searchQuery: string; categories: TList<string>;
-      CFRange, EURange, WURange: array of integer): tADODataSet;
+      CFRange, EURange, WURange, resultRange: array of integer): tADODataSet;
 
     function isInTable(pkValue: array of Variant; pkName: array of string;
       tbName: string): boolean;
@@ -128,6 +128,8 @@ type
 
     procedure updateRating(userID, itemID: string; rating: integer);
     procedure insertRating(userID, itemID: string; rating: integer);
+
+    function CloneRecordset(const Data: _Recordset): _Recordset;
 
   end;
 
@@ -405,6 +407,19 @@ begin
 
 end;
 
+function TDataModule1.CloneRecordset(const Data: _Recordset): _Recordset;
+var
+  newRec: _Recordset;
+  stm: Stream;
+begin
+  newRec := CoRecordset.Create as _Recordset;
+  stm := CoStream.Create;
+  Data.Save(stm, adPersistADTG);
+  newRec.Open(stm, EmptyParam, CursorTypeEnum(adOpenUnspecified),
+    LockTypeEnum(adLockUnspecified), 0);
+  Result := newRec;
+end;
+
 // once the user has checked out a cart or has logged in
 // generate a new shopping cart for the user
 function TDataModule1.CreateUserCart(userID: string): string;
@@ -649,11 +664,13 @@ begin
 end;
 
 // get the all the products made by a particular seller
-function TDataModule1.getProducts(userID: string): tADODataSet;
+function TDataModule1.getProducts(userID: string; iMin, iMax: integer)
+  : tADODataSet;
 var
-  sql: string;
+  sql, lastItemId: string;
   params: tObjectDictionary<string, Variant>;
   dsResult: tADODataSet;
+  i: integer;
 begin
   sql := 'SELECT ItemTB.ItemID, Sales, Image, ItemName, Revenue ' +
     'FROM ItemTB LEFT JOIN ( SELECT ItemID, ' +
@@ -668,6 +685,27 @@ begin
 
   try
     Result := runSQL(sql, params);
+
+    Result.First;
+    for i := 1 to iMin do
+    begin
+      Result.Delete;
+    end;
+
+    for i := 1 to iMax - iMin - 1 do
+    begin
+      Result.Next;
+    end;
+
+    lastitemId := Result['ItemID'];
+    Result.Last;
+
+    while not (lastItemID = Result['ItemID']) do
+    begin
+      Result.Delete;
+    end;
+
+    Result.First;
 
   finally
     params.Free;
@@ -720,18 +758,20 @@ end;
 
 // Search for items with a specific string and category
 function TDataModule1.getSearchResults(searchQuery: string;
-  categories: TList<string>; CFRange, EURange, WURange: array of integer)
-  : tADODataSet;
+  categories: TList<string>; CFRange, EURange, WURange,
+  resultRange: array of integer): tADODataSet;
 var
   sql, categoryParamName: string;
   params: tObjectDictionary<string, Variant>;
+  dsResult: tADODataSet;
   i: integer;
+  finalItemId: string;
 
 begin
 
   // sql statement and params
   // does not show deleted items
-  sql := ' SELECT ItemTB.ItemID, ItemName, Cost, Image,' +
+  sql := ' SELECT  ItemTB.ItemID, ItemName, Cost, Image,' +
     ' (SELECT IIF( Avg(RatingsTB.rating) IS NULL, 0, Avg(RatingsTB.rating) )' +
     ' FROM RatingsTB WHERE RatingsTB.ItemID = ItemTB.ItemID ' +
     ') as avgRating , ' +
@@ -801,6 +841,32 @@ begin
     // return the results
     Result := runSQL(sql, params);
 
+    // select top values in a range
+    // not using sql cause it was too buggy and complicated and not worth my time
+    Result.First;
+    Result.Edit;
+    for i := 1 to resultRange[0] do
+    begin
+      Result.Delete;
+    end;
+
+    // skip the ones we want to keep
+    for i := 1 to resultRange[1] - resultRange[0] - 1 do
+    begin
+      Result.Next;
+    end;
+
+    // delete the rest
+    finalItemId := Result['ItemID'];
+
+    Result.Last;
+
+    while Result['ItemID'] <> finalItemId do
+    begin
+      Result.Delete;
+    end;
+
+    Result.First;
   finally
     params.Free;
   end;
@@ -1303,7 +1369,7 @@ begin
           Query.Open;
           dsOutput.Free;
           dsOutput := tADODataSet.Create(Nil);
-          dsOutput.Recordset := Query.Recordset.Clone(1);
+          dsOutput.Recordset := CloneRecordset(Query.Recordset);
         end
         else
         begin

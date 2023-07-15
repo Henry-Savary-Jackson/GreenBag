@@ -27,6 +27,7 @@ type
     procedure FormShow(Sender: TObject);
     procedure removeProcedure(itemID: string);
     procedure btnHelpClick(Sender: TObject);
+    procedure btnLoadMoreItemsClick(Sender: TObject);
 
   private
     { Private declarations }
@@ -34,6 +35,9 @@ type
   public
     { Public declarations }
     items: tObjectDictionary<string, ProductItem>;
+    scrollRangeMin: integer;
+    scrollRangeMax: integer;
+    btnLoadMoreitems: tButton;
     procedure updateItemsDisplay;
   end;
 
@@ -68,6 +72,14 @@ begin
   frmHelp.Show;
 end;
 
+procedure TfrmYourProducts.btnLoadMoreItemsClick(Sender: TObject);
+begin
+  //
+  scrollRangeMin := scrollRangeMin + 10;
+  scrollRangeMax := scrollRangeMax + 10;
+  updateItemsDisplay;
+end;
+
 procedure TfrmYourProducts.btnViewItemClick(Sender: TObject);
 begin
   frmYourProducts.Hide;
@@ -96,6 +108,13 @@ end;
 
 procedure TfrmYourProducts.FormShow(Sender: TObject);
 begin
+  if items <> nil then
+  begin
+    items.Free;
+    items := tObjectDictionary<string, ProductItem>.Create([doOwnsValues]);
+  end;
+  scrollRangeMin := 0;
+  scrollRangeMax := 10;
   updateItemsDisplay;
 end;
 
@@ -118,21 +137,22 @@ var
   dsResult: tADODataSet;
   currentItem: ProductItem;
 begin
-  if items <> nil then
-  begin
-    items.Free;
-  end;
-
-  items := tObjectDictionary<string, ProductItem>.Create([doOwnsValues]);
 
   try
 
-    dsResult := datamodule1.getProducts(datamodule1.userID);
+    dsResult := datamodule1.getProducts(datamodule1.userID, scrollRangeMin,
+      scrollRangeMax);
 
     if dsResult.Fields.FindField('Status') <> nil then
     begin
       showMessage(dsResult['Status']);
       Exit;
+    end;
+
+    if btnLoadMoreitems <> nil then
+    begin
+      btnLoadMoreItems.Free;
+      btnLoadMoreItems := nil;
     end;
 
     dsResult.First;
@@ -143,6 +163,15 @@ begin
         self.removeProcedure);
       items.add(currentItem.itemID, currentItem);
       dsResult.Next;
+    end;
+
+    if scrollRangeMax - scrollRangeMin = dsResult.RecordCount then
+    begin
+      btnLoadMoreitems := tButton.Create(self.Owner);
+      btnLoadMoreitems.Caption := 'load More items';
+      btnLoadMoreitems.OnClick := btnLoadMoreItemsClick;
+      btnLoadMoreitems.Parent := flpnlProducts;
+      btnLoadMoreitems.Width := 500;
     end;
 
   finally

@@ -58,7 +58,8 @@ type
     procedure grpCheckoutClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure OnClickCategory(Sender: TObject);
-    procedure SearchItems(Sender: TObject);
+    procedure onSearchBoxClick(Sender: TObject);
+    procedure SearchItems();
     procedure ViewItem(sellerID, itemID: string);
     procedure chbCFEnableClick(Sender: TObject);
     procedure spnCFMinChange(Sender: TObject);
@@ -68,12 +69,17 @@ type
     procedure chbWUEnableClick(Sender: TObject);
     procedure chbRatingsEnableClick(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
+    procedure btnLoadMoreItemsClick(Sender: TObject);
+    procedure addQueryResult(dsResult: tAdoDataset);
 
   private
     { Private declarations }
   public
     category: string;
     items: TObjectList<BrowseItem>;
+    scrollRangeMin: integer;
+    scrollRangeMax: integer;
+    btnLoadMoreitems: tButton;
 
     { Public declarations }
 
@@ -90,6 +96,60 @@ uses
 
 {$R *.dfm}
 
+procedure TfrmBrowse.addQueryResult(dsResult: tAdoDataset);
+var
+  iMinRating: integer;
+begin
+
+  if chbRatingsEnable.Checked then
+  begin
+    iMinRating := spnMinRating.Value;
+
+  end
+  else
+  begin
+    iMinRating := -1;
+  end;
+
+  if Assigned(btnLoadMoreitems) then
+    btnLoadMoreitems.Free;
+    btnLoadMoreItems := nil;
+
+
+
+  dsResult.First;
+
+  while not dsResult.Eof do
+  begin
+    if not(chbRatingsEnable.Enabled and dsResult['avgRating'] >= iMinRating)
+    then
+    begin
+      dsResult.Next;
+      continue;
+    end
+    else if not(chbRatingsEnable.Enabled) then
+    begin
+      dsResult.Next;
+      continue;
+    end;
+
+    items.Add(BrowseItem.Create(self, flpnlItems, dsResult, self.ViewItem));
+    dsResult.Next;
+
+  end;
+
+  // only add the load more button if =this is not the end of the items in the query
+  if scrollRangeMax-scrollRangeMin = dsResult.RecordCount then
+  begin
+    btnLoadMoreitems := tButton.Create(self.Owner);
+    btnLoadMoreitems.Caption := 'load More items';
+    btnLoadMoreitems.OnClick := btnLoadMoreItemsClick;
+    btnLoadMoreitems.Parent := flpnlItems;
+    btnLoadMoreitems.Width := 500;
+  end;
+
+end;
+
 procedure TfrmBrowse.btnCheckoutClick(Sender: TObject);
 begin
   frmBrowse.Hide;
@@ -101,6 +161,16 @@ begin
   frmHelp.frmPrevious := self;
   self.Hide;
   frmHelp.Show;
+end;
+
+procedure TfrmBrowse.btnLoadMoreItemsClick(Sender: TObject);
+begin
+  if Sender is tButton then
+  begin
+    scrollRangeMin := scrollRangeMin + 10;
+    scrollRangeMax := scrollRangeMax + 10;
+    SearchItems;
+  end;
 end;
 
 procedure TfrmBrowse.btnLogoutClick(Sender: TObject);
@@ -176,7 +246,7 @@ end;
 
 procedure TfrmBrowse.FormShow(Sender: TObject);
 var
-  dsResult: TADODataSet;
+  dsResult: tAdoDataset;
   currentCheckbox: TCheckBox;
 begin
 
@@ -199,7 +269,7 @@ begin
     begin
       currentCheckbox := TCheckBox.Create(self);
       currentCheckbox.Parent := flpnlCategories;
-      currentCheckbox.onClick := self.OnClickCategory;
+      currentCheckbox.OnClick := self.OnClickCategory;
       currentCheckbox.Caption := dsResult['Category'];
       categories.Add(currentCheckbox);
 
@@ -228,11 +298,11 @@ end;
 
 procedure TfrmBrowse.OnClickCategory(Sender: TObject);
 var
-  button: TButton;
+  button: tButton;
 begin
-  if Sender is TButton then
+  if Sender is tButton then
   begin
-    button := TButton(Sender);
+    button := tButton(Sender);
     if category = button.Caption then
     begin
       category := '';
@@ -243,13 +313,25 @@ begin
   end;
 end;
 
-procedure TfrmBrowse.SearchItems(Sender: TObject);
+procedure TfrmBrowse.onSearchBoxClick(Sender: TObject);
+begin
+  if items <> nil then
+  begin
+    items.Free;
+    items := nil;
+  end;
+  scrollRangeMin := 0;
+  scrollRangeMax := 10;
+  SearchItems;
+end;
+
+procedure TfrmBrowse.SearchItems();
 var
-  dsResult: TADODataSet;
+  dsResult: tAdoDataset;
   searchQuery: string;
   arrCategories: TList<string>;
-  I, iMinRating: Integer;
-  cfRange, euRange, wuRange: array of Integer;
+  I, iMinRating: integer;
+  cfRange, euRange, wuRange: array of integer;
 
 begin
 
@@ -297,25 +379,11 @@ begin
 
   end;
 
-  if chbRatingsEnable.Checked then
-  begin
-    iMinRating := spnMinRating.Value;
-
-  end
-  else
-  begin
-    iMinRating := -1;
-  end;
-
   dsResult := DataModule1.getSearchResults(searchQuery, arrCategories, cfRange,
-    euRange, wuRange);
+    euRange, wuRange, [scrollRangeMin, scrollRangeMax]);
 
-  if items <> nil then
-  begin
-    items.Free;
-  end;
-
-  items := TObjectList<BrowseItem>.Create();
+  if items = nil then
+    items := TObjectList<BrowseItem>.Create();
 
   if dsResult.Fields.FindField('Status') <> nil then
   begin
@@ -330,26 +398,7 @@ begin
     Exit;
   end;
 
-  dsResult.First;
-
-  while not dsResult.Eof do
-  begin
-    if not(chbRatingsEnable.Enabled and dsResult['avgRating'] >= iMinRating)
-    then
-    begin
-      dsResult.Next;
-      continue;
-    end
-    else if not(chbRatingsEnable.Enabled) then
-    begin
-      dsResult.Next;
-      continue;
-    end;
-
-    items.Add(BrowseItem.Create(self, flpnlItems, dsResult, self.ViewItem));
-    dsResult.Next;
-
-  end;
+  addQueryResult(dsResult);
 
   dsResult.Free;
 
@@ -386,14 +435,11 @@ begin
 
   if spnWUMax.Value < spnWUMin.Value then
   begin
-    // TODO : bit broken, at 1000 it breaks
     spnWUMax.Value := spnWUMin.Value;
   end;
 
   spnWUMax.Enabled := spnWUMax.MinValue <> spnWUMax.MaxValue
 end;
-
-
 
 // procedure given to all browse item containers
 // if the user is the object's seller, rather show them the screen that allows them to edit
