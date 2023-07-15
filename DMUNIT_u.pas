@@ -686,6 +686,9 @@ begin
   try
     Result := runSQL(sql, params);
 
+    if Result.IsEmpty then
+      Exit;
+
     Result.First;
     for i := 1 to iMin do
     begin
@@ -841,6 +844,10 @@ begin
   try
     // return the results
     Result := runSQL(sql, params);
+
+    if Result.isEmpty then
+      Exit;
+
 
     // select top values in a range
     // not using sql cause it was too buggy and complicated and not worth my time
