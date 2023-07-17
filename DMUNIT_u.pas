@@ -41,8 +41,16 @@ type
     // stores these global vairables for all screen
     userID: string;
     CartID: string;
-    dDate: tDate;
+    dDate: tDateTime;
     lastForm: TForm;
+
+  const
+    stRevenue = 0;
+    stSales = 1;
+    stSpending = 2;
+    stCF = 3;
+    stEU = 4;
+    stWU = 5;
 
     procedure findInTable(table: TADOTable; pk: string; pkVal: string);
 
@@ -61,7 +69,7 @@ type
 
     function hasUserBoughtItem(itemID, userID: string): boolean;
 
-    function obtainStats(userID, statType: string;
+    function obtainStats(userID : string; statType: integer;
       DateBegin, DateEnd: tDateTime): tADODataSet;
 
     function viewItem(itemID: string): tADODataSet;
@@ -91,7 +99,7 @@ type
       tbName: string): boolean;
 
     // methods relating to transaction management
-    function CreateUserCart(userID: string): string;
+    function CreateUserCart(buyerID: string): string;
 
     procedure CancelCart(ShoppingCartID: string);
 
@@ -103,7 +111,8 @@ type
 
     procedure StoreShoppingCart(ShoppingCartID: string);
 
-    function addToCart(ShoppingCartID, itemID: string; quantity: integer): string;
+    function addToCart(ShoppingCartID, itemID: string;
+      quantity: integer): string;
 
     function getCartItems(ShoppingCartID: string): tADODataSet;
     procedure removeFromCart(ShoppingCartItemID: string);
@@ -392,10 +401,6 @@ begin
     // transfer funds
     updateSellerAndBuyer(ShoppingCartID);
 
-    // update The user's  and buyers' statistics  based on these transactions
-
-    updateStats(ShoppingCartID);
-
 
     // Now, Delete all temporary shopping cart records from the database
 
@@ -433,7 +438,7 @@ end;
 
 // once the user has checked out a cart or has logged in
 // generate a new shopping cart for the user
-function TDataModule1.CreateUserCart(userID: string): string;
+function TDataModule1.CreateUserCart(buyerID: string): string;
 var
   sShoppingCartID, sql: string;
   i: integer;
@@ -456,8 +461,8 @@ begin
 
   params := tObjectDictionary<string, Variant>.Create();
   params.Add('ShoppingCartID', sShoppingCartID);
-  params.Add('Date', Date);
-  params.Add('UserID', userID);
+  params.Add('Date', dDate);
+  params.Add('UserID', buyerID);
 
   // insert user's shopping cart into database
   sql := 'INSERT INTO ShoppingCartTB (ShoppingCartID, BuyerID, DateCreated) VALUES (:ShoppingCartID, :UserID , :Date)';
@@ -1002,7 +1007,6 @@ begin
 
 end;
 
-
 // procedure to insert a new item into the database
 procedure TDataModule1.insertItem(itemID, Name, SellerID, category,
   Desc: string; Price, stock, maxwithdrawstock, CF, EU, WU, CFProduce,
@@ -1268,26 +1272,77 @@ begin
 
 end;
 
-function TDataModule1.obtainStats(userID, statType: string;
+function TDataModule1.obtainStats(userID : string; statType: integer;
   DateBegin, DateEnd: tDateTime): tADODataSet;
 var
-
+  fieldToAnalyse: string;
   sql: string;
   params: tObjectDictionary<string, Variant>;
 
 begin;
-  sql := 'SELECT YEAR(statDate) AS y, MONTH(statDate) as m , SUM(statValue) AS TotalMonth FROM StatsTB'
-    + ' WHERE UserID = :UserID AND Type = :Type AND statDate BETWEEN :MonthBegin AND :MonthEnd '
-    + 'GROUP BY YEAR(statDate), MONTH(statDate) ORDER BY YEAR(statDate) ASC, MONTH(statDate) ASC';
+
+  // based on what the category of statistic you want to get
+  // choose which field in the transactionTB to analyse in order to get statistics
+  case statType of
+    stRevenue:
+      begin
+        fieldToAnalyse := 'TransactionItemTB.Cost';
+      end;
+    stSales:
+      begin
+        fieldToAnalyse := 'Quantity';
+      end;
+    stSpending:
+      begin
+        fieldToAnalyse := 'TransactionItemTB.Cost';
+      end;
+    stCF:
+      begin
+        fieldToAnalyse := 'CF';
+      end;
+    stEU:
+      begin
+        fieldToAnalyse := 'EU';
+      end;
+    stWU:
+      begin
+        fieldToAnalyse := 'WU';
+      end;
+
+  end;
+
+  sql := 'SELECT SUM(' + fieldToAnalyse + ') as TotalMonth , ' +
+    'YEAR(TransactionDate) as y , MONTH(TransactionDate) as m ' + 'FROM ';
+
+  // create sql based on whether your looking from the perspective of the seller
+  // or the buyer
+  if ( statType <> stRevenue) and (statType <> stSales) then
+  begin
+    sql := sql + ' TransactionItemTB ' +
+      'INNER JOIN TransactionTB ON TransactionItemTB.TransactionID = TransactionTB.TransactionID '
+      + ' WHERE BuyerID = :UserID AND TransactionDate BETWEEN :MonthBegin AND :MonthEnd';
+  end
+  else
+  begin
+    sql := sql + '( TransactionItemTB ' +
+      'INNER JOIN TransactionTB ON TransactionItemTB.TransactionID = TransactionTB.TransactionID ) '
+      + ' INNER JOIN ItemTB ON TransactionItemTB.ItemID = ItemTB.ItemID ' +
+      'WHERE SellerID = :UserID AND TransactionDate BETWEEN :MonthBegin AND :MonthEnd';
+  end;
+
+  sql := sql + ' GROUP BY YEAR(TransactionDate), MONTH(TransactionDate)' +
+    ' ORDER BY YEAR(TransactionDate) ASC, MONTH(TransactionDate) ASC';
+
   params := tObjectDictionary<string, Variant>.Create();
 
   params.Add('UserID', userID);
-  params.Add('Type', statType);
   params.Add('MonthBegin', DateBegin);
   params.Add('MonthEnd', DateEnd);
 
   try
+
     Result := runSQL(sql, params);
+
 
   finally
     params.Free;
@@ -1457,7 +1512,6 @@ begin
           // read
           // read data from sql into output dataset
           Query.Open;
-          dsOutput.Free;
           dsOutput := tADODataSet.Create(Nil);
           dsOutput.Recordset := CloneRecordset(Query.Recordset);
         end
@@ -1684,12 +1738,11 @@ var
 begin
 
   // copy fist into transactionTB
-  sql := 'INSERT INTO TransactionTB (TransactionID, BuyerID, TransactionDate ) ' +
-    'SELECT ShoppingCartID, BuyerID, :CurrentDate FROM ShoppingCartTB WHERE ShoppingCartID = :ShoppingCartID';
+  sql := 'INSERT INTO TransactionTB (TransactionID, BuyerID, TransactionDate ) '
+    + 'SELECT ShoppingCartID, BuyerID, DateCreated FROM ShoppingCartTB WHERE ShoppingCartID = :ShoppingCartID';
 
   params := tObjectDictionary<String, Variant>.Create();
   params.Add('ShoppingCartID', ShoppingCartID);
-  params.Add('CurrentDate', dDate);
   try
     dsResult := runSQL(sql, params);
 
@@ -1702,13 +1755,13 @@ begin
 
     // Then for TransactionItemTB
     sql := 'INSERT INTO TransactionItemTB (CartItemID, ItemID, Quantity, TransactionID, Cost, CF, EU, WU) '
-      + 'SELECT ShoppingCartItemID, ShoppingCartItemsTB.ItemID, Quantity, '+
-      'ShoppingCartID, (Cost * Quantity) AS TotalCost,'+
-      ' (( CarbonFootprintProduction + CarbonFootprintUsage )* Quantity ) AS CF , '+
-      ' (( EnergyUsageProduction + EnergyFootprintUsage )* Quantity ) AS EU, '+
-      ' (( WaterUsageProduction + WaterFootprintUsage )* Quantity ) AS WU '+
-      'FROM ShoppingCartItemsTB '+
-    ' INNER JOIN ItemTB ON ItemTB.ItemID = ShoppingCartItemsTB.ItemID '+
+      + 'SELECT ShoppingCartItemID, ShoppingCartItemsTB.ItemID, Quantity, ' +
+      'ShoppingCartID, (Cost * Quantity) AS TotalCost,' +
+      ' (( CarbonFootprintProduction + CarbonFootprintUsage )* Quantity ) AS CF , '
+      + ' (( EnergyUsageProduction + EnergyFootprintUsage )* Quantity ) AS EU, '
+      + ' (( WaterUsageProduction + WaterFootprintUsage )* Quantity ) AS WU ' +
+      'FROM ShoppingCartItemsTB ' +
+      ' INNER JOIN ItemTB ON ItemTB.ItemID = ShoppingCartItemsTB.ItemID ' +
       ' WHERE ShoppingCartID  = :ShoppingCartID ';
 
     dsResult := runSQL(sql, params);
@@ -1824,7 +1877,7 @@ var
   sql, sqlUpdateBuyer, sqlUpdateItem, sqlUpdateSeller: string;
   params: tObjectDictionary<string, Variant>;
   dsResult, dsResultUpdateSeller, dsResultUpdateBuyer: tADODataSet;
-  BuyerID: string;
+  buyerID: string;
   buyerBalance, itemPrice: double;
 begin
   try
@@ -1844,12 +1897,12 @@ begin
       raise Exception.Create(dsResult['Status']);
     end;
 
-    BuyerID := dsResult['BuyerID'];
+    buyerID := dsResult['BuyerID'];
     buyerBalance := dsResult['Balance'];
 
     // Select all relevant data on the items and Seller for each item in user's cart
 
-    sql := 'SELECT ShoppingCartItemsTB.Quantity, ShoppingCartItemsTB.ItemID, ShoppingCartItemsTB.Cost'
+    sql := 'SELECT ShoppingCartItemsTB.Quantity, ShoppingCartItemsTB.ItemID, ItemTB.Cost'
       + ' , ItemTB.SellerID ' +
       ' FROM ((ShoppingCartItemsTB INNER JOIN ShoppingCartTB ' +
       'ON ShoppingCartItemsTB.ShoppingCartID = ShoppingCartTB.ShoppingCartID) '
@@ -1882,7 +1935,7 @@ begin
     begin
       // update buyer
 
-      itemPrice := dsResult['Cost'];
+      itemPrice := dsResult['Cost'] * dsResult['Quantity'];
       buyerBalance := buyerBalance - itemPrice;
 
       if buyerBalance < 0 then
@@ -1895,7 +1948,7 @@ begin
       // if sufficient funds remove from user's account
       params.clear;
       params.Add('Balance', buyerBalance);
-      params.Add('UserID', BuyerID);
+      params.Add('UserID', buyerID);
 
       dsResultUpdateBuyer := runSQL(sqlUpdateBuyer, params);
 
@@ -1941,7 +1994,7 @@ end;
 
 procedure TDataModule1.updateStats(ShoppingCartID: string);
 var
-  sql, BuyerID: string;
+  sql, buyerID: string;
   params: tObjectDictionary<string, Variant>;
   dsResult, dsResultStats: tADODataSet;
   SellerID: string;
@@ -1958,7 +2011,7 @@ begin
   try
     dsResult := runSQL(sql, params);
 
-    BuyerID := dsResult['BuyerID'];
+    buyerID := dsResult['BuyerID'];
 
     // for each item in this cart, select all relevant data
     sql := 'SELECT ShoppingCartItemsTB.ItemID, Quantity, ItemTB.SellerID, ShoppingCartItemsTB.Cost, '
@@ -1991,10 +2044,10 @@ begin
       try
         insertStatData(SellerID, dDate, 'REV', CostItem);
         insertStatData(SellerID, dDate, 'SAL', quantityItem);
-        insertStatData(BuyerID, dDate, 'SPE', CostItem);
-        insertStatData(BuyerID, dDate, 'CF', CFItem * quantityItem);
-        insertStatData(BuyerID, dDate, 'EU', EUItem * quantityItem);
-        insertStatData(BuyerID, dDate, 'WU', WUItem * quantityItem);
+        insertStatData(buyerID, dDate, 'SPE', CostItem);
+        insertStatData(buyerID, dDate, 'CF', CFItem * quantityItem);
+        insertStatData(buyerID, dDate, 'EU', EUItem * quantityItem);
+        insertStatData(buyerID, dDate, 'WU', WUItem * quantityItem);
 
       except
         on e: Exception do

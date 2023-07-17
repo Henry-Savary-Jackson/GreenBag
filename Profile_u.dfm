@@ -61,7 +61,7 @@ object frmProfile: TfrmProfile
         Align = alClient
         Caption = 'Carbon Footprint'
         Flat = True
-        OnClick = categoryClickStats
+        OnClick = btnCFClick
         ExplicitLeft = 5
         ExplicitTop = 8
       end
@@ -82,7 +82,7 @@ object frmProfile: TfrmProfile
         Align = alClient
         Caption = 'Energy Usage'
         Flat = True
-        OnClick = categoryClickStats
+        OnClick = btnEUClick
         ExplicitLeft = 0
         ExplicitWidth = 122
         ExplicitHeight = 16
@@ -104,10 +104,9 @@ object frmProfile: TfrmProfile
         Align = alClient
         Caption = 'Revenue'
         Flat = True
-        OnClick = categoryClickStats
+        OnClick = btnRevenueClick
         ExplicitLeft = -3
         ExplicitTop = 3
-        ExplicitHeight = 20
       end
     end
     object pnlSales: TPanel
@@ -126,10 +125,9 @@ object frmProfile: TfrmProfile
         Align = alClient
         Caption = 'Sales'
         Flat = True
-        OnClick = categoryClickStats
-        ExplicitLeft = -3
+        OnClick = btnSalesClick
+        ExplicitLeft = 5
         ExplicitTop = 3
-        ExplicitHeight = 20
       end
     end
     object pnlSpending: TPanel
@@ -148,7 +146,7 @@ object frmProfile: TfrmProfile
         Align = alClient
         Caption = 'Spending'
         Flat = True
-        OnClick = categoryClickStats
+        OnClick = btnSpendingClick
         ExplicitLeft = 2
         ExplicitTop = 0
         ExplicitWidth = 162
@@ -171,7 +169,7 @@ object frmProfile: TfrmProfile
         Align = alClient
         Caption = 'Water Usage'
         Flat = True
-        OnClick = categoryClickStats
+        OnClick = btnWUClick
         ExplicitLeft = 121
         ExplicitTop = -46
         ExplicitWidth = 162
@@ -316,9 +314,9 @@ object frmProfile: TfrmProfile
     end
   end
   object chrtStats: TChart
-    Left = 35
+    Left = 0
     Top = 450
-    Width = 625
+    Width = 692
     Height = 258
     Cursor = crArrow
     AllowPanning = pmHorizontal

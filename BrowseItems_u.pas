@@ -186,7 +186,8 @@ begin
   try
     DataModule1.CancelCart(DataModule1.CartID);
 
-    items.Clear;
+    if items <> nil then
+      items.Clear;
 
     srchSearchItems.Text := '';
 

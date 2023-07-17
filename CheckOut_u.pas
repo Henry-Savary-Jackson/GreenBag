@@ -8,7 +8,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls,
   Vcl.ExtCtrls, Data.win.ADODB,
   Vcl.Samples.Spin, Vcl.Imaging.pngimage, CartItem_u,
-  System.Generics.Collections, ItemContainer_u, DMUnit_u, Vcl.Buttons;
+  System.Generics.Collections, ItemContainer_u, DMUnit_u, Vcl.Buttons, Math;
 
 type
   TfrmCheckout = class(TForm)
@@ -93,18 +93,15 @@ end;
 
 procedure TfrmCheckout.Button1Click(Sender: TObject);
 var
-  sqlUsers, sqlupdateUsers, sqlItems, userID, itemID, shoppingCartID: string;
+  sqlUsers, sqlupdateUsers, sqlItems, curruserID, itemID,
+    shoppingCartID: string;
   dsResult, dsResultItems: tAdoDataSet;
   params: TObjectDictionary<string, variant>;
-  dictItems: TObjectDictionary<string, integer>;
-  listUsers: tList<string>;
   i, j, itemQuantity, itemsInCart: integer;
 
 begin
-
   try
-
-    sqlupdateUsers := ' UPDATE UserTB SET Balance = 1000000';
+    sqlupdateUsers := ' UPDATE UserTB SET Balance = 10000000';
 
     dsResult := DataModule1.runSQL(sqlupdateUsers);
 
@@ -113,46 +110,77 @@ begin
       showMessage(dsResult['Status']);
     end;
 
+    dsResult.Free;
+
     sqlUsers := 'SELECT UserID FROM UserTB';
-    sqlItems := 'SELECT ItemID, MaxWithdrawableStock AS max FROM ItemTB WHERE SellerID <> :SellerID';
+    sqlItems :=
+      'SELECT ItemID, MaxWithdrawableStock AS maximum FROM ItemTB WHERE SellerID <> :SellerID';
 
     dsResult := DataModule1.runSQL(sqlUsers);
 
     dsResult.First;
 
+    params := TObjectDictionary<string, variant>.create();
+
     while not dsResult.Eof do
     begin
-      userID := dsResult['UserID'];
-
-      params := TObjectDictionary<string, variant>.create;
+      curruserID := dsResult['UserID'];
 
       try
-
-        params.Add('SellerID', userID);
+        params.Clear;
+        params.Add('SellerID', curruserID);
 
         dsResultItems := DataModule1.runSQL(sqlItems, params);
 
-        shoppingCartID := DataModule1.CreateUserCart(userID);
+        if dsResult.Fields.FindField('Status') <> nil then
+        begin
+          showMessage(dsResult['Status']);
+        end;
 
         for i := 1 to 500 do
         begin
 
-          itemsInCart := random(10) + 1;
+          try
+            DataModule1.dDate := Date - random(5 * 365);
 
-          for j := 1 to itemsInCart do
-          begin
-            dsResultItems.First;
-            dsResultItems.MoveBy(random(dsResultItems.RecordCount));
+            shoppingCartID := DataModule1.CreateUserCart(curruserID);
 
-            DataModule1.addToCart()
+            itemsInCart := random(10) + 1;
+
+            for j := 1 to itemsInCart do
+            begin
+
+              try
+                dsResultItems.First;
+                dsResultItems.MoveBy(random(dsResultItems.RecordCount));
+                itemID := dsResultItems['ItemID'];
+                DataModule1.addToCart(shoppingCartID, itemID,
+                  min(ceil((random(dsResultItems['maximum']) + 1) / 10), 10));
+
+              except
+                on e: exception do
+                begin
+                  Continue;
+                end;
+              end;
+
+            end;
+
+            DataModule1.CheckoutCart(shoppingCartID);
+
+          finally
+            if shoppingCartID <> '' then
+              DataModule1.CancelCart(shoppingCartID);
           end;
-
-          DataModule1.dDate := Date - random(3 * 365);
 
         end;
 
       finally
-        params.Free
+        if Assigned(dsResultItems) then
+          dsResultItems.Free;
+
+        dsResult.Next;
+
       end;
 
     end;
@@ -160,8 +188,9 @@ begin
   finally
     if Assigned(dsResult) then
       dsResult.Free;
-    if Assigned(dsResultItems) then
-      dsResultItems.Free
+
+    if Assigned(params) then
+      params.Free;
 
   end;
 

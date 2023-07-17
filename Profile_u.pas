@@ -56,7 +56,7 @@ type
     procedure btnBackClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure showTotals(UserType: string);
-    procedure categoryClickStats(Sender: TObject);
+    procedure categoryClickStats(caption: string);
     procedure NameTOCategString(sName: string);
     procedure UpdateChart();
     procedure btnLeftClick(Sender: TObject);
@@ -66,9 +66,14 @@ type
     procedure btnAddFundsClick(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
     procedure ShowCategButtons(UserType: string);
+    procedure btnCFClick(Sender: TObject);
+    procedure btnEUClick(Sender: TObject);
+    procedure btnRevenueClick(Sender: TObject);
+    procedure btnSalesClick(Sender: TObject);
+    procedure btnSpendingClick(Sender: TObject);
+    procedure btnWUClick(Sender: TObject);
   private
     { Private declarations }
-    NameToCateg: TObjectDictionary<string, string>;
   public
     { Public declarations }
   end;
@@ -76,7 +81,7 @@ type
 var
   frmProfile: TfrmProfile;
   dateRangeBegin, dateRangeEnd: tDateTime;
-  sType: string;
+  statType: integer;
   balance: double;
 
 implementation
@@ -92,6 +97,18 @@ begin
   frmBrowse.Show;
 end;
 
+procedure TfrmProfile.btnCFClick(Sender: TObject);
+begin
+  statType := DataModule1.stCF;
+  categoryClickStats(TSpeedButton(Sender).caption);
+end;
+
+procedure TfrmProfile.btnEUClick(Sender: TObject);
+begin
+  statType := DataModule1.stEU;
+  categoryClickStats(TSpeedButton(Sender).caption);
+end;
+
 procedure TfrmProfile.btnHelpClick(Sender: TObject);
 begin
   frmHelp.frmPrevious := self;
@@ -103,7 +120,13 @@ procedure TfrmProfile.btnLeftClick(Sender: TObject);
 
 begin
   changeChartDateRange(-1);
-  UpdateChart;
+  UpdateChart();
+end;
+
+procedure TfrmProfile.btnRevenueClick(Sender: TObject);
+begin
+  statType := DataModule1.stRevenue;
+  categoryClickStats(TSpeedButton(Sender).caption);
 end;
 
 procedure TfrmProfile.btnRightClick(Sender: TObject);
@@ -112,10 +135,28 @@ begin
   UpdateChart;
 end;
 
+procedure TfrmProfile.btnSalesClick(Sender: TObject);
+begin
+  statType := DataModule1.stSales;
+  categoryClickStats(TSpeedButton(Sender).caption);
+end;
+
+procedure TfrmProfile.btnSpendingClick(Sender: TObject);
+begin
+  statType := DataModule1.stSpending;
+  categoryClickStats(TSpeedButton(Sender).caption);
+end;
+
 procedure TfrmProfile.btnViewProductsClick(Sender: TObject);
 begin
   frmProfile.Hide;
   frmYourProducts.Show;
+end;
+
+procedure TfrmProfile.btnWUClick(Sender: TObject);
+begin
+  statType := DataModule1.stWU;
+  categoryClickStats(TSpeedButton(Sender).caption);
 end;
 
 procedure TfrmProfile.btnAddFundsClick(Sender: TObject);
@@ -128,7 +169,7 @@ begin
     DataModule1.addFunds(DataModule1.userID, dExtra);
     balance := balance + dExtra;
 
-    lblBalance.Caption := 'Current Balance: ' + floatToStrf(balance,
+    lblBalance.caption := 'Current Balance: ' + floatToStrf(balance,
       ffCurrency, 8, 2);
 
   except
@@ -139,42 +180,38 @@ begin
   end;
 end;
 
-procedure TfrmProfile.categoryClickStats(Sender: TObject);
+// code for all buttons to set up the graph and populate it
+procedure TfrmProfile.categoryClickStats(caption: string);
 begin
-  if Sender is TSpeedButton then
+  // get the code for this category
+
+  chrtStats.Title.caption := 'Your ' + caption;
+
+  srsStats.XLabel[0] := caption;
+
+  if (statType = DataModule1.stRevenue) or (statType = DataModule1.stSpending)
+  then
   begin
-
-    // get the code for this category
-    NameToCateg.TryGetValue(TButton(Sender).Caption, sType);
-
-    chrtStats.Title.Caption := 'Your ' + TButton(Sender).Caption;
-
-    srsStats.XLabel[0] := TButton(Sender).Caption;
-
-    if (sType = 'REV') or (sType = 'SPE') then
-    begin
-      srsStats.XLabel[0] := srsStats.Xlabel[0] + '(Rands)';
-    end
-    else if sType = 'CF' then
-    begin
-      srsStats.XLabel[0] := srsStats.XLabel[0] + ' (tonnes) ';
-    end
-    else if sType = 'EU' then
-    begin
-      srsStats.XLabel[0] := srsStats.XLabel[0] + ' (kWh) ';
-    end
-    else if sType = 'WU' then
-    begin
-      srsStats.XLabel[0] := srsStats.XLabel[0] + ' (L) ';
-    end
-    else if sType = 'SAL' then
-    begin
-      srsStats.XLabel[0] := srsStats.XLabel[0] + ' (units) ';
-    end;
-
-    UpdateChart;
-
+    srsStats.XLabel[0] := srsStats.XLabel[0] + '(Rands)';
+  end
+  else if (statType = DataModule1.stCF) then
+  begin
+    srsStats.XLabel[0] := srsStats.XLabel[0] + ' (tonnes) ';
+  end
+  else if (statType = DataModule1.stEU) then
+  begin
+    srsStats.XLabel[0] := srsStats.XLabel[0] + ' (kWh) ';
+  end
+  else if (statType = DataModule1.stWU) then
+  begin
+    srsStats.XLabel[0] := srsStats.XLabel[0] + ' (L) ';
+  end
+  else if (statType = DataModule1.stSales) then
+  begin
+    srsStats.XLabel[0] := srsStats.XLabel[0] + ' (units) ';
   end;
+
+  UpdateChart;
 
 end;
 
@@ -211,53 +248,44 @@ var
   imageStream: tStream;
 begin
 
-  NameToCateg := TObjectDictionary<string, string>.Create();
-  // dictionary of button and name and category string
-  NameToCateg.Add('Sales', 'SAL');
-  NameToCateg.Add('Spending', 'SPE');
-  NameToCateg.Add('Carbon Footprint', 'CF');
-  NameToCateg.Add('Energy Usage', 'EU');
-  NameToCateg.Add('Water Usage', 'WU');
-  NameToCateg.Add('Revenue', 'REV');
-
   dsResult := DataModule1.userInfo(DataModule1.userID);
 
   showTotals(dsResult['UserType']);
   ShowCategButtons(dsResult['UserType']);
 
-  lblUsername.Caption := dsResult['Username'];
+  lblUsername.caption := dsResult['Username'];
 
   balance := dsResult['Balance'];
 
-  lblBalance.Caption := 'Current Balance: ' + floatToStrf(balance,
+  lblBalance.caption := 'Current Balance: ' + floatToStrf(balance,
     ffCurrency, 8, 2);
 
-  lblSpendingTotal.Caption := 'Total Spending: ' +
+  lblSpendingTotal.caption := 'Total Spending: ' +
     floatToStrf(dsResult['TotalSpending'], ffCurrency, 8, 2);
 
-  lblTotalCF.Caption := 'Total Carbon Footprint: ' +
+  lblTotalCF.caption := 'Total Carbon Footprint: ' +
     floatToStrf(dsResult['TotalCF'], ffFixed, 8, 2) + ' t';
 
-  lblTotalEU.Caption := 'Total Energy Usage: ' +
+  lblTotalEU.caption := 'Total Energy Usage: ' +
     floatToStrf(dsResult['TotalEU'], ffFixed, 8, 2) + ' kWh';
 
-  lblTotalWU.Caption := 'Total Water Usage: ' + floatToStrf(dsResult['TotalWU'],
+  lblTotalWU.caption := 'Total Water Usage: ' + floatToStrf(dsResult['TotalWU'],
     ffFixed, 8, 2) + ' L';
 
   if dsResult['UserType'] = 'SELLER' then
   begin
 
-    lblRevenueTotal.Caption := 'Total Revenue: ' +
+    lblRevenueTotal.caption := 'Total Revenue: ' +
       floatToStrf(dsResult['Revenue'], ffCurrency, 8, 2);
 
-    lblSales.Caption := 'Total Sales: ' + intTOstr(dsResult['TotalSales']);
+    lblSales.caption := 'Total Sales: ' + intTOstr(dsResult['TotalSales']);
     if dsResult['TotalSales'] = 1 then
     begin
-      lblSales.Caption := lblSales.Caption + ' unit'
+      lblSales.caption := lblSales.caption + ' unit'
     end
     else
     begin
-      lblSales.Caption := lblSales.Caption + ' units'
+      lblSales.caption := lblSales.caption + ' units'
     end;
 
   end;
@@ -273,7 +301,7 @@ begin
 
   srsStats.Marks.Visible := False;
 
-  chrtStats.Title.Caption := '';
+  chrtStats.Title.caption := '';
 
   imageStream := dsResult.CreateBlobStream
     (dsResult.FieldByName('ProfileImage'), bmRead);
@@ -356,8 +384,7 @@ begin
 
 end;
 
-
-procedure TfrmProfile.UpdateChart;
+procedure TfrmProfile.UpdateChart();
 var
   dsResult: TADODataSet;
   i: integer;
@@ -365,8 +392,15 @@ var
 begin
 
   // get the statistic
-  dsResult := DataModule1.obtainStats(DataModule1.userID, sType, dateRangeBegin,
-    dateRangeEnd);
+  dsResult := DataModule1.obtainStats(DataModule1.userID, statType,
+    dateRangeBegin, dateRangeEnd);
+
+  if dsResult.Fields.FindField('Status') <> nil then
+  begin
+    showMessage(dsResult['Status']);
+    dsResult.Free;
+    Exit;
+  end;
 
   srsStats.Clear;
 
@@ -375,7 +409,6 @@ begin
 
   for i := 0 to 9 do
   begin
-
 
     if (YearOf(currentDate) = dsResult['y']) and
       (MonthOf(currentDate) = dsResult['m']) then
