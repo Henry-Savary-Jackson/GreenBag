@@ -75,6 +75,7 @@ begin;
 
   quantity := spnQuantity.Value;
 
+  // make sure user doesn't take more
   if stock - quantity < 0 then
   begin
     showMessage('Not enough stock.');
@@ -82,7 +83,7 @@ begin;
   end;
 
   try
-    DataModule1.addToCart(DataModule1.CartID, itemID, quantity, price);
+    DataModule1.addToCart(DataModule1.CartID, itemID, quantity);
     frmViewItem.Hide;
     frmBrowse.Show;
 
@@ -153,7 +154,7 @@ var
   dsResult: TADODataSet;
   imageStream: tStream;
 begin
-  //
+  // get the info of the item
   dsResult := DataModule1.viewItem(itemID);
 
   if dsResult.Fields.FindField('Status') <> nil then
@@ -163,6 +164,7 @@ begin
     Exit;
   end;
 
+  // write dtaa to gui
   lblName.Caption := 'Name :' + dsResult['ItemName'];
   lblSeller.Caption := 'Seller: ' + dsResult['SellerName'];
   lblPrice.Caption := 'Price: ' + floatToStrf(dsResult['Cost'],
@@ -235,9 +237,6 @@ begin
     imageStream.Free;
 
   end;
-
-  btnSendRating.Enabled := dsResult['SellerID'] <> DataModule1.userID;
-  btnAddToCart.Enabled := dsResult['SellerID'] <> DataModule1.userID;
 
   spnQuantity.Value := 1;
   trcRating.Position := 0;

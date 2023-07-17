@@ -23,6 +23,7 @@ begin
   inherited Create(Owner);
   self.Owner := Owner;
   self.Parent := Parent;
+  // instantiate gui
   self.createDesign;
   self.itemID := ItemID;
 end;

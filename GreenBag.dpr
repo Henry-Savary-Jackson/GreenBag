@@ -2,9 +2,9 @@ program GreenBag;
 
 uses
   Vcl.Forms,
-  Loginu in 'Loginu.pas' {frmLogin},
+  Login_u in 'Login_u.pas' {frmLogin},
   DMUNIT_u in 'DMUNIT_u.pas' {DataModule1: TDataModule},
-  Signupu in 'Signupu.pas' {frmSignUp},
+  Signup_u in 'Signup_u.pas' {frmSignUp},
   BrowseItems_u in 'BrowseItems_u.pas' {frmBrowse},
   AddItem_u in 'AddItem_u.pas' {frmAddItem},
   ViewItem_u in 'ViewItem_u.pas' {frmViewItem},

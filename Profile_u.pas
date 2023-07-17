@@ -88,7 +88,6 @@ uses
 
 procedure TfrmProfile.btnBackClick(Sender: TObject);
 begin
-  //
   frmProfile.Hide;
   frmBrowse.Show;
 end;
@@ -213,7 +212,7 @@ var
 begin
 
   NameToCateg := TObjectDictionary<string, string>.Create();
-
+  // dictionary of button and name and category string
   NameToCateg.Add('Sales', 'SAL');
   NameToCateg.Add('Spending', 'SPE');
   NameToCateg.Add('Carbon Footprint', 'CF');
@@ -262,11 +261,13 @@ begin
     end;
 
   end;
-
+  // decrease current date by 9 months
   dateLowerLimit := IncMonth(DataModule1.dDate, -9);
-
+  // date is first day of the month
   dateRangeEnd := StrToDate(intTOstr(YearOf(DataModule1.dDate)) + '/' +
     intTOstr(MonthOf(DataModule1.dDate) + 1) + '/01');
+
+  // date is first day of next month
   dateRangeBegin := StrToDate(intTOstr(YearOf(dateLowerLimit)) + '/' +
     intTOstr(MonthOf(dateLowerLimit)) + '/01');
 
@@ -330,6 +331,7 @@ begin
   pnlWU.Show;
 end;
 
+// show the labels showing total and hide them based on usertype
 procedure TfrmProfile.showTotals(UserType: string);
 begin
 
@@ -354,6 +356,7 @@ begin
 
 end;
 
+
 procedure TfrmProfile.UpdateChart;
 var
   dsResult: TADODataSet;
@@ -361,6 +364,7 @@ var
   currentDate: tDateTime;
 begin
 
+  // get the statistic
   dsResult := DataModule1.obtainStats(DataModule1.userID, sType, dateRangeBegin,
     dateRangeEnd);
 
@@ -368,21 +372,26 @@ begin
 
   dsResult.First;
   currentDate := dateRangeBegin;
+
   for i := 0 to 9 do
   begin
+
 
     if (YearOf(currentDate) = dsResult['y']) and
       (MonthOf(currentDate) = dsResult['m']) then
     begin
+      // if there is a month in that data for this month, add data to chart
       srsStats.Add(dsResult['TotalMonth'], intTOstr(dsResult['y']) + '-' +
         intTOstr(dsResult['m']), clTeeColor);
       dsResult.Next;
     end
     else
     begin
+      // if there is no data for that month, put 0 for that month on the chart
       srsStats.Add(0, intTOstr(YearOf(currentDate)) + '-' +
         intTOstr(MonthOf(currentDate)), clTeeColor);
     end;
+
     currentDate := IncMonth(currentDate, 1);
 
   end;

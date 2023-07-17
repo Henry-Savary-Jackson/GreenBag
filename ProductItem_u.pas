@@ -32,6 +32,7 @@ type
     Constructor Create(Owner: tForm; Parent: TWinControl;
       productData: tAdoDataset; removeProcedure: tRemoveProcedure);
     procedure createDesign(); override;
+    // procedure to execute when the view item button is clicked
     procedure viewItem(Sender: tObject);
     // event handling code for the remove button
     procedure onRemoveClick(Sender: tObject);
@@ -157,7 +158,7 @@ end;
 
 procedure ProductItem.viewItem(Sender: tObject);
 begin
-  //
+  //  when clicking on the view item vraible, open the item on the AddItem screen
   self.Owner.Hide;
   DataModule1.lastForm := self.Owner;
   frmAddItem.itemID := itemID;

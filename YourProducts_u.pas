@@ -20,6 +20,7 @@ type
     btnAddItem: TSpeedButton;
     pnlHelp: TPanel;
     spnHelp: TSpeedButton;
+    lblNumberProducts: TLabel;
     procedure btnAddItemClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnBackClick(Sender: TObject);
@@ -35,6 +36,8 @@ type
   public
     { Public declarations }
     items: tObjectDictionary<string, ProductItem>;
+    // these 2 variables specify the range in which items must be loaded
+    // for example, load the the items between the 40th (including) and 50th item
     scrollRangeMin: integer;
     scrollRangeMax: integer;
     btnLoadMoreitems: tButton;
@@ -43,6 +46,7 @@ type
 
 var
   frmYourProducts: TfrmYourProducts;
+  numProducts : integer;
 
 implementation
 
@@ -55,6 +59,7 @@ uses
 procedure TfrmYourProducts.btnAddItemClick(Sender: TObject);
 begin
   frmYourProducts.Hide;
+  frmAddItem.itemID := '';
   datamodule1.lastForm := self;
   frmAddItem.Show;
 end;
@@ -74,9 +79,6 @@ end;
 
 procedure TfrmYourProducts.btnLoadMoreItemsClick(Sender: TObject);
 begin
-  //
-  scrollRangeMin := scrollRangeMin + 10;
-  scrollRangeMax := scrollRangeMax + 10;
   updateItemsDisplay;
 end;
 
@@ -118,7 +120,7 @@ begin
   begin
     items := tObjectDictionary<string, ProductItem>.Create([doOwnsValues]);
   end;
-
+  numProducts := 0;
   scrollRangeMin := 0;
   scrollRangeMax := 10;
   updateItemsDisplay;
@@ -131,9 +133,16 @@ begin
   if MessageDlg('Are you sure you want to delete this item?', mtConfirmation,
     [mbYes, mbNo], 0, mbNo) = mryes then
   begin
+    // delete itme from database
     datamodule1.deleteItem(itemID);
+    // remove from gui
     items.TryGetValue(itemID, itemToBeDeleted);
     itemToBeDeleted.Hide;
+
+    // update label
+    numProducts := numProducts -1;
+    lblNumberProducts.Caption := 'Number of products: ' + inttostr(numProducts);
+
   end;
 
 end;
@@ -146,38 +155,55 @@ begin
 
   try
 
-    dsResult := datamodule1.getProducts(datamodule1.userID, scrollRangeMin,
-      scrollRangeMax);
+    try
+       // get info on your products in a range
+      dsResult := datamodule1.getProducts(datamodule1.userID, scrollRangeMin,
+        scrollRangeMax, numProducts);
 
-    if dsResult.Fields.FindField('Status') <> nil then
-    begin
-      showMessage(dsResult['Status']);
-      Exit;
-    end;
+      lblNumberProducts.Caption := 'Number of products: ' + inttostr(numProducts);
 
-    if btnLoadMoreitems <> nil then
-    begin
-      btnLoadMoreItems.Free;
-      btnLoadMoreItems := nil;
-    end;
+      if dsResult.Fields.FindField('Status') <> nil then
+      begin
+        showMessage(dsResult['Status']);
+        Exit;
+      end;
 
-    dsResult.First;
+      if btnLoadMoreitems <> nil then
+      begin
+        btnLoadMoreitems.Free;
+        btnLoadMoreitems := nil;
+      end;
 
-    while not dsResult.Eof do
-    begin
-      currentItem := ProductItem.Create(self, flpnlProducts, dsResult,
-        self.removeProcedure);
-      items.add(currentItem.itemID, currentItem);
-      dsResult.Next;
-    end;
+      // instanitate all the gui objects
+      dsResult.First;
 
-    if scrollRangeMax - scrollRangeMin = dsResult.RecordCount then
-    begin
-      btnLoadMoreitems := tButton.Create(self.Owner);
-      btnLoadMoreitems.Caption := 'load More items';
-      btnLoadMoreitems.OnClick := btnLoadMoreItemsClick;
-      btnLoadMoreitems.Parent := flpnlProducts;
-      btnLoadMoreitems.Width := 500;
+      while not dsResult.Eof do
+      begin
+        currentItem := ProductItem.Create(self, flpnlProducts, dsResult,
+          self.removeProcedure);
+        items.add(currentItem.itemID, currentItem);
+        dsResult.Next;
+      end;
+
+      // only add the load more button if =this is not the end of the items in the query
+      if items.Count < numProducts then
+      begin
+        btnLoadMoreitems := tButton.Create(self.Owner);
+        btnLoadMoreitems.Caption := 'load More items';
+        btnLoadMoreitems.OnClick := btnLoadMoreItemsClick;
+        btnLoadMoreitems.Parent := flpnlProducts;
+        btnLoadMoreitems.Width := 500;
+      end;
+
+      scrollRangeMin := scrollRangeMin + 10;
+      scrollRangeMax := scrollRangeMax + 10;
+
+    except
+      on e: exception do
+      begin
+        showMessage(e.Message);
+      end;
+
     end;
 
   finally

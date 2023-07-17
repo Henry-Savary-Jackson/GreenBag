@@ -80,10 +80,12 @@ type
 
     procedure sendRating(userID, itemID: string; rating: integer);
 
-    function getProducts(userID: string; iMin, iMax: integer): tADODataSet;
+    function getProducts(userID: string; iMin, iMax: integer;
+      var numproducts: integer): tADODataSet;
 
     function getSearchResults(searchQuery: string; categories: TList<string>;
-      CFRange, EURange, WURange, resultRange: array of integer): tADODataSet;
+      CFRange, EURange, WURange, resultRange: array of integer;
+      var numResults: integer): tADODataSet;
 
     function isInTable(pkValue: array of Variant; pkName: array of string;
       tbName: string): boolean;
@@ -101,8 +103,7 @@ type
 
     procedure StoreShoppingCart(ShoppingCartID: string);
 
-    function addToCart(ShoppingCartID, itemID: string; quantity: integer;
-      itemPrice: double): string;
+    function addToCart(ShoppingCartID, itemID: string; quantity: integer): string;
 
     function getCartItems(ShoppingCartID: string): tADODataSet;
     procedure removeFromCart(ShoppingCartItemID: string);
@@ -131,6 +132,8 @@ type
 
     function CloneRecordset(const Data: _Recordset): _Recordset;
 
+    function ResizeImage(Image: tImage; width, height: integer): tpngImage;
+
   end;
 
 var
@@ -140,6 +143,7 @@ implementation
 
 {$R *.dfm}
 
+// increase a given user's balance by a given amount
 procedure TDataModule1.addFunds(userID: string; amount: double);
 var
   sql: string;
@@ -154,6 +158,7 @@ begin
   try
     dsResult := runSQL(sql, params);
 
+    // handle db errors
     if dsResult['Status'] <> 'Success' then
     begin
       raise Exception.Create(dsResult['Status']);
@@ -166,8 +171,9 @@ begin
   end;
 end;
 
+// add an item to a user's shopping cart
 function TDataModule1.addToCart(ShoppingCartID, itemID: string;
-  quantity: integer; itemPrice: double): string;
+  quantity: integer): string;
 var
   ShoppingCartItemID, sql: string;
   params: tObjectDictionary<string, Variant>;
@@ -191,14 +197,13 @@ begin
   params := tObjectDictionary<string, Variant>.Create();
 
   params.Add('Quantity', quantity);
-  params.Add('Cost', quantity * itemPrice);
 
   if ShoppingCartItemID <> '' then
   begin
     // update if item is in user's cart
-    params.Add('ShoppingCartItemID', ShoppingCartItemID);
+
     sql := 'UPDATE ShoppingCartItemsTB' +
-      ' SET Quantity = Quantity + :Quantity, Cost = :Cost + Cost WHERE ShoppingCartItemID = :ShoppingCartItemID  ';
+      ' SET Quantity = Quantity + :Quantity WHERE ShoppingCartItemID = :ShoppingCartItemID  ';
     Result := '';
   end
   else
@@ -211,14 +216,14 @@ begin
     begin
       ShoppingCartItemID := ShoppingCartItemID + intToStr(random(10));
     end;
-    sql := 'INSERT INTO ShoppingCartItemsTB (ShoppingCartItemID, ItemID, Quantity, ShoppingCartID, Cost ) '
-      + 'VALUES ( :ShoppingCartItemID, :ItemID, :Quantity, :ShoppingCartID , :Cost)';
+    sql := 'INSERT INTO ShoppingCartItemsTB (ShoppingCartItemID, ItemID, Quantity, ShoppingCartID ) '
+      + 'VALUES ( :ShoppingCartItemID, :ItemID, :Quantity, :ShoppingCartID )';
 
     params.Add('ItemID', itemID);
-    params.Add('ShoppingCartItemID', ShoppingCartItemID);
     params.Add('ShoppingCartID', ShoppingCartID);
-    Result := ShoppingCartItemID;
   end;
+
+  params.Add('ShoppingCartItemID', ShoppingCartItemID);
 
   try
     dsResult := runSQL(sql, params);
@@ -234,7 +239,8 @@ begin
     // update stock
     // check if  there is enough stock to withdraw that quantity
 
-    // TODO: DAFUCK IS UP WITH PARAMETERS NOT WORKING
+    // Note : not using parameters because it kept giving me bugs
+    // this works, and it is unlikely someone will use a shopping cart item id for an sql injection
 
     sql := 'SELECT ItemTB.Stock, ItemTB.MaxWithdrawableStock, ShoppingCartItemsTB.Quantity '
       + 'FROM ShoppingCartItemsTB, ItemTB WHERE ItemTB.ItemID = :ItemID AND ' +
@@ -284,6 +290,8 @@ begin
 
     // commit changes to DB
     CommitTransaction;
+
+    Result := ShoppingCartItemID;
 
   finally
     if Assigned(dsResult) then
@@ -407,6 +415,9 @@ begin
 
 end;
 
+// creates a deep copy of a recordset so as to copy the data from on dataset
+// to another
+// thanks stack overflow
 function TDataModule1.CloneRecordset(const Data: _Recordset): _Recordset;
 var
   newRec: _Recordset;
@@ -569,15 +580,16 @@ var
   params: tObjectDictionary<string, Variant>;
   dsResult: tADODataSet;
 begin
-  //
   sql := 'DELETE FROM ShoppingCartTB WHERE ShoppingCartID = :ShoppingCartID';
 
   params := tObjectDictionary<string, Variant>.Create();
   params.Add('ShoppingCartID', ShoppingCartID);
 
   try
+
     dsResult := runSQL(sql, params);
 
+    // handle db errors
     if dsResult['Status'] <> 'Success' then
     begin
       raise Exception.Create(dsResult['Status']);
@@ -592,6 +604,7 @@ begin
   end;
 end;
 
+// change the cursor of an Adotable to a record with a given field with a given value of string
 procedure TDataModule1.findInTable(table: TADOTable; pk, pkVal: string);
 var
   bFound: boolean;
@@ -637,7 +650,7 @@ begin
   params.Add('ShoppingCartID', ShoppingCartID);
 
   try
-    // retur nsql result
+    // return sql result
     Result := runSQL(sql, params);
 
     // handle db errors
@@ -664,8 +677,8 @@ begin
 end;
 
 // get the all the products made by a particular seller
-function TDataModule1.getProducts(userID: string; iMin, iMax: integer)
-  : tADODataSet;
+function TDataModule1.getProducts(userID: string; iMin, iMax: integer;
+  var numproducts: integer): tADODataSet;
 var
   sql, lastItemId: string;
   params: tObjectDictionary<string, Variant>;
@@ -674,6 +687,8 @@ var
 begin
   sql := 'SELECT ItemTB.ItemID, Sales, Image, ItemName, Revenue ' +
     'FROM ItemTB LEFT JOIN ( SELECT ItemID, ' +
+  // iif is a function that takes a condtion, the value to give if true,and the value to give if false
+  // this is incase there are no records, preventing null pointer
     ' IIF(SUM(Cost) IS NULL, 0, SUM(Cost)) AS Revenue, ' +
     ' IIF(SUM(Quantity) IS NULL, 0, SUM(Quantity)) AS Sales ' +
     ' FROM TransactionItemTB GROUP BY ItemID ) AS revenueTB  ' +
@@ -686,26 +701,33 @@ begin
   try
     Result := runSQL(sql, params);
 
+    numproducts := Result.RecordCount;
+
+    // only select the products of a user in the specified range
     if Result.IsEmpty then
       Exit;
 
+    // delete items before lower bound
     Result.First;
     for i := 1 to iMin do
     begin
       Result.Delete;
     end;
 
+    // skip items you want to keep
     for i := 1 to iMax - iMin - 1 do
     begin
       Result.Next;
     end;
+
+    // delete all the items after upper bound
 
     lastItemId := Result['ItemID'];
     Result.Last;
 
     while not(lastItemId = Result['ItemID']) do
     begin
-        Result.Delete;
+      Result.Delete;
 
     end;
 
@@ -733,15 +755,18 @@ begin
   try
     dsResult := runSQL(sql, params);
 
+    // handle database errors
     if dsResult.Fields.FindField('Status') <> nil then
     begin
       raise Exception.Create(dsResult['Status']);
     end;
 
+    // serialise image into a stream
     imageStream := dsResult.CreateBlobStream
       (dsResult.FieldByName('ProfileImage'), bmRead);
     try
       try
+        // set that stream to the image's picture
         Image.Picture.LoadFromStream(imageStream);
       finally
         imageStream.Free;
@@ -763,12 +788,12 @@ end;
 // Search for items with a specific string and category
 function TDataModule1.getSearchResults(searchQuery: string;
   categories: TList<string>; CFRange, EURange, WURange,
-  resultRange: array of integer): tADODataSet;
+  resultRange: array of integer; var numResults: integer): tADODataSet;
 var
   sql, categoryParamName: string;
   params: tObjectDictionary<string, Variant>;
   dsResult: tADODataSet;
-  i: integer;
+  i, iNumResults: integer;
   finalItemId: string;
 
 begin
@@ -842,12 +867,14 @@ begin
   end;
 
   try
-    // return the results
+    // return the results   within the specified range
+
     Result := runSQL(sql, params);
 
-    if Result.isEmpty then
-      Exit;
+    numResults := Result.RecordCount;
 
+    if Result.IsEmpty then
+      Exit;
 
     // select top values in a range
     // not using sql cause it was too buggy and complicated and not worth my time
@@ -864,6 +891,8 @@ begin
       Result.Next;
     end;
 
+    if Result.Eof then
+      Exit;
     // delete the rest
     finalItemId := Result['ItemID'];
 
@@ -875,6 +904,7 @@ begin
     end;
 
     Result.First;
+
   finally
     params.Free;
   end;
@@ -898,6 +928,7 @@ begin
   try
     dsResult := runSQL(sql, params);
 
+    // handle db errors
     if dsResult.Fields.FindField('Status') <> nil then
     begin
       raise Exception.Create(dsResult['Status']);
@@ -971,48 +1002,65 @@ begin
 
 end;
 
+
 // procedure to insert a new item into the database
 procedure TDataModule1.insertItem(itemID, Name, SellerID, category,
   Desc: string; Price, stock, maxwithdrawstock, CF, EU, WU, CFProduce,
   EUProduce, WUProduce: double; Image: tImage);
 var
-  memStream: TMemoryStream;
+  sql: string;
+  params: tObjectDictionary<string, Variant>;
+  dsResult: tADODataSet;
+
 begin
-  ItemTB.Insert;
-  ItemTB.Edit;
 
-  ItemTB['ItemID'] := itemID;
-  ItemTB['ItemName'] := name;
-  ItemTB['Cost'] := Price;
-  ItemTB['CarbonFootprintProduction'] := CFProduce;
-  ItemTB['WaterUsageProduction'] := WUProduce;
-  ItemTB['EnergyUsageProduction'] := EUProduce;
-  ItemTB['CarbonFootprintUsage'] := CF;
-  ItemTB['WaterFootprintUsage'] := WU;
-  ItemTB['EnergyFootprintUsage'] := EU;
-  ItemTB['SellerID'] := SellerID;
-  ItemTB['Description'] := Desc;
-  ItemTB['Category'] := category;
-  ItemTB['Stock'] := stock;
-  ItemTB['MaxWithdrawableStock'] := maxwithdrawstock;
-  ItemTB['Deleted'] := False;
-  memStream := TMemoryStream.Create;
+  sql := 'INSERT INTO ItemTB ( [ItemID], [ItemName], [Cost], ' +
+    ' [CarbonFootprintProduction], [WaterUsageProduction], [EnergyUsageProduction], '
+    + ' [CarbonFootprintUsage], [WaterFootprintUsage], [EnergyFootprintUsage],'
+    + ' [SellerID], [Description], [Category], [Stock], [MaxWithdrawableStock], [Image] ) '
+    + 'VALUES ( :ItemID, :ItemName, :Cost, ' +
+    ':CarbonFootprintProduction, :WaterUsageProduction, :EnergyUsageProduction, '
+    + ':CarbonFootprintUsage, :WaterFootprintUsage, :EnergyFootprintUsage, ' +
+    ':SellerID, :Description, :Category, :Stock, :MaxWithdrawableStock, :Image )';
+
+  params := tObjectDictionary<string, Variant>.Create();
+
+  params.Add('ItemID', itemID);
+  params.Add('ItemName', name);
+  params.Add('Cost', Price);
+  params.Add('CarbonFootprintProduction', CFProduce);
+  params.Add('WaterUsageProduction', WUProduce);
+  params.Add('EnergyUsageProduction', EUProduce);
+  params.Add('CarbonFootprintUsage', CF);
+  params.Add('WaterFootprintUsage', WU);
+  params.Add('EnergyFootprintUsage', EU);
+  params.Add('SellerID', SellerID);
+  params.Add('Description', Desc);
+  params.Add('Category', category);
+  params.Add('Stock', stock);
+  params.Add('MaxWithdrawableStock', maxwithdrawstock);
+  params.Add('Image', ImageToVariant(Image));
+
   try
-    Image.Picture.Graphic.SetSize(128, 128);
-    Image.Picture.Graphic.SaveToStream(memStream);
-    memStream.Position := 0;
-    ItemTB.Edit;
-    TBlobField(ItemTB.FieldByName('Image')).LoadFromStream(memStream);
+
+    dsResult := runSQL(sql, params);
+
+    if dsResult['Status'] <> 'Success' then
+    begin
+      raise Exception.Create(dsResult['Status']);
+    end;
+
   finally
+    if Assigned(params) then
+      params.Free;
+    if Assigned(dsResult) then
+      dsResult.Free;
 
-    memStream.Free;
   end;
-
-  ItemTB.Post;
-  ItemTB.Refresh;
 
 end;
 
+// insert a new rating from a user if this is the first time rating the item
 procedure TDataModule1.insertRating(userID, itemID: string; rating: integer);
 var
   sql: string;
@@ -1037,14 +1085,15 @@ begin
     end;
 
   finally
-
-    params.Free;
+    if Assigned(params) then
+      params.Free;
     if Assigned(dsResult) then
       dsResult.Free;
 
   end;
 end;
 
+// insert a record into the statsTB table
 procedure TDataModule1.insertStatData(userID: string; statDate: tDateTime;
   statType: string; value: double);
 var
@@ -1186,7 +1235,7 @@ begin
     if dsResult.Fields.FindField('Status') <> nil then
     begin
       raise Exception.Create(dsResult['Status']);
-      exit;
+      Exit;
     end;
 
 
@@ -1195,7 +1244,7 @@ begin
     if dsResult.IsEmpty then
     begin
       raise Exception.Create('User does not Exist');
-      exit;
+      Exit;
     end;
 
     // check password match
@@ -1204,7 +1253,7 @@ begin
       dsResult['Salt'], dsResult['Password'], b) then
     begin
       raise Exception.Create('Incorrect Password');
-      exit;
+      Exit;
     end;
 
     // return the corresponding user id of the user that the program can use
@@ -1283,7 +1332,7 @@ begin
       RollBack;
       showMessage('Error: Could not find ShoppingCart Item');
       // rollback
-      exit;
+      Exit;
     end;
     quantity := dsResultItemInfo['Quantity'];
     itemID := dsResultItemInfo['ItemID'];
@@ -1331,6 +1380,39 @@ begin
     if Assigned(dsResultItemInfo) then
       dsResultItemInfo.Free;
     params.Free;
+  end;
+
+end;
+
+// this resizes an image to a certain height and returns a tpngimage
+function TDataModule1.ResizeImage(Image: tImage; width, height: integer)
+  : tpngImage;
+var
+  ResizedImage: tImage;
+  PngImage: tpngImage;
+begin
+
+  try
+    // resize the image
+    ResizedImage := tImage.Create(nil);
+    ResizedImage.Picture.Assign(Image.Picture);
+
+    ResizedImage.Stretch := True;
+
+    ResizedImage.width := width;
+    ResizedImage.height := height;
+
+    // get image as a png
+    Result := tpngImage.Create;
+
+    Result.Assign(ResizedImage.Picture.Graphic);
+
+  finally
+
+    // free allocated memory
+    if Assigned(ResizedImage) then
+      ResizedImage.Free;
+
   end;
 
 end;
@@ -1455,6 +1537,7 @@ begin
 
 end;
 
+// set the profile picture of a given use using a given image
 procedure TDataModule1.setProfilePicture(userID: string; imgPfp: tImage);
 var
   sql: string;
@@ -1471,12 +1554,15 @@ begin
   try
     dsResult := runSQL(sql, params);
 
+    // handle db errors
+
     if dsResult['status'] <> 'Success' then
     begin
       raise Exception.Create(dsResult['status']);
     end;
 
   finally
+    // free memory
     if Assigned(dsResult) then
       dsResult.Free;
     params.Free;
@@ -1598,11 +1684,12 @@ var
 begin
 
   // copy fist into transactionTB
-  sql := 'INSERT INTO TransactionTB (TransactionID, BuyerID) ' +
-    'SELECT ShoppingCartID, BuyerID FROM ShoppingCartTB WHERE ShoppingCartID = :ShoppingCartID';
+  sql := 'INSERT INTO TransactionTB (TransactionID, BuyerID, TransactionDate ) ' +
+    'SELECT ShoppingCartID, BuyerID, :CurrentDate FROM ShoppingCartTB WHERE ShoppingCartID = :ShoppingCartID';
 
   params := tObjectDictionary<String, Variant>.Create();
   params.Add('ShoppingCartID', ShoppingCartID);
+  params.Add('CurrentDate', dDate);
   try
     dsResult := runSQL(sql, params);
 
@@ -1614,8 +1701,15 @@ begin
     dsResult.Free;
 
     // Then for TransactionItemTB
-    sql := 'INSERT INTO TransactionItemTB (CartItemID, ItemID, Quantity, TransactionID, Cost) '
-      + 'SELECT ShoppingCartItemID, ItemID, Quantity, ShoppingCartID, Cost FROM ShoppingCartItemsTB WHERE ShoppingCartID  = :ShoppingCartID ';
+    sql := 'INSERT INTO TransactionItemTB (CartItemID, ItemID, Quantity, TransactionID, Cost, CF, EU, WU) '
+      + 'SELECT ShoppingCartItemID, ShoppingCartItemsTB.ItemID, Quantity, '+
+      'ShoppingCartID, (Cost * Quantity) AS TotalCost,'+
+      ' (( CarbonFootprintProduction + CarbonFootprintUsage )* Quantity ) AS CF , '+
+      ' (( EnergyUsageProduction + EnergyFootprintUsage )* Quantity ) AS EU, '+
+      ' (( WaterUsageProduction + WaterFootprintUsage )* Quantity ) AS WU '+
+      'FROM ShoppingCartItemsTB '+
+    ' INNER JOIN ItemTB ON ItemTB.ItemID = ShoppingCartItemsTB.ItemID '+
+      ' WHERE ShoppingCartID  = :ShoppingCartID ';
 
     dsResult := runSQL(sql, params);
 
@@ -1635,54 +1729,60 @@ procedure TDataModule1.updateItem(itemID, Name, SellerID, category,
   Desc: string; Price, stock, maxwithdrawstock, CF, EU, WU, CFProduce,
   EUProduce, WUProduce: double; Image: tImage);
 var
-  memStream: TMemoryStream;
+  sql: string;
+  params: tObjectDictionary<string, Variant>;
+  dsResult: tADODataSet;
 begin
 
-  try
-    findInTable(ItemTB, 'ItemID', itemID);
+  sql := 'UPDATE ItemTB SET [ItemName] = :ItemName, [Cost] = :Cost, ' +
+    ' [CarbonFootprintProduction] = :CarbonFootprintProduction,' +
+    ' [WaterUsageProduction] = :WaterUsageProduction,' +
+    ' [EnergyUsageProduction] = :EnergyUsageProduction, ' +
+    ' [CarbonFootprintUsage] = :CarbonFootprintUsage' +
+    ' , [WaterFootprintUsage] = :WaterFootprintUsage,' +
+    ' [EnergyFootprintUsage] = :EnergyFootprintUsage, [SellerID] = :SellerID,' +
+    ' [Description] = :Description, [Category] = :Category, [Stock] = :Stock, '
+    + ' [MaxWithdrawableStock] = :MaxWithdrawableStock , [Image] = :Image  ' +
+    ' WHERE [ItemID] = :ItemID';
 
-  except
-    on e: Exception do
+  params := tObjectDictionary<string, Variant>.Create();
+
+  params.Add('ItemID', itemID);
+  params.Add('ItemName', name);
+  params.Add('Cost', Price);
+  params.Add('CarbonFootprintProduction', CFProduce);
+  params.Add('WaterUsageProduction', WUProduce);
+  params.Add('EnergyUsageProduction', EUProduce);
+  params.Add('CarbonFootprintUsage', CF);
+  params.Add('WaterFootprintUsage', WU);
+  params.Add('EnergyFootprintUsage', EU);
+  params.Add('SellerID', SellerID);
+  params.Add('Description', Desc);
+  params.Add('Category', category);
+  params.Add('Stock', stock);
+  params.Add('MaxWithdrawableStock', maxwithdrawstock);
+  params.Add('Image', ImageToVariant(Image));
+
+  try
+
+    dsResult := runSQL(sql, params);
+
+    // handle db errors
+    if dsResult['Status'] <> 'Success' then
     begin
-      showMessage(e.Message);
-      raise e;
+      raise Exception.Create(dsResult['Status']);
     end;
 
-  end;
-  ItemTB.Edit;
-
-  ItemTB['ItemName'] := name;
-  ItemTB['Cost'] := Price;
-  ItemTB['CarbonFootprintProduction'] := CFProduce;
-  ItemTB['WaterUsageProduction'] := WUProduce;
-  ItemTB['EnergyUsageProduction'] := EUProduce;
-  ItemTB['CarbonFootprintUsage'] := CF;
-  ItemTB['WaterFootprintUsage'] := WU;
-  ItemTB['EnergyFootprintUsage'] := EU;
-  ItemTB['SellerID'] := SellerID;
-  ItemTB['Description'] := Desc;
-  ItemTB['Category'] := category;
-  ItemTB['Stock'] := stock;
-  ItemTB['Deleted'] := False;
-  ItemTB['MaxWithdrawableStock'] := maxwithdrawstock;
-
-  memStream := TMemoryStream.Create;
-  try
-
-    Image.Picture.Graphic.SaveToStream(memStream);
-    memStream.Position := 0;
-    ItemTB.Edit;
-    TBlobField(ItemTB.FieldByName('Image')).LoadFromStream(memStream);
-
   finally
-
-    memStream.Free;
+    if Assigned(params) then
+      params.Free;
+    if Assigned(dsResult) then
+      dsResult.Free;
   end;
 
-  ItemTB.Post;
-  ItemTB.Refresh;
 end;
 
+// use this if a user has already given a review, and want to change their review
 procedure TDataModule1.updateRating(userID, itemID: string; rating: integer);
 var
   sql: string;
@@ -1700,11 +1800,14 @@ begin
   try
     dsResult := runSQL(sql, params);
 
+    // handle db errors
     if dsResult['Status'] <> 'Success' then
     begin
       raise Exception.Create(dsResult['Status']);
     end;
   finally
+
+    // free memory
     params.Free;
     if Assigned(dsResult) then
       dsResult.Free;
@@ -1932,13 +2035,13 @@ begin
     if dsResult.Fields.FindField('Status') <> nil then
     begin
       showMessage(dsResult['Status']);
-      exit;
+      Exit;
     end;
 
     if dsResult.IsEmpty then
     begin
       showMessage('No user with userID');
-      exit;
+      Exit;
     end;
 
     Result := tADODataSet.Create(nil);
@@ -1978,7 +2081,7 @@ begin
       if dsResult.Fields.FindField('Status') <> nil then
       begin
         showMessage(dsResult['Status']);
-        exit;
+        Exit;
       end;
 
       if dsResult.IsEmpty then

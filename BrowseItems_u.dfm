@@ -21,21 +21,22 @@ object frmBrowse: TfrmBrowse
     Top = 0
     Width = 912
     Height = 587
+    Margins.Top = 0
     Align = alClient
     TabOrder = 0
     object grpHeader: TGroupBox
       Left = 2
       Top = 20
       Width = 908
-      Height = 121
+      Height = 126
       Margins.Top = 0
       Align = alTop
       TabOrder = 0
       DesignSize = (
         908
-        121)
+        126)
       object lblCFRange: TLabel
-        Left = 438
+        Left = 418
         Top = 39
         Width = 171
         Height = 18
@@ -50,7 +51,7 @@ object frmBrowse: TfrmBrowse
         ParentFont = False
       end
       object lbWURange: TLabel
-        Left = 464
+        Left = 444
         Top = 90
         Width = 145
         Height = 18
@@ -65,7 +66,7 @@ object frmBrowse: TfrmBrowse
         ParentFont = False
       end
       object lblEURange: TLabel
-        Left = 459
+        Left = 439
         Top = 66
         Width = 150
         Height = 18
@@ -81,7 +82,7 @@ object frmBrowse: TfrmBrowse
       end
       object lblAndCF: TLabel
         Left = 670
-        Top = 42
+        Top = 39
         Width = 16
         Height = 18
         Caption = 'to'
@@ -211,7 +212,7 @@ object frmBrowse: TfrmBrowse
       end
       object srchSearchItems: TSearchBox
         Left = 44
-        Top = 29
+        Top = 34
         Width = 368
         Height = 26
         Anchors = []
@@ -226,9 +227,9 @@ object frmBrowse: TfrmBrowse
         OnInvokeSearch = onSearchBoxClick
       end
       object spnCFMin: TSpinEdit
-        Left = 615
-        Top = 34
-        Width = 41
+        Left = 595
+        Top = 32
+        Width = 61
         Height = 28
         Color = 7987076
         Enabled = False
@@ -245,9 +246,9 @@ object frmBrowse: TfrmBrowse
         OnChange = spnCFMinChange
       end
       object spnEUMin: TSpinEdit
-        Left = 615
-        Top = 56
-        Width = 41
+        Left = 595
+        Top = 63
+        Width = 61
         Height = 28
         Color = 7987076
         Enabled = False
@@ -264,9 +265,9 @@ object frmBrowse: TfrmBrowse
         OnChange = spnEUMinChange
       end
       object spnWUMin: TSpinEdit
-        Left = 615
-        Top = 90
-        Width = 41
+        Left = 595
+        Top = 97
+        Width = 61
         Height = 28
         Color = 7987076
         Enabled = False
@@ -283,9 +284,9 @@ object frmBrowse: TfrmBrowse
         OnChange = spnWUMinChange
       end
       object spnCFMax: TSpinEdit
-        Left = 705
-        Top = 38
-        Width = 41
+        Left = 692
+        Top = 32
+        Width = 54
         Height = 28
         Color = 7987076
         Enabled = False
@@ -301,9 +302,9 @@ object frmBrowse: TfrmBrowse
         Value = 0
       end
       object spnEUMax: TSpinEdit
-        Left = 705
-        Top = 63
-        Width = 41
+        Left = 692
+        Top = 66
+        Width = 54
         Height = 28
         Color = 7987076
         Enabled = False
@@ -319,9 +320,9 @@ object frmBrowse: TfrmBrowse
         Value = 0
       end
       object spnWUMax: TSpinEdit
-        Left = 705
+        Left = 692
         Top = 95
-        Width = 41
+        Width = 54
         Height = 28
         Color = 7987076
         Enabled = False
@@ -424,9 +425,9 @@ object frmBrowse: TfrmBrowse
     end
     object scrbxItems: TScrollBox
       Left = 2
-      Top = 141
+      Top = 146
       Width = 908
-      Height = 444
+      Height = 439
       VertScrollBar.Tracking = True
       Align = alClient
       TabOrder = 1
@@ -434,7 +435,7 @@ object frmBrowse: TfrmBrowse
         Left = 0
         Top = 0
         Width = 904
-        Height = 252
+        Height = 100
         Align = alTop
         AutoSize = True
         Color = 11074992

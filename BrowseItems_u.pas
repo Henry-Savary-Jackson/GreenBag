@@ -57,7 +57,6 @@ type
     procedure imgProfileClick(Sender: TObject);
     procedure grpCheckoutClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
-    procedure OnClickCategory(Sender: TObject);
     procedure onSearchBoxClick(Sender: TObject);
     procedure SearchItems();
     procedure ViewItem(sellerID, itemID: string);
@@ -70,16 +69,22 @@ type
     procedure chbRatingsEnableClick(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
     procedure btnLoadMoreItemsClick(Sender: TObject);
-    procedure addQueryResult(dsResult: tAdoDataset);
+    procedure addQueryResult(dsResult: tAdoDataset; numResults: integer);
 
   private
     { Private declarations }
   public
-    category: string;
     items: TObjectList<BrowseItem>;
+    // these 2 variables specify the range in which items must be loaded
+    // for example, load the the items between the 40th (including) and 50th item
     scrollRangeMin: integer;
     scrollRangeMax: integer;
+    // button to allow use to load more items
     btnLoadMoreitems: tButton;
+
+  const
+    // all the current categories
+    categoryList: array[0..5] of string = ( 'Toileteries', 'Food', 'Electronics', 'Containers', 'Clothes', 'Other');
 
     { Public declarations }
 
@@ -87,20 +92,22 @@ type
 
 var
   frmBrowse: TfrmBrowse;
-  categories: TObjectList<TCheckBox>;
+  categoryCheckboxes: TObjectList<TCheckBox>;
 
 implementation
 
 uses
-  Loginu, CheckOut_u, profile_u, ViewItem_u, Additem_u, HelpScreen_u;
+  Login_u, CheckOut_u, profile_u, ViewItem_u, Additem_u, HelpScreen_u;
 
 {$R *.dfm}
 
-procedure TfrmBrowse.addQueryResult(dsResult: tAdoDataset);
+// this is the read the results of a query for items, and instantiate gui for the results
+procedure TfrmBrowse.addQueryResult(dsResult: tAdoDataset; numResults: integer);
 var
   iMinRating: integer;
 begin
 
+  // the rating filtering is done here instead of in sql, because the query is too complex
   if chbRatingsEnable.Checked then
   begin
     iMinRating := spnMinRating.Value;
@@ -113,12 +120,12 @@ begin
 
   if Assigned(btnLoadMoreitems) then
     btnLoadMoreitems.Free;
-    btnLoadMoreItems := nil;
 
-
+  btnLoadMoreitems := nil;
 
   dsResult.First;
 
+  // add the items to gui
   while not dsResult.Eof do
   begin
     if not(chbRatingsEnable.Enabled and dsResult['avgRating'] >= iMinRating)
@@ -138,8 +145,8 @@ begin
 
   end;
 
-  // only add the load more button if =this is not the end of the items in the query
-  if scrollRangeMax-scrollRangeMin = dsResult.RecordCount then
+  // only add the load more button if this is not the end of the items in the query
+  if (numResults > items.Count) and (items.Count <> 0)then
   begin
     btnLoadMoreitems := tButton.Create(self.Owner);
     btnLoadMoreitems.Caption := 'load More items';
@@ -147,6 +154,9 @@ begin
     btnLoadMoreitems.Parent := flpnlItems;
     btnLoadMoreitems.Width := 500;
   end;
+
+  scrollRangeMin := scrollRangeMin + 10;
+  scrollRangeMax := scrollRangeMin + 10;
 
 end;
 
@@ -167,8 +177,6 @@ procedure TfrmBrowse.btnLoadMoreItemsClick(Sender: TObject);
 begin
   if Sender is tButton then
   begin
-    scrollRangeMin := scrollRangeMin + 10;
-    scrollRangeMax := scrollRangeMax + 10;
     SearchItems;
   end;
 end;
@@ -177,6 +185,31 @@ procedure TfrmBrowse.btnLogoutClick(Sender: TObject);
 begin
   try
     DataModule1.CancelCart(DataModule1.CartID);
+
+    items.Clear;
+
+    srchSearchItems.Text := '';
+
+    spnCFMin.Value := 0;
+    spnWUMin.Value := 0;
+    spnEUMin.Value := 0;
+    spnCFMax.Value := 0;
+    spnWUMax.Value := 0;
+    spnEUMax.Value := 0;
+
+    spnMinRating.Value := 0;
+
+    chbCFEnable.Checked := False;
+    chbEUEnable.Checked := False;
+    chbWUEnable.Checked := False;
+    chbRatingsEnable.Checked := False;
+
+    if btnLoadMoreitems <> nil then
+    begin
+      btnLoadMoreitems.Free;
+      btnLoadMoreitems := nil;
+    end;
+
     frmBrowse.Hide;
     frmLogin.Show;
 
@@ -248,8 +281,10 @@ procedure TfrmBrowse.FormShow(Sender: TObject);
 var
   dsResult: tAdoDataset;
   currentCheckbox: TCheckBox;
+  i: integer;
 begin
 
+  // add all the categories to gui
   dsResult := DataModule1.getCategories;
 
   if dsResult.Fields.FindField('Status') <> nil then
@@ -260,24 +295,26 @@ begin
   begin
     dsResult.First;
 
-    if categories <> nil then
-      categories.Free;
+    if categoryCheckboxes <> nil then
+      categoryCheckboxes.Free;
 
-    categories := TObjectList<TCheckBox>.Create();
+     categoryCheckboxes:= TObjectList<TCheckBox>.Create();
 
-    while not dsResult.Eof do
+    // add the checkboxes
+    for I := 0 to length(categoryList)-1 do
+
     begin
       currentCheckbox := TCheckBox.Create(self);
       currentCheckbox.Parent := flpnlCategories;
-      currentCheckbox.OnClick := self.OnClickCategory;
-      currentCheckbox.Caption := dsResult['Category'];
-      categories.Add(currentCheckbox);
+      currentCheckbox.Caption := categoryList[i];
+      categoryCheckboxes.add(currentCheckbox);
 
       dsResult.Next;
     end;
 
     dsResult.Free;
 
+    // load profile picture
     DataModule1.loadProfilePicture(DataModule1.userID, imgProfile);
   end;
 
@@ -296,22 +333,8 @@ begin
   frmProfile.Show;
 end;
 
-procedure TfrmBrowse.OnClickCategory(Sender: TObject);
-var
-  button: tButton;
-begin
-  if Sender is tButton then
-  begin
-    button := tButton(Sender);
-    if category = button.Caption then
-    begin
-      category := '';
-      Exit;
-    end;
-    category := button.Caption;
 
-  end;
-end;
+
 
 procedure TfrmBrowse.onSearchBoxClick(Sender: TObject);
 begin
@@ -320,17 +343,27 @@ begin
     items.Free;
     items := nil;
   end;
+  if btnLoadMoreitems <> nil then
+  begin
+    btnLoadMoreitems.Free;
+    btnLoadMoreitems := nil;
+  end;
   scrollRangeMin := 0;
   scrollRangeMax := 10;
   SearchItems;
+  if items.Count = 0 then
+  begin
+    showMessage('There no items matching your query');
+  end;
 end;
 
+// use this to get the query info from gui and get a tadodataset with search results
 procedure TfrmBrowse.SearchItems();
 var
   dsResult: tAdoDataset;
   searchQuery: string;
   arrCategories: TList<string>;
-  I, iMinRating: integer;
+  I, iNumResults, iMinRating: integer;
   cfRange, euRange, wuRange: array of integer;
 
 begin
@@ -343,13 +376,14 @@ begin
     Exit;
   end;
 
+  /// / get fitler info
   arrCategories := TList<String>.Create();
 
-  for I := 0 to categories.Count - 1 do
+  for I := 0 to categoryCheckboxes.Count - 1 do
   begin
-    if categories.items[I].Checked then
+    if categoryCheckboxes[I].Checked then
     begin
-      arrCategories.Add(categories.items[I].Caption);
+      arrCategories.Add(categoryCheckboxes[I].Caption);
     end;
 
   end;
@@ -379,31 +413,46 @@ begin
 
   end;
 
-  dsResult := DataModule1.getSearchResults(searchQuery, arrCategories, cfRange,
-    euRange, wuRange, [scrollRangeMin, scrollRangeMax]);
+  try
+    try
+      // get results as table
+      dsResult := DataModule1.getSearchResults(searchQuery, arrCategories,
+        cfRange, euRange, wuRange, [scrollRangeMin, scrollRangeMax],
+        iNumResults);
 
-  if items = nil then
-    items := TObjectList<BrowseItem>.Create();
+      if items = nil then
+        items := TObjectList<BrowseItem>.Create();
 
-  if dsResult.Fields.FindField('Status') <> nil then
-  begin
-    showMessage(dsResult['Status']);
-    Exit;
+      if dsResult.Fields.FindField('Status') <> nil then
+      begin
+        showMessage(dsResult['Status']);
+        Exit;
+      end;
+
+      if dsResult.IsEmpty then
+      begin
+        Exit;
+      end;
+
+      // add to gui
+      addQueryResult(dsResult, iNumResults);
+
+    except
+      on e: exception do
+      begin
+        showMessage(e.Message);
+      end;
+
+    end;
+
+  finally
+    if Assigned(dsResult) then
+      dsResult.Free;
   end;
-
-  if dsResult.IsEmpty then
-  begin
-    showMessage('There are no items matching your search query.');
-
-    Exit;
-  end;
-
-  addQueryResult(dsResult);
-
-  dsResult.Free;
 
 end;
 
+// this code ensures you never has a situation where the min value is bigger than max value
 procedure TfrmBrowse.spnCFMinChange(Sender: TObject);
 begin
 

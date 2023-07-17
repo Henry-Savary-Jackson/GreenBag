@@ -104,7 +104,7 @@ begin
   lblQuantity.AlignWithMargins := True;
   lblQuantity.Margins.Right := 10;
   lblQuantity.Caption := 'Quantity:';
-  //
+
   redItemInfo := TRichEdit.Create(self.Owner);
   redItemInfo.Parent := self;
 
@@ -155,7 +155,6 @@ end;
 
 procedure CartItem.onRemoveClick(Sender: tObject);
 begin
-  //
   self.removeProcedure(self.shoppingCartItemID);
 end;
 
@@ -163,7 +162,7 @@ procedure CartItem.onSpnQuantityChange(Sender: tObject);
 var
   oldQuantity: integer;
 begin
-  //
+  // update gui when the quantity is changed
   oldQuantity := self.iQuantity;
   self.iQuantity := spnQuantity.Value;
   self.updateInfo;
@@ -173,7 +172,6 @@ end;
 
 procedure CartItem.updateInfo;
 begin
-  //
   // add info to reditemInfo
 
   self.itemTotalPrice := iQuantity * self.itemPrice;

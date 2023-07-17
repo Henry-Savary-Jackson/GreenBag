@@ -24,11 +24,13 @@ type
     SpeedButton1: TSpeedButton;
     btnCheckout: TSpeedButton;
     pnlCheckout: TPanel;
+    Button1: TButton;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnBackClick(Sender: TObject);
     procedure btnCheckoutClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
+    procedure Button1Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -68,6 +70,7 @@ begin
     end;
 
     DataModule1.CheckoutCart(DataModule1.CartID);
+    // delete the user's cart and create a new one
     DataModule1.CartID := DataModule1.CreateUserCart(DataModule1.userID);
     frmCheckout.Hide;
     frmBrowse.Show;
@@ -88,12 +91,87 @@ begin
   frmHelp.Show;
 end;
 
+procedure TfrmCheckout.Button1Click(Sender: TObject);
+var
+  sqlUsers, sqlupdateUsers, sqlItems, userID, itemID, shoppingCartID: string;
+  dsResult, dsResultItems: tAdoDataSet;
+  params: TObjectDictionary<string, variant>;
+  dictItems: TObjectDictionary<string, integer>;
+  listUsers: tList<string>;
+  i, j, itemQuantity, itemsInCart: integer;
+
+begin
+
+  try
+
+    sqlupdateUsers := ' UPDATE UserTB SET Balance = 1000000';
+
+    dsResult := DataModule1.runSQL(sqlupdateUsers);
+
+    if dsResult['Status'] <> 'Success' then
+    begin
+      showMessage(dsResult['Status']);
+    end;
+
+    sqlUsers := 'SELECT UserID FROM UserTB';
+    sqlItems := 'SELECT ItemID, MaxWithdrawableStock AS max FROM ItemTB WHERE SellerID <> :SellerID';
+
+    dsResult := DataModule1.runSQL(sqlUsers);
+
+    dsResult.First;
+
+    while not dsResult.Eof do
+    begin
+      userID := dsResult['UserID'];
+
+      params := TObjectDictionary<string, variant>.create;
+
+      try
+
+        params.Add('SellerID', userID);
+
+        dsResultItems := DataModule1.runSQL(sqlItems, params);
+
+        shoppingCartID := DataModule1.CreateUserCart(userID);
+
+        for i := 1 to 500 do
+        begin
+
+          itemsInCart := random(10) + 1;
+
+          for j := 1 to itemsInCart do
+          begin
+            dsResultItems.First;
+            dsResultItems.MoveBy(random(dsResultItems.RecordCount));
+
+            DataModule1.addToCart()
+          end;
+
+          DataModule1.dDate := Date - random(3 * 365);
+
+        end;
+
+      finally
+        params.Free
+      end;
+
+    end;
+
+  finally
+    if Assigned(dsResult) then
+      dsResult.Free;
+    if Assigned(dsResultItems) then
+      dsResultItems.Free
+
+  end;
+
+end;
+
 procedure TfrmCheckout.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   try
     try
       DataModule1.CancelCart(DataModule1.CartID);
-
     except
       on e: exception do
       begin
@@ -115,9 +193,11 @@ begin
 
 end;
 
+// event handler for removing an item from cart
 procedure TfrmCheckout.removeItem(shoppingCartItemID: string);
 begin
   try
+    // change db
     DataModule1.removeFromCart(shoppingCartItemID);
     updateDisplay;
 
@@ -130,26 +210,28 @@ begin
   end;
 end;
 
+// update the gui
 procedure TfrmCheckout.updateDisplay;
 var
   item: tPair<String, integer>;
-  dsCartItems: TADODataSet;
+  dsCartItems: tAdoDataSet;
   currentItem: CartItem;
 begin
 
   if items <> nil then
     items.Free;
 
-  items := tObjectList<CartItem>.Create();
+  items := tObjectList<CartItem>.create();
 
   dsCartItems := DataModule1.getCartItems(DataModule1.CartID);
 
   dsCartItems.First;
 
+  // instantiate gui for each cart item
   while not dsCartItems.Eof do
   begin
 
-    currentItem := CartItem.Create(self, flpnlItems, dsCartItems,
+    currentItem := CartItem.create(self, flpnlItems, dsCartItems,
       self.removeItem, self.updateItemQuantity);
     items.Add(currentItem);
 
@@ -164,7 +246,7 @@ procedure TfrmCheckout.updateItemQuantity(itemID: string; iQuantity: integer;
   Cost: double);
 begin
   try
-    DataModule1.addToCart(DataModule1.CartID, itemID, iQuantity, Cost);
+    DataModule1.addToCart(DataModule1.CartID, itemID, iQuantity);
     updateLabels;
 
   except
@@ -177,6 +259,7 @@ begin
   end;
 end;
 
+// update totals
 procedure TfrmCheckout.updateLabels;
 var
   item: CartItem;

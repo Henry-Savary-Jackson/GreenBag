@@ -32,6 +32,7 @@ type
     sellerID: string;
     itemName, itemSeller: string;
     itemPrice, itemCF, itemWU, itemEU: double;
+    // procedure to execute when the view item button is clicked
     viewProcedure: tViewProcedure;
     imageStream: TStream;
 
@@ -47,6 +48,7 @@ Constructor BrowseItem.Create(Owner: tForm; Parent: TWinControl;
   ItemData: TADODataSet; viewProcedure: tViewProcedure);
 begin;
 
+  // get data
   itemID := ItemData['ItemID'];
   itemName := ItemData['ItemName'];
   itemSeller := ItemData['SellerName'];

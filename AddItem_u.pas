@@ -97,6 +97,7 @@ var
   I: Integer;
 begin
 
+  // gather input and do input validation
   if imgItem.Picture = nil then
   begin
     showMessage('Please upload an image of your item.');
@@ -175,6 +176,7 @@ begin
 
       if itemID = '' then
       begin
+        // if this is a new item
         itemID := UpperCase(DataModule1.userID[2] + sName[1]);
 
         for I := 1 to 8 do
@@ -189,6 +191,7 @@ begin
       end
       else
       begin
+        // if this is updating an existing item
         DataModule1.updateItem(itemID, sName, DataModule1.userID, category,
           sDesc, Price, stock, maxWithdrawstock, CF, EU, WU, CFProduce,
           EUProduce, WUProduce, imgItem);
@@ -315,6 +318,34 @@ begin
     end;
 
     dsResult.Free;
+  end
+  else
+  begin
+    edtName.Text := '';
+
+    edtPrice.Text := '0';
+
+    edtCF.Text := '0';
+
+    edtEU.Text := '0';
+
+    edtWU.Text := '0';
+
+    edtCFProduce.Text := '0';
+
+    edtWUProduce.Text := '0';
+
+    edtEUProduce.Text := '0';
+
+    edtStock.Text := '0';
+
+    edtMaxWithdrawStock.Text := '0';
+
+    cmbCategory.ItemIndex := -1;
+
+    redDesc.Lines.Clear;
+
+
   end;
 
 end;
@@ -348,7 +379,7 @@ begin
   // open filchooser
   fileChooser := tOpenDialog.Create(self);
   try
-    fileChooser.Filter := 'jpg Files|*.jpg|png files|*.png';
+    fileChooser.Filter := 'png files|*.png|jpg Files|*.jpg';
     fileChooser.InitialDir := 'C:\';
 
     if fileChooser.Execute(Handle) then
@@ -357,12 +388,8 @@ begin
       imgItem.Picture.LoadFromFile(sImagePath);
 
       // reduce the size of the image that is shown to save storage
-      png := TPngImage.Create;
-      png.Assign(imgItem.Picture.Graphic);
-      png.Resize(128,128);
-      png.Canvas.StretchDraw(Rect(0,0,128,128), imgItem.Picture.Graphic);
-      imgItem.Picture.Graphic.Assign(png);
-      png.Free;
+
+      imgItem.Picture.Graphic.Assign(DataModule1.ResizeImage(imgItem, 128, 128));
     end
     else
     begin
