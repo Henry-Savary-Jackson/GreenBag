@@ -76,9 +76,7 @@ begin
 
   try
     userID := DataModule1.Login(userName, password);
-
-    // get app variables
-    DataModule1.dDate := StrToDate(inputbox('', 'Date:', ''));
+    // set global app variables
     frmLogin.Hide;
     DataModule1.userID := userID;
     DataModule1.CartID := DataModule1.CreateUserCart(DataModule1.userID);

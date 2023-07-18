@@ -24,13 +24,11 @@ type
     SpeedButton1: TSpeedButton;
     btnCheckout: TSpeedButton;
     pnlCheckout: TPanel;
-    Button1: TButton;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnBackClick(Sender: TObject);
     procedure btnCheckoutClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -91,111 +89,6 @@ begin
   frmHelp.Show;
 end;
 
-procedure TfrmCheckout.Button1Click(Sender: TObject);
-var
-  sqlUsers, sqlupdateUsers, sqlItems, curruserID, itemID,
-    shoppingCartID: string;
-  dsResult, dsResultItems: tAdoDataSet;
-  params: TObjectDictionary<string, variant>;
-  i, j, itemQuantity, itemsInCart: integer;
-
-begin
-  try
-    sqlupdateUsers := ' UPDATE UserTB SET Balance = 10000000';
-
-    dsResult := DataModule1.runSQL(sqlupdateUsers);
-
-    if dsResult['Status'] <> 'Success' then
-    begin
-      showMessage(dsResult['Status']);
-    end;
-
-    dsResult.Free;
-
-    sqlUsers := 'SELECT UserID FROM UserTB';
-    sqlItems :=
-      'SELECT ItemID, MaxWithdrawableStock AS maximum FROM ItemTB WHERE SellerID <> :SellerID';
-
-    dsResult := DataModule1.runSQL(sqlUsers);
-
-    dsResult.First;
-
-    params := TObjectDictionary<string, variant>.create();
-
-    while not dsResult.Eof do
-    begin
-      curruserID := dsResult['UserID'];
-
-      try
-        params.Clear;
-        params.Add('SellerID', curruserID);
-
-        dsResultItems := DataModule1.runSQL(sqlItems, params);
-
-        if dsResult.Fields.FindField('Status') <> nil then
-        begin
-          showMessage(dsResult['Status']);
-        end;
-
-        for i := 1 to 500 do
-        begin
-
-          try
-            DataModule1.dDate := Date - random(5 * 365);
-
-            shoppingCartID := DataModule1.CreateUserCart(curruserID);
-
-            itemsInCart := random(10) + 1;
-
-            for j := 1 to itemsInCart do
-            begin
-
-              try
-                dsResultItems.First;
-                dsResultItems.MoveBy(random(dsResultItems.RecordCount));
-                itemID := dsResultItems['ItemID'];
-                DataModule1.addToCart(shoppingCartID, itemID,
-                  min(ceil((random(dsResultItems['maximum']) + 1) / 10), 10));
-
-              except
-                on e: exception do
-                begin
-                  Continue;
-                end;
-              end;
-
-            end;
-
-            DataModule1.CheckoutCart(shoppingCartID);
-
-          finally
-            if shoppingCartID <> '' then
-              DataModule1.CancelCart(shoppingCartID);
-          end;
-
-        end;
-
-      finally
-        if Assigned(dsResultItems) then
-          dsResultItems.Free;
-
-        dsResult.Next;
-
-      end;
-
-    end;
-
-  finally
-    if Assigned(dsResult) then
-      dsResult.Free;
-
-    if Assigned(params) then
-      params.Free;
-
-  end;
-
-end;
-
 procedure TfrmCheckout.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   try
@@ -248,7 +141,7 @@ var
 begin
 
   if items <> nil then
-    items.Free;
+    FreeAndNil(items);
 
   items := tObjectList<CartItem>.create();
 

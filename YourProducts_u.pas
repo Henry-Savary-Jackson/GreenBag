@@ -46,7 +46,7 @@ type
 
 var
   frmYourProducts: TfrmYourProducts;
-  numProducts : integer;
+  numProducts: integer;
 
 implementation
 
@@ -112,14 +112,11 @@ procedure TfrmYourProducts.FormShow(Sender: TObject);
 begin
   if items <> nil then
   begin
-    items.Free;
-    items := nil;
+    FreeAndNil(items);
   end;
 
-  if items = nil then
-  begin
-    items := tObjectDictionary<string, ProductItem>.Create([doOwnsValues]);
-  end;
+  items := tObjectDictionary<string, ProductItem>.Create([doOwnsValues]);
+
   numProducts := 0;
   scrollRangeMin := 0;
   scrollRangeMax := 10;
@@ -140,7 +137,7 @@ begin
     itemToBeDeleted.Hide;
 
     // update label
-    numProducts := numProducts -1;
+    numProducts := numProducts - 1;
     lblNumberProducts.Caption := 'Number of products: ' + inttostr(numProducts);
 
   end;
@@ -156,11 +153,12 @@ begin
   try
 
     try
-       // get info on your products in a range
+      // get info on your products in a range
       dsResult := datamodule1.getProducts(datamodule1.userID, scrollRangeMin,
         scrollRangeMax, numProducts);
 
-      lblNumberProducts.Caption := 'Number of products: ' + inttostr(numProducts);
+      lblNumberProducts.Caption := 'Number of products: ' +
+        inttostr(numProducts);
 
       if dsResult.Fields.FindField('Status') <> nil then
       begin
@@ -170,8 +168,7 @@ begin
 
       if btnLoadMoreitems <> nil then
       begin
-        btnLoadMoreitems.Free;
-        btnLoadMoreitems := nil;
+        FreeAndNil(btnLoadMoreitems);
       end;
 
       // instanitate all the gui objects
@@ -207,8 +204,7 @@ begin
     end;
 
   finally
-    if Assigned(dsResult) then
-      dsResult.Free;
+    FreeAndNil(dsResult);
 
   end;
 

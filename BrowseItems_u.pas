@@ -84,7 +84,8 @@ type
 
   const
     // all the current categories
-    categoryList: array[0..5] of string = ( 'Toileteries', 'Food', 'Electronics', 'Containers', 'Clothes', 'Other');
+    categoryList: array [0 .. 5] of string = ('Toileteries', 'Food',
+      'Electronics', 'Containers', 'Clothes', 'Other');
 
     { Public declarations }
 
@@ -118,10 +119,7 @@ begin
     iMinRating := -1;
   end;
 
-  if Assigned(btnLoadMoreitems) then
-    btnLoadMoreitems.Free;
-
-  btnLoadMoreitems := nil;
+  FreeAndNil(btnLoadMoreitems);
 
   dsResult.First;
 
@@ -146,7 +144,7 @@ begin
   end;
 
   // only add the load more button if this is not the end of the items in the query
-  if (numResults > items.Count) and (items.Count <> 0)then
+  if (numResults > items.Count) and (items.Count <> 0) then
   begin
     btnLoadMoreitems := tButton.Create(self.Owner);
     btnLoadMoreitems.Caption := 'load More items';
@@ -207,7 +205,7 @@ begin
 
     if btnLoadMoreitems <> nil then
     begin
-      btnLoadMoreitems.Free;
+      FreeAndNil(btnLoadMoreitems);
       btnLoadMoreitems := nil;
     end;
 
@@ -297,23 +295,23 @@ begin
     dsResult.First;
 
     if categoryCheckboxes <> nil then
-      categoryCheckboxes.Free;
+      FreeAndNil(categoryCheckboxes);
 
-     categoryCheckboxes:= TObjectList<TCheckBox>.Create();
+    categoryCheckboxes := TObjectList<TCheckBox>.Create();
 
     // add the checkboxes
-    for I := 0 to length(categoryList)-1 do
+    for i := 0 to length(categoryList) - 1 do
 
     begin
       currentCheckbox := TCheckBox.Create(self);
       currentCheckbox.Parent := flpnlCategories;
       currentCheckbox.Caption := categoryList[i];
-      categoryCheckboxes.add(currentCheckbox);
+      categoryCheckboxes.Add(currentCheckbox);
 
       dsResult.Next;
     end;
 
-    dsResult.Free;
+    FreeAndNil(dsResult);
 
     // load profile picture
     DataModule1.loadProfilePicture(DataModule1.userID, imgProfile);
@@ -334,19 +332,16 @@ begin
   frmProfile.Show;
 end;
 
-
-
-
 procedure TfrmBrowse.onSearchBoxClick(Sender: TObject);
 begin
   if items <> nil then
   begin
-    items.Free;
+    FreeAndNil(items);
     items := nil;
   end;
   if btnLoadMoreitems <> nil then
   begin
-    btnLoadMoreitems.Free;
+    FreeAndNil(btnLoadMoreitems);
     btnLoadMoreitems := nil;
   end;
   scrollRangeMin := 0;
@@ -354,7 +349,7 @@ begin
   SearchItems;
   if items.Count = 0 then
   begin
-    showMessage('There no items matching your query');
+    showMessage('There are no items matching your query');
   end;
 end;
 
@@ -364,7 +359,7 @@ var
   dsResult: tAdoDataset;
   searchQuery: string;
   arrCategories: TList<string>;
-  I, iNumResults, iMinRating: integer;
+  i, iNumResults: integer;
   cfRange, euRange, wuRange: array of integer;
 
 begin
@@ -380,11 +375,11 @@ begin
   /// / get fitler info
   arrCategories := TList<String>.Create();
 
-  for I := 0 to categoryCheckboxes.Count - 1 do
+  for i := 0 to categoryCheckboxes.Count - 1 do
   begin
-    if categoryCheckboxes[I].Checked then
+    if categoryCheckboxes[i].Checked then
     begin
-      arrCategories.Add(categoryCheckboxes[I].Caption);
+      arrCategories.Add(categoryCheckboxes[i].Caption);
     end;
 
   end;
@@ -448,7 +443,7 @@ begin
 
   finally
     if Assigned(dsResult) then
-      dsResult.Free;
+      FreeAndNil(dsResult);
   end;
 
 end;

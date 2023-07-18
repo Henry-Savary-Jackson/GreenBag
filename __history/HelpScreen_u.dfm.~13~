@@ -1,0 +1,52 @@
+object frmHelp: TfrmHelp
+  Left = 366
+  Top = 100
+  Caption = 'Help Screen'
+  ClientHeight = 290
+  ClientWidth = 619
+  Color = 11074994
+  Font.Charset = ANSI_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -16
+  Font.Name = 'Arial Rounded MT Bold'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poDesigned
+  OnClose = FormClose
+  PixelsPerInch = 96
+  TextHeight = 18
+  object memHelp: TMemo
+    Left = 24
+    Top = 57
+    Width = 577
+    Height = 217
+    Color = 8118149
+    Lines.Strings = (
+      'Memo1')
+    ReadOnly = True
+    TabOrder = 0
+  end
+  object pnlBack: TPanel
+    Left = 13
+    Top = 8
+    Width = 75
+    Height = 33
+    BorderWidth = 1
+    Color = 8118149
+    ParentBackground = False
+    TabOrder = 1
+    OnClick = btnBackClick
+    object SpeedButton1: TSpeedButton
+      Left = 2
+      Top = 2
+      Width = 71
+      Height = 29
+      Align = alClient
+      Caption = 'Back'
+      Flat = True
+      OnClick = btnBackClick
+      ExplicitLeft = 4
+      ExplicitTop = 4
+    end
+  end
+end

@@ -141,8 +141,8 @@ object frmBrowse: TfrmBrowse
         ParentFont = False
       end
       object lblCFUnit: TLabel
-        Left = 752
-        Top = 39
+        Left = 768
+        Top = 38
         Width = 40
         Height = 18
         Caption = 't/unit'
@@ -156,7 +156,7 @@ object frmBrowse: TfrmBrowse
         ParentFont = False
       end
       object Label1: TLabel
-        Left = 752
+        Left = 760
         Top = 97
         Width = 44
         Height = 18
@@ -171,8 +171,8 @@ object frmBrowse: TfrmBrowse
         ParentFont = False
       end
       object lblEuUnit: TLabel
-        Left = 752
-        Top = 74
+        Left = 760
+        Top = 73
         Width = 68
         Height = 18
         Caption = 'kWh/unit'
@@ -229,7 +229,7 @@ object frmBrowse: TfrmBrowse
       object spnCFMin: TSpinEdit
         Left = 595
         Top = 32
-        Width = 61
+        Width = 69
         Height = 28
         Color = 7987076
         Enabled = False
@@ -238,7 +238,7 @@ object frmBrowse: TfrmBrowse
         Font.Height = -16
         Font.Name = 'Arial Rounded MT Bold'
         Font.Style = []
-        MaxValue = 1000
+        MaxValue = 2000
         MinValue = 0
         ParentFont = False
         TabOrder = 2
@@ -248,7 +248,7 @@ object frmBrowse: TfrmBrowse
       object spnEUMin: TSpinEdit
         Left = 595
         Top = 63
-        Width = 61
+        Width = 69
         Height = 28
         Color = 7987076
         Enabled = False
@@ -257,7 +257,7 @@ object frmBrowse: TfrmBrowse
         Font.Height = -16
         Font.Name = 'Arial Rounded MT Bold'
         Font.Style = []
-        MaxValue = 1000
+        MaxValue = 2000
         MinValue = 0
         ParentFont = False
         TabOrder = 3
@@ -267,7 +267,7 @@ object frmBrowse: TfrmBrowse
       object spnWUMin: TSpinEdit
         Left = 595
         Top = 97
-        Width = 61
+        Width = 69
         Height = 28
         Color = 7987076
         Enabled = False
@@ -276,7 +276,7 @@ object frmBrowse: TfrmBrowse
         Font.Height = -16
         Font.Name = 'Arial Rounded MT Bold'
         Font.Style = []
-        MaxValue = 1000
+        MaxValue = 2000
         MinValue = 0
         ParentFont = False
         TabOrder = 4
@@ -284,9 +284,9 @@ object frmBrowse: TfrmBrowse
         OnChange = spnWUMinChange
       end
       object spnCFMax: TSpinEdit
-        Left = 692
-        Top = 32
-        Width = 54
+        Left = 696
+        Top = 36
+        Width = 62
         Height = 28
         Color = 7987076
         Enabled = False
@@ -295,16 +295,16 @@ object frmBrowse: TfrmBrowse
         Font.Height = -16
         Font.Name = 'Arial Rounded MT Bold'
         Font.Style = []
-        MaxValue = 1000
+        MaxValue = 2000
         MinValue = 0
         ParentFont = False
         TabOrder = 5
         Value = 0
       end
       object spnEUMax: TSpinEdit
-        Left = 692
-        Top = 66
-        Width = 54
+        Left = 696
+        Top = 70
+        Width = 62
         Height = 28
         Color = 7987076
         Enabled = False
@@ -313,16 +313,16 @@ object frmBrowse: TfrmBrowse
         Font.Height = -16
         Font.Name = 'Arial Rounded MT Bold'
         Font.Style = []
-        MaxValue = 1000
+        MaxValue = 2000
         MinValue = 0
         ParentFont = False
         TabOrder = 6
         Value = 0
       end
       object spnWUMax: TSpinEdit
-        Left = 692
-        Top = 95
-        Width = 54
+        Left = 696
+        Top = 99
+        Width = 62
         Height = 28
         Color = 7987076
         Enabled = False
@@ -331,7 +331,7 @@ object frmBrowse: TfrmBrowse
         Font.Height = -16
         Font.Name = 'Arial Rounded MT Bold'
         Font.Style = []
-        MaxValue = 1000
+        MaxValue = 2000
         MinValue = 0
         ParentFont = False
         TabOrder = 7

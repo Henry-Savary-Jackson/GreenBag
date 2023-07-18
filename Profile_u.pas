@@ -81,6 +81,7 @@ type
 var
   frmProfile: TfrmProfile;
   dateRangeBegin, dateRangeEnd: tDateTime;
+  // this used by the graph to determine what kind of field to analyse
   statType: integer;
   balance: double;
 
@@ -99,7 +100,9 @@ end;
 
 procedure TfrmProfile.btnCFClick(Sender: TObject);
 begin
+  // this sets the forms statType variable to the needed value
   statType := DataModule1.stCF;
+  // calls function to update chart based on button pressed
   categoryClickStats(TSpeedButton(Sender).caption);
 end;
 
@@ -163,10 +166,14 @@ procedure TfrmProfile.btnAddFundsClick(Sender: TObject);
 var
   dExtra: double;
 begin
+  // get amount
   dExtra := strtofloat(InputBox('Funds', 'Add funds:', ''));
 
   try
+    // add that amount to user
     DataModule1.addFunds(DataModule1.userID, dExtra);
+
+    // update gui
     balance := balance + dExtra;
 
     lblBalance.caption := 'Current Balance: ' + floatToStrf(balance,
@@ -290,18 +297,20 @@ begin
 
   end;
   // decrease current date by 9 months
-  dateLowerLimit := IncMonth(DataModule1.dDate, -9);
+  dateLowerLimit := IncMonth(Now, -9);
   // date is first day of the month
-  dateRangeEnd := StrToDate(intTOstr(YearOf(DataModule1.dDate)) + '/' +
-    intTOstr(MonthOf(DataModule1.dDate) + 1) + '/01');
+  dateRangeEnd := StrToDate(intTOstr(YearOf(Now)) + '/' +
+    intTOstr(MonthOf(Now) + 1) + '/01');
 
   // date is first day of next month
   dateRangeBegin := StrToDate(intTOstr(YearOf(dateLowerLimit)) + '/' +
     intTOstr(MonthOf(dateLowerLimit)) + '/01');
 
+  // init chart
   srsStats.Marks.Visible := False;
 
   chrtStats.Title.caption := '';
+  srsStats.Clear;
 
   imageStream := dsResult.CreateBlobStream
     (dsResult.FieldByName('ProfileImage'), bmRead);
@@ -309,7 +318,7 @@ begin
     imgProfilePic.Picture.LoadFromStream(imageStream);
 
   finally
-    imageStream.Free;
+    FreeAndNil(imageStream);
 
   end;
 
@@ -398,7 +407,7 @@ begin
   if dsResult.Fields.FindField('Status') <> nil then
   begin
     showMessage(dsResult['Status']);
-    dsResult.Free;
+    FreeAndNil(dsResult);
     Exit;
   end;
 

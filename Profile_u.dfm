@@ -17,7 +17,7 @@ object frmProfile: TfrmProfile
   PixelsPerInch = 96
   TextHeight = 18
   object imgProfilePic: TImage
-    Left = 304
+    Left = 291
     Top = 0
     Width = 105
     Height = 105
@@ -25,7 +25,7 @@ object frmProfile: TfrmProfile
     OnClick = imgProfilePicClick
   end
   object lblUsername: TLabel
-    Left = 304
+    Left = 291
     Top = 111
     Width = 107
     Height = 22
@@ -308,7 +308,6 @@ object frmProfile: TfrmProfile
         Caption = 'View your products'
         Flat = True
         OnClick = btnViewProductsClick
-        ExplicitLeft = 3
         ExplicitTop = 2
       end
     end

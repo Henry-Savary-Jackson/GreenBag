@@ -1696,9 +1696,8 @@ object frmSignUp: TfrmSignUp
     Top = 176
     Width = 121
     Height = 26
-    Color = 7987076
+    Color = 8118149
     TabOrder = 1
-    Text = 'password1+'
     OnKeyDown = FormKeyDown
   end
   object edtUsername: TEdit
@@ -1706,9 +1705,8 @@ object frmSignUp: TfrmSignUp
     Top = 144
     Width = 121
     Height = 26
-    Color = 7987076
+    Color = 8118149
     TabOrder = 2
-    Text = 'User'
     OnKeyDown = FormKeyDown
   end
   object edtCertification: TEdit
@@ -1716,10 +1714,9 @@ object frmSignUp: TfrmSignUp
     Top = 298
     Width = 121
     Height = 26
-    Color = 7987076
+    Color = 8118149
     Enabled = False
     TabOrder = 3
-    Text = '1234567890'
     OnKeyDown = FormKeyDown
   end
   object redHomeAddress: TRichEdit

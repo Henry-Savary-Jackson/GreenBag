@@ -35,7 +35,6 @@ type
     function verifyCertificationCode(code: string): integer;
     procedure imgPfpClick(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
-    procedure Button1Click(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
   private
     { Private declarations }
@@ -194,8 +193,6 @@ begin
     UserId := DataModule1.SignUp(userName, password, userType, homeaddress,
       certificationCode, imgPfp);
 
-    // set app variables
-    DataModule1.dDate := StrToDate(inputbox('', 'Date:', ''));
     DataModule1.UserId := UserId;
     DataModule1.CartID := DataModule1.CreateUserCart(DataModule1.UserId);
     frmSignUp.Hide;
@@ -218,119 +215,6 @@ begin
 
 end;
 
-// for testing by creating range user
-procedure TfrmSignUp.Button1Click(Sender: TObject);
-var
-  fFile: textfile;
-  code, userName, userType, address, password, sLine: string;
-  i, j: integer;
-  words, codes: tList<string>;
-
-begin
-  // get all seller verification codes
-  words := tList<string>.Create();
-
-  if fileExists('words.txt') then
-  begin
-
-    AssignFile(fFile, 'words.txt');
-    reset(fFile);
-
-    while not eof(fFile) do
-    begin
-      readln(fFile, sLine);
-      words.Add(sLine);
-    end;
-
-    CloseFile(fFile);
-  end
-  else
-  begin
-    showMessage('no file lol');
-  end;
-
-  codes := Tlist<string>.create();
-  if fileExists('SellerCertificationCodes.txt') then
-  begin
-    AssignFile(fFile, 'SellerCertificationCodes.txt');
-    reset(fFile);
-
-    while not eof(fFile) do
-    begin
-      readln(fFile, sLine);
-      codes.Add(sLine);
-    end;
-
-    CloseFile(fFile);
-  end
-  else
-  begin
-    showMessage('no codes file lol');
-  end;
-
-  try
-
-    AssignFile(fFile, 'log.txt');
-
-    ReWrite(fFile);
-
-    for j := 1 to 1000 do
-    begin
-
-      password := '';
-      for i := 1 to 8 do
-      begin
-        password := password + chr(random(26) + ord('a'))
-
-      end;
-
-      for i := 1 to 2 do
-      begin
-        password := password + special[random(length(special)) + 1];
-        password := password + nums[random(length(nums)) + 1];
-      end;
-
-      userName := words.Items[random(length(words.ToArray))] +
-        inttostr(random(11));
-
-      code := codes.Items[random(length(codes.ToArray))];
-
-      address := 'somehwere';
-
-      case random(10) of
-
-        8, 9, 1:
-          begin
-            userType := 'SELLER';
-
-          end
-      else
-        begin
-          userType := 'BUYER';
-        end;
-
-      end;
-
-      try
-        DataModule1.SignUp(userName, password, userType, address, code, imgPfp);
-        writeln(fFile, format('%s, %s, %s, %s', [username, password, usertype, code]))
-      except
-        on e: exception do
-        begin
-          showMessage(e.Message);
-        end;
-
-      end;
-
-    end;
-
-  finally
-
-    CloseFile(fFile);
-
-  end;
-
-end;
 
 procedure TfrmSignUp.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
@@ -341,7 +225,7 @@ end;
 procedure TfrmSignUp.FormKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
-  if key = vk_return then
+  if Key = vk_return then
   begin
     btnSignUp.Click;
   end;

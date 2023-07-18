@@ -14,24 +14,9 @@ type
   TDataModule1 = class(TDataModule)
     Connection: TADOConnection;
     Query: TADOQuery;
-    UserTB: TADOTable;
     ItemTB: TADOTable;
-    StatsTB: TADOTable;
-    TransactionItemTB: TADOTable;
-    TransactionTB: TADOTable;
     SellerTB: TADOTable;
-    dsUserTB: TDataSource;
     dsSellerTB: TDataSource;
-    dsItemTB: TDataSource;
-    dsTransactionTB: TDataSource;
-    dsStatsTB: TDataSource;
-    dsTransactionItemTB: TDataSource;
-    RatingsTB: TADOTable;
-    dsRatingsTB: TDataSource;
-    ShoppingCartTB: TADOTable;
-    dsShoppingCartTB: TDataSource;
-    ShoppingCartItemsTB: TADOTable;
-    dsShoppingCartItemsTB: TDataSource;
     procedure DataModuleCreate(Sender: TObject);
   private
     { Private declarations }
@@ -41,7 +26,6 @@ type
     // stores these global vairables for all screen
     userID: string;
     CartID: string;
-    dDate: tDateTime;
     lastForm: TForm;
 
   const
@@ -69,7 +53,7 @@ type
 
     function hasUserBoughtItem(itemID, userID: string): boolean;
 
-    function obtainStats(userID : string; statType: integer;
+    function obtainStats(userID: string; statType: integer;
       DateBegin, DateEnd: tDateTime): tADODataSet;
 
     function viewItem(itemID: string): tADODataSet;
@@ -125,11 +109,6 @@ type
 
     procedure BeginTransaction();
 
-    procedure updateStats(ShoppingCartID: string);
-
-    procedure insertStatData(userID: string; statDate: tDateTime;
-      statType: string; value: double);
-
     procedure loadImageFromFile(img: tImage; window: TForm);
 
     function ImageToVariant(Image: tImage): Variant;
@@ -174,9 +153,8 @@ begin
     end;
 
   finally
-    if Assigned(dsResult) then
-      dsResult.Free;
-    params.Free;
+    FreeAndNil(dsResult);
+    FreeAndNil(params);
   end;
 end;
 
@@ -198,7 +176,7 @@ begin
   except
     on e: Exception do
     begin
-      raise e
+      raise e   ;
     end;
 
   end;
@@ -217,7 +195,7 @@ begin
   end
   else
   begin
-    // insertitem into user's cart if doesn't exist
+    // insert item into user's cart if doesn't exist
 
     // generate new ShoppingCartitemID
     ShoppingCartItemID := ShoppingCartID[1] + itemID[2];
@@ -236,7 +214,6 @@ begin
 
   try
     dsResult := runSQL(sql, params);
-
     if dsResult['Status'] <> 'Success' then
     begin
       RollBack;
@@ -258,11 +235,14 @@ begin
     params.clear;
     params.Add('ItemID', itemID);
 
+    // free memory
+    FreeAndNil(dsResult);
+
     dsResult := runSQL(sql, params);
 
     if dsResult.Fields.FindField('Status') <> nil then
     begin
-
+      Rollback;
       raise Exception.Create(dsResult['Status']);
     end;
 
@@ -288,12 +268,17 @@ begin
     params.clear;
     params.Add('Quantity', quantity);
     params.Add('ItemID', itemID);
+
+    FreeAndNil(dsResult);
+
     dsResult := runSQL(sql, params);
 
     if dsResult['Status'] <> 'Success' then
     begin
 
       // raise exception
+
+      RollBack;
       raise Exception.Create(dsResult['Status']);
     end;
 
@@ -303,9 +288,9 @@ begin
     Result := ShoppingCartItemID;
 
   finally
-    if Assigned(dsResult) then
-      dsResult.Free;
-    params.Free;
+    FreeAndNil(dsResult);
+
+    FreeAndNil(params);
   end;
 
 end;
@@ -373,9 +358,8 @@ begin
     CommitTransaction;
 
   finally
-    if Assigned(dsResult) then
-      dsResult.Free;
-    params.Free;
+    FreeAndNil(dsResult);
+    FreeAndNil(params);
   end;
 
 end;
@@ -443,13 +427,10 @@ var
   sShoppingCartID, sql: string;
   i: integer;
   params: tObjectDictionary<string, Variant>;
-  currDate: tDateTime;
   dsResult: tADODataSet;
 begin
 
   BeginTransaction;
-
-  currDate := Date;
 
   // generate a unique code for the shopping cart
   sShoppingCartID := userID[2];
@@ -461,7 +442,7 @@ begin
 
   params := tObjectDictionary<string, Variant>.Create();
   params.Add('ShoppingCartID', sShoppingCartID);
-  params.Add('Date', dDate);
+  params.Add('Date', Now);
   params.Add('UserID', buyerID);
 
   // insert user's shopping cart into database
@@ -480,9 +461,8 @@ begin
     Result := sShoppingCartID;
 
   finally
-    params.Free;
-    if Assigned(dsResult) then
-      dsResult.Free;
+    FreeAndNil(params);
+    FreeAndNil(dsResult);
   end;
 
 end;
@@ -500,53 +480,23 @@ begin
   Connection.Open;
 
   // Connection for every table you have
-  UserTB.Connection := Connection;
   // ADOTable1 must be named ADOtablename(your associated table)
   SellerTB.Connection := Connection;
-  ItemTB.Connection := Connection;
-  TransactionItemTB.Connection := Connection;
-  TransactionTB.Connection := Connection;
-  StatsTB.Connection := Connection;
-  RatingsTB.Connection := Connection;
-  ShoppingCartTB.Connection := Connection;
-  ShoppingCartItemsTB.Connection := Connection;
-
   // Each ADOTable is associated with each table name in access
-  UserTB.TableName := 'UserTB'; // table name spelled as in in MS access
   SellerTB.TableName := 'SellerTB'; // table name spelled as in in MS access
-  ItemTB.TableName := 'ItemTB';
-  TransactionItemTB.TableName := 'TransactionItemTB';
-  TransactionTB.TableName := 'TransactionTB';
-  StatsTB.TableName := 'StatsTB';
-  RatingsTB.TableName := 'RatingsTB';
-  ShoppingCartTB.TableName := 'ShoppingCartTB';
-  ShoppingCartItemsTB.TableName := 'ShoppingCartItemsTB';
 
   // a data source is named DSTableName.
   // each data source must be associated with the correct ADOtable
-  dsUserTB.DataSet := UserTB;
   dsSellerTB.DataSet := SellerTB;
-  dsItemTB.DataSet := ItemTB;
-  dsTransactionItemTB.DataSet := TransactionItemTB;
-  dsTransactionTB.DataSet := TransactionTB;
-  dsStatsTB.DataSet := StatsTB;
-  dsRatingsTB.DataSet := RatingsTB;
-  dsShoppingCartTB.DataSet := ShoppingCartTB;
-  dsShoppingCartItemsTB.DataSet := ShoppingCartItemsTB;
 
   Query.Connection := Connection;
 
   // open dataset
-  UserTB.Open;
   SellerTB.Open;
-  ItemTB.Open;
-  TransactionItemTB.Open;
-  TransactionTB.Open;
-  StatsTB.Open;
-  RatingsTB.Open;
-  ShoppingCartTB.Open;
-  ShoppingCartItemsTB.Open;
 
+  // There reason many tables and datasets are not here is because they were
+  // never used without sql, so they are unnecessary and would use
+  // unnecessary memory
 end;
 
 // Mark an item as deleted
@@ -602,9 +552,8 @@ begin
 
   finally
 
-    params.clear;
-    if Assigned(dsResult) then
-      dsResult.Free;
+    FreeAndNil(params);
+    FreeAndNil(dsResult);
 
   end;
 end;
@@ -665,7 +614,7 @@ begin
     end;
 
   finally
-    params.Free;
+    FreeAndNil(params);
   end;
 
 end;
@@ -739,7 +688,7 @@ begin
     Result.First;
 
   finally
-    params.Free;
+    FreeAndNil(params);
   end;
 
 end;
@@ -774,7 +723,7 @@ begin
         // set that stream to the image's picture
         Image.Picture.LoadFromStream(imageStream);
       finally
-        imageStream.Free;
+        FreeAndNil(imageStream);
       end;
 
     except
@@ -782,9 +731,8 @@ begin
     end;
 
   finally
-    if Assigned(dsResult) then
-      dsResult.Free;
-    params.Free;
+    FreeAndNil(dsResult);
+    FreeAndNil(params);
 
   end;
 
@@ -911,7 +859,7 @@ begin
     Result.First;
 
   finally
-    params.Free;
+    FreeAndNil(params);
   end;
 
 end;
@@ -941,8 +889,8 @@ begin
 
     Result := not dsResult.IsEmpty;
   finally
-    params.Free;
-    dsResult.Free;
+    FreeAndNil(params);
+    FreeAndNil(dsResult);
   end;
 
 end;
@@ -959,7 +907,7 @@ begin
     Result := imageStream.Bytes;
 
   finally
-    imageStream.Free;
+    FreeAndNil(imageStream);
   end;
 
 end;
@@ -1000,9 +948,9 @@ begin
       Result := dsResult['ShoppingCartItemID'];
     end;
   finally
-    if Assigned(dsResult) then
-      dsResult.Free;
-    params.Free;
+
+    FreeAndNil(dsResult);
+    FreeAndNil(params);
   end;
 
 end;
@@ -1055,10 +1003,8 @@ begin
     end;
 
   finally
-    if Assigned(params) then
-      params.Free;
-    if Assigned(dsResult) then
-      dsResult.Free;
+    FreeAndNil(params);
+    FreeAndNil(dsResult);
 
   end;
 
@@ -1089,60 +1035,10 @@ begin
     end;
 
   finally
-    if Assigned(params) then
-      params.Free;
-    if Assigned(dsResult) then
-      dsResult.Free;
+    FreeAndNil(params);
+    FreeAndNil(dsResult);
 
   end;
-end;
-
-// insert a record into the statsTB table
-procedure TDataModule1.insertStatData(userID: string; statDate: tDateTime;
-  statType: string; value: double);
-var
-  statid, sql: string;
-  params: tObjectDictionary<string, Variant>;
-  dsResult: tADODataSet;
-  i: integer;
-begin
-  // generate unqiue statId
-  statid := userID[2] + intToStr(DayOf(Date))[1];
-
-  for i := 1 to 12 do
-  begin
-    statid := statid + intToStr(random(10));
-  end;
-
-  sql := 'INSERT INTO StatsTB (StatID, UserID, statDate, Type, statValue)' +
-    ' VALUES (:statID, :UserID, :statDate, :statType, :statValue) ';
-
-  // get paramater for query
-
-  params := tObjectDictionary<string, Variant>.Create();
-
-  params.Add('statID', statid);
-  params.Add('UserID', userID);
-  params.Add('statDate', statDate);
-  params.Add('statType', statType);
-  params.Add('statValue', value);
-
-  try
-    // send sql insert statement
-    dsResult := runSQL(sql, params);
-
-    if dsResult['Status'] <> 'Success' then
-    begin
-      raise Exception.Create(dsResult['Status']);
-    end;
-
-  finally
-    if Assigned(dsResult) then
-      dsResult.Free;
-    params.Free;
-
-  end;
-
 end;
 
 // a function used to check for whether any records mtching certain conditions
@@ -1186,9 +1082,8 @@ begin
     Result := not dsResult.IsEmpty;
 
   finally
-    if Assigned(dsResult) then
-      dsResult.Free;
-    dParams.Free;
+    FreeAndNil(dsResult);
+    FreeAndNil(dParams);
   end;
 
 end;
@@ -1214,7 +1109,7 @@ begin
       showMessage('Please choose a file');
     end;
   finally
-    fileChooser.Free;
+    FreeAndNil(fileChooser);
   end;
 
 end;
@@ -1265,14 +1160,16 @@ begin
     Result := dsResult['UserID'];
 
   finally
-    if Assigned(dsResult) then
-      dsResult.Free;
-    params.Free;
+    FreeAndNil(dsResult);
+    FreeAndNil(params);
   end;
 
 end;
 
-function TDataModule1.obtainStats(userID : string; statType: integer;
+// this table doesn't use StatsTB, as it is unnecessary and full of redundancy
+// and calculated fields, so i deleted the table and instead calculated using
+// transaction history
+function TDataModule1.obtainStats(userID: string; statType: integer;
   DateBegin, DateEnd: tDateTime): tADODataSet;
 var
   fieldToAnalyse: string;
@@ -1316,7 +1213,7 @@ begin;
 
   // create sql based on whether your looking from the perspective of the seller
   // or the buyer
-  if ( statType <> stRevenue) and (statType <> stSales) then
+  if (statType <> stRevenue) and (statType <> stSales) then
   begin
     sql := sql + ' TransactionItemTB ' +
       'INNER JOIN TransactionTB ON TransactionItemTB.TransactionID = TransactionTB.TransactionID '
@@ -1343,9 +1240,8 @@ begin;
 
     Result := runSQL(sql, params);
 
-
   finally
-    params.Free;
+    FreeAndNil(params);
   end;
 
 end;
@@ -1392,7 +1288,7 @@ begin
     quantity := dsResultItemInfo['Quantity'];
     itemID := dsResultItemInfo['ItemID'];
 
-    dsResultItemInfo.Free;
+    FreeAndNil(dsResultItemInfo);
     params.clear;
 
     // update stock
@@ -1430,11 +1326,9 @@ begin
     CommitTransaction;
 
   finally
-    if Assigned(dsResult) then
-      dsResult.Free;
-    if Assigned(dsResultItemInfo) then
-      dsResultItemInfo.Free;
-    params.Free;
+    FreeAndNil(dsResult);
+    FreeAndNil(dsResultItemInfo);
+    FreeAndNil(params);
   end;
 
 end;
@@ -1465,8 +1359,7 @@ begin
   finally
 
     // free allocated memory
-    if Assigned(ResizedImage) then
-      ResizedImage.Free;
+    FreeAndNil(ResizedImage);
 
   end;
 
@@ -1518,8 +1411,7 @@ begin
         else
         begin
           // Create update delete
-          // Create update delete
-          // Query.Prepared := True;
+          Query.Prepared := True;
           Query.ExecSQL;
 
           dsOutput.InsertRecord(['Success']);
@@ -1617,9 +1509,8 @@ begin
 
   finally
     // free memory
-    if Assigned(dsResult) then
-      dsResult.Free;
-    params.Free;
+    FreeAndNil(dsResult);
+    FreeAndNil(params);
   end;
 
 end;
@@ -1690,7 +1581,10 @@ begin
         raise Exception.Create(dsResult['Status']);
       end;
 
+
+
       // if user is a seller, set up a corresponding record in seller tb as well
+
       if usertype = 'SELLER' then
       begin
 
@@ -1721,9 +1615,8 @@ begin
     end;
 
   finally
-    params.Free;
-    if Assigned(dsResult) then
-      dsResult.Free;
+    FreeAndNil(params);
+    FreeAndNil(dsResult);
   end;
 
 end;
@@ -1751,7 +1644,7 @@ begin
       raise Exception.Create(dsResult['Status']);
     end;
 
-    dsResult.Free;
+    FreeAndNil(dsResult);
 
     // Then for TransactionItemTB
     sql := 'INSERT INTO TransactionItemTB (CartItemID, ItemID, Quantity, TransactionID, Cost, CF, EU, WU) '
@@ -1772,9 +1665,8 @@ begin
     end;
 
   finally
-    params.Free;
-    if Assigned(dsResult) then
-      dsResult.Free;
+    FreeAndNil(params);
+    FreeAndNil(dsResult);
   end;
 end;
 
@@ -1827,10 +1719,8 @@ begin
     end;
 
   finally
-    if Assigned(params) then
-      params.Free;
-    if Assigned(dsResult) then
-      dsResult.Free;
+    FreeAndNil(params);
+    FreeAndNil(dsResult);
   end;
 
 end;
@@ -1861,9 +1751,8 @@ begin
   finally
 
     // free memory
-    params.Free;
-    if Assigned(dsResult) then
-      dsResult.Free;
+    FreeAndNil(params);
+    FreeAndNil(dsResult);
 
   end;
 
@@ -1899,6 +1788,8 @@ begin
 
     buyerID := dsResult['BuyerID'];
     buyerBalance := dsResult['Balance'];
+
+    FreeAndNil(dsResult);
 
     // Select all relevant data on the items and Seller for each item in user's cart
 
@@ -1957,7 +1848,7 @@ begin
         raise Exception.Create(dsResult['Status']);
       end;
 
-      dsResultUpdateBuyer.Free;
+      FreeAndNil(dsResultUpdateBuyer);
 
       // update seller's revenue amount
 
@@ -1972,100 +1863,23 @@ begin
 
       end;
 
-      dsResultUpdateSeller.Free;
+      FreeAndNil(dsResultUpdateSeller);
 
       dsResult.Next;
     end;
 
   finally
 
-    if Assigned(dsResult) then
-      dsResult.Free;
+    FreeAndNil(dsResultUpdateBuyer);
 
-    params.Free;
+    FreeAndNil(dsResultUpdateSeller);
+
+    FreeAndNil(dsResult);
+
+    FreeAndNil(params);
 
   end;
 
-end;
-
-// used every time a user checksout a shopping cart
-// updates the statistics of the user and the sellers involved in all
-// the transactions
-
-procedure TDataModule1.updateStats(ShoppingCartID: string);
-var
-  sql, buyerID: string;
-  params: tObjectDictionary<string, Variant>;
-  dsResult, dsResultStats: tADODataSet;
-  SellerID: string;
-  CFItem, WUItem, EUItem, CostItem: double;
-  quantityItem: integer;
-begin
-
-  // get the buyer ID from this cart
-  sql := 'SELECT BuyerID FROM ShoppingCartTB WHERE ShoppingCartID = :ShoppingCartID';
-  params := tObjectDictionary<string, Variant>.Create();
-
-  params.Add('ShoppingCartID', ShoppingCartID);
-
-  try
-    dsResult := runSQL(sql, params);
-
-    buyerID := dsResult['BuyerID'];
-
-    // for each item in this cart, select all relevant data
-    sql := 'SELECT ShoppingCartItemsTB.ItemID, Quantity, ItemTB.SellerID, ShoppingCartItemsTB.Cost, '
-      + ' (CarbonFootprintProduction + CarbonFootprintUsage) AS CF , ' +
-      '(WaterUsageProduction + WaterFootprintUsage) AS WU, ' +
-      '(EnergyUsageProduction + EnergyFootprintUsage) AS EU ' +
-      'FROM  ShoppingCartItemsTB, ItemTB ' +
-      'WHERE ShoppingCartID = :ShoppingCartID AND ShoppingCartItemsTB.ItemID = ItemTB.ItemID ';
-
-    dsResult := runSQL(sql, params);
-
-    // handle database errors
-    if dsResult.Fields.FindField('Status') <> nil then
-    begin
-      raise Exception.Create(dsResult['Status']);
-    end;
-
-    dsResult.First;
-    // loop through all transactions and update stats accordingly
-    while not dsResult.Eof do
-    begin
-      // get data from one transaction
-      SellerID := dsResult['SellerID'];
-      CFItem := dsResult['CF'];
-      WUItem := dsResult['WU'];
-      EUItem := dsResult['EU'];
-      quantityItem := dsResult['Quantity'];
-      CostItem := dsResult['Cost'];
-      // insert records into statsTB
-      try
-        insertStatData(SellerID, dDate, 'REV', CostItem);
-        insertStatData(SellerID, dDate, 'SAL', quantityItem);
-        insertStatData(buyerID, dDate, 'SPE', CostItem);
-        insertStatData(buyerID, dDate, 'CF', CFItem * quantityItem);
-        insertStatData(buyerID, dDate, 'EU', EUItem * quantityItem);
-        insertStatData(buyerID, dDate, 'WU', WUItem * quantityItem);
-
-      except
-        on e: Exception do
-        begin
-          raise e;
-        end;
-
-      end;
-
-      dsResult.Next;
-
-    end;
-
-  finally
-    if Assigned(dsResult) then
-      dsResult.Free;
-    params.Free;
-  end;
 end;
 
 function TDataModule1.userInfo(userID: string): tADODataSet;
@@ -2110,7 +1924,7 @@ begin
     Result.FieldDefs.Add('TotalSpending', ftCurrency);
     Result.CreateDataSet;
 
-    // mf clean this shit up at some point
+    // todo : clean this maybe
     Result.Insert;
     Result.Edit;
     Result['UserType'] := dsResult['UserType'];
@@ -2156,21 +1970,26 @@ begin
 
     end;
 
+    // for all users
     // select total spending
 
-    sql := 'SELECT IIF(Sum(statValue) is Null ,0 ,Sum(statValue)) AS total FROM StatsTB WHERE UserID = :UserID AND Type = :statType ';
+    sql := 'SELECT IIF(Sum(Cost) IS NULL ,0 ,Sum(Cost)) AS total ' +
+      'FROM TransactionItemTB INNER JOIN TransactionTB ON TransactionTB.TransactionID = TransactionItemTB.TransactionID'
+      + ' WHERE BuyerID = :UserID ';
     params.clear;
     params.Add('UserID', userID);
-    params.Add('statType', 'SPE');
 
     dsResult := runSQL(sql, params);
+
     Result.Edit;
 
     Result['TotalSpending'] := dsResult['total'];
 
-    // select total cf
+    // select to cf
 
-    params.AddOrSetValue('statType', 'CF');
+    sql := 'SELECT IIF(Sum(CF) IS NULL ,0 ,Sum(CF)) AS total ' +
+      'FROM TransactionItemTB INNER JOIN TransactionTB ON TransactionTB.TransactionID = TransactionItemTB.TransactionID'
+      + ' WHERE BuyerID = :UserID ';
 
     dsResult := runSQL(sql, params);
 
@@ -2178,23 +1997,27 @@ begin
     Result['TotalCF'] := dsResult['total'];
     // select total eu
 
-    params.AddOrSetValue('statType', 'EU');
+    sql := 'SELECT IIF(Sum(EU) IS NULL ,0 ,Sum(EU)) AS total ' +
+      'FROM TransactionItemTB INNER JOIN TransactionTB ON TransactionTB.TransactionID = TransactionItemTB.TransactionID'
+      + ' WHERE BuyerID = :UserID ';
 
     dsResult := runSQL(sql, params);
     Result.Edit;
     Result['TotalEU'] := dsResult['total'];
 
     // select total wu
-    params.AddOrSetValue('statType', 'WU');
+
+    sql := 'SELECT IIF(Sum(WU) IS NULL ,0 ,Sum(WU)) AS total ' +
+      'FROM TransactionItemTB INNER JOIN TransactionTB ON TransactionTB.TransactionID = TransactionItemTB.TransactionID'
+      + ' WHERE BuyerID = :UserID ';
 
     dsResult := runSQL(sql, params);
     Result.Edit;
     Result['TotalWU'] := dsResult['total'];
 
   finally
-    params.Free;
-    if Assigned(dsResult) then
-      dsResult.Free;
+    FreeAndNil(params);
+    FreeAndNil(dsResult);
   end;
 
 end;
@@ -2234,7 +2057,7 @@ begin
     Result := dsResult;
 
   finally
-    params.Free;
+    FreeAndNil(params);
   end;
 
 end;
