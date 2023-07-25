@@ -14,9 +14,22 @@ type
   TDataModule1 = class(TDataModule)
     Connection: TADOConnection;
     Query: TADOQuery;
+    UserTB: TADOTable;
     ItemTB: TADOTable;
+    TransactionItemTB: TADOTable;
+    TransactionTB: TADOTable;
     SellerTB: TADOTable;
+    dsUserTB: TDataSource;
     dsSellerTB: TDataSource;
+    dsItemTB: TDataSource;
+    dsTransactionTB: TDataSource;
+    dsTransactionItemTB: TDataSource;
+    RatingsTB: TADOTable;
+    dsRatingsTB: TDataSource;
+    ShoppingCartTB: TADOTable;
+    dsShoppingCartTB: TDataSource;
+    ShoppingCartItemsTB: TADOTable;
+    dsShoppingCartItemsTB: TDataSource;
     procedure DataModuleCreate(Sender: TObject);
   private
     { Private declarations }
@@ -176,7 +189,7 @@ begin
   except
     on e: Exception do
     begin
-      raise e   ;
+      raise e
     end;
 
   end;
@@ -195,7 +208,7 @@ begin
   end
   else
   begin
-    // insert item into user's cart if doesn't exist
+    // insertitem into user's cart if doesn't exist
 
     // generate new ShoppingCartitemID
     ShoppingCartItemID := ShoppingCartID[1] + itemID[2];
@@ -258,7 +271,7 @@ begin
     // set by the buyer, rollback transaction
     else if dsResult['MaxWithdrawableStock'] < dsResult['Quantity'] then
     begin
-      RollBack;
+      //RollBack;
       raise Exception.Create
         ('You are not permitted to withdraw more units at once.');
     end;
@@ -277,13 +290,11 @@ begin
     begin
 
       // raise exception
-
-      RollBack;
       raise Exception.Create(dsResult['Status']);
     end;
 
     // commit changes to DB
-    CommitTransaction;
+    //CommitTransaction;
 
     Result := ShoppingCartItemID;
 
@@ -409,15 +420,15 @@ end;
 // thanks stack overflow
 function TDataModule1.CloneRecordset(const Data: _Recordset): _Recordset;
 var
-  RecordSetCopy: _Recordset;
+  newRec: _Recordset;
   stm: Stream;
 begin
-  RecordSetCopy := CoRecordset.Create as _Recordset;
+  newRec := CoRecordset.Create as _Recordset;
   stm := CoStream.Create;
   Data.Save(stm, adPersistADTG);
-  RecordSetCopy.Open(stm, EmptyParam, CursorTypeEnum(adOpenUnspecified),
+  newRec.Open(stm, EmptyParam, CursorTypeEnum(adOpenUnspecified),
     LockTypeEnum(adLockUnspecified), 0);
-  Result := RecordSetCopy;
+  Result := newRec;
 end;
 
 // once the user has checked out a cart or has logged in
@@ -494,9 +505,9 @@ begin
   // open dataset
   SellerTB.Open;
 
-  // There reason many tables and datasets are not here is because they were
-  // never used without sql, so they are unnecessary and would use
-  // unnecessary memory
+  // I am not opening all of the table, because I mostly use sql
+  // by not opening unnecesssary tables, I am saving on a heck of a lot of memory
+
 end;
 
 // Mark an item as deleted
@@ -1166,9 +1177,6 @@ begin
 
 end;
 
-// this table doesn't use StatsTB, as it is unnecessary and full of redundancy
-// and calculated fields, so i deleted the table and instead calculated using
-// transaction history
 function TDataModule1.obtainStats(userID: string; statType: integer;
   DateBegin, DateEnd: tDateTime): tADODataSet;
 var

@@ -404,19 +404,20 @@ begin
 
 end;
 
-// found code that creates a deep copy of a recordset so as to copy the data from on dataset
+// creates a deep copy of a recordset so as to copy the data from on dataset
 // to another
+// thanks stack overflow
 function TDataModule1.CloneRecordset(const Data: _Recordset): _Recordset;
 var
-  RecordSetCopy: _Recordset;
-  stream: Stream;
+  newRec: _Recordset;
+  stm: Stream;
 begin
-  RecordSetCopy := CoRecordset.Create as _Recordset;
-  stream := CoStream.Create;
-  Data.Save(stream, adPersistADTG);
-  RecordSetCopy.Open(stream, EmptyParam, CursorTypeEnum(adOpenUnspecified),
+  newRec := CoRecordset.Create as _Recordset;
+  stm := CoStream.Create;
+  Data.Save(stm, adPersistADTG);
+  newRec.Open(stm, EmptyParam, CursorTypeEnum(adOpenUnspecified),
     LockTypeEnum(adLockUnspecified), 0);
-  Result := RecordSetCopy;
+  Result := newRec;
 end;
 
 // once the user has checked out a cart or has logged in
