@@ -91,20 +91,8 @@ end;
 
 procedure TfrmCheckout.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  try
-    try
-      DataModule1.CancelCart(DataModule1.CartID);
-    except
-      on e: exception do
-      begin
-        showMessage(e.Message);
-      end;
 
-    end;
-
-  finally
-    Application.Terminate;
-  end;
+  Application.Terminate;
 
 end;
 

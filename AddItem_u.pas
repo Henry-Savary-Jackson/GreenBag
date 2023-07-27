@@ -219,21 +219,9 @@ end;
 
 procedure TfrmAddItem.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  try
-    try
-      DataModule1.CancelCart(DataModule1.CartID);
 
-    except
-      on e: exception do
-      begin
-        showMessage(e.Message);
-      end;
+  Application.Terminate;
 
-    end;
-
-  finally
-    Application.Terminate;
-  end;
 end;
 
 procedure TfrmAddItem.FormShow(Sender: TObject);
@@ -280,18 +268,18 @@ begin
 
     edtPrice.Text := floatTOStrf(dsResult['Cost'], ffFixed, 8, 2);
 
-    edtStock.Text := intToStr(dsResult['Stock']) ;
+    edtStock.Text := intToStr(dsResult['Stock']);
     if dsResult['Stock'] = 1 then
       lblStockUnits.Caption := 'unit';
 
-    edtCF.Text := floatTOStrf(dsResult['CarbonFootprintUsage'], ffFixed, 8, 2) ;
+    edtCF.Text := floatTOStrf(dsResult['CarbonFootprintUsage'], ffFixed, 8, 2);
     edtEU.Text := floatTOStrf(dsResult['EnergyFootprintUsage'], ffFixed, 8, 2);
     edtWU.Text := floatTOStrf(dsResult['WaterFootprintUsage'], ffFixed, 8, 2);
 
     edtCFProduce.Text := floatTOStrf(dsResult['CarbonFootprintUsage'],
       ffFixed, 8, 2);
     edtEUProduce.Text := floatTOStrf(dsResult['EnergyFootprintUsage'],
-      ffFixed, 8, 2) ;
+      ffFixed, 8, 2);
     edtWUProduce.Text := floatTOStrf(dsResult['WaterFootprintUsage'],
       ffFixed, 8, 2);
 
@@ -300,7 +288,7 @@ begin
 
     cmbCategory.ItemIndex := cmbCategory.Items.IndexOf(dsResult['Category']);
 
-    edtMaxWithdrawStock.Text := intToStr(dsResult['MaxWithdrawableStock']) ;
+    edtMaxWithdrawStock.Text := intToStr(dsResult['MaxWithdrawableStock']);
 
     if dsResult['MaxWithdrawableStock'] = 1 then
     begin
@@ -343,8 +331,7 @@ begin
 
     cmbCategory.ItemIndex := -1;
 
-    redDesc.Lines.Clear;
-
+    redDesc.lines.Clear;
 
   end;
 
@@ -374,7 +361,7 @@ procedure TfrmAddItem.imgItemClick(Sender: TObject);
 var
   fileChooser: tOpenDialog;
   sImagePath: string;
-  png : tPngimage;
+  png: tPngimage;
 begin
   // open filchooser
   fileChooser := tOpenDialog.Create(self);
@@ -389,7 +376,8 @@ begin
 
       // reduce the size of the image that is shown to save storage
 
-      imgItem.Picture.Graphic.Assign(DataModule1.ResizeImage(imgItem, 128, 128));
+      imgItem.Picture.Graphic.Assign(DataModule1.ResizeImage(imgItem,
+        128, 128));
     end
     else
     begin

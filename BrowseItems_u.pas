@@ -209,6 +209,8 @@ begin
       btnLoadMoreitems := nil;
     end;
 
+    DataModule1.timeCheckTimer.Enabled := false;
+
     frmBrowse.Hide;
     frmLogin.Show;
 
@@ -259,21 +261,9 @@ end;
 
 procedure TfrmBrowse.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  try
-    try
-      DataModule1.CancelCart(DataModule1.CartID);
 
-    except
-      on e: exception do
-      begin
-        showMessage(e.Message);
-      end;
+  Application.Terminate;
 
-    end;
-
-  finally
-    Application.Terminate;
-  end;
 end;
 
 procedure TfrmBrowse.FormShow(Sender: TObject);

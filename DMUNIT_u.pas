@@ -8,7 +8,8 @@ uses
   Vcl.ComCtrls,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.ExtCtrls, PngImage,
   System.Win.ComObj, ADOInt,
-  dateutils, stdctrls;
+  dateutils, stdctrls, System.JSON, System.Threading, REST.Types,
+  Data.Bind.Components, Data.Bind.ObjectScope, REST.Client, IdServerIOHandler;
 
 type
   TDataModule1 = class(TDataModule)
@@ -16,8 +17,12 @@ type
     Query: TADOQuery;
     ItemTB: TADOTable;
     SellerTB: TADOTable;
-    dsSellerTB: TDataSource;
+    restCLient: TRESTClient;
+    restRequest: TRESTRequest;
+    restResponse: TRESTResponse;
+    timeCheckTimer: TTimer;
     procedure DataModuleCreate(Sender: TObject);
+    procedure checkIFCartOutdated(Sender: TObject);
   private
     { Private declarations }
   public
@@ -25,7 +30,13 @@ type
     { Public declarations }
     // stores these global vairables for all screen
     userID: string;
+    // sotres the user's current shopping cart
     CartID: string;
+    // used to store the previous form
+    // this var is ony changed a few times in the app
+    // this is to make sure that pressing back button on Add item screen
+    // will go back to the previous screen, as you can access add item screen
+    // from either browse items screen or your products screen.
     lastForm: TForm;
 
   const
@@ -122,12 +133,27 @@ type
 
     function ResizeImage(Image: tImage; width, height: integer): tpngImage;
 
+    function getCartDate(CartID: string): tDateTime;
+
+    function getUserCart(userID: string): string;
+
+    procedure resetCart();
+
+    procedure warnUser();
+
   end;
 
 var
   DataModule1: TDataModule1;
+  warnedUser: boolean;
+
+const
+  ianaTimezone = 'Africa/Johannesburg';
 
 implementation
+
+uses
+  Checkout_u;
 
 {$R *.dfm}
 
@@ -176,7 +202,7 @@ begin
   except
     on e: Exception do
     begin
-      raise e   ;
+      raise e;
     end;
 
   end;
@@ -242,7 +268,7 @@ begin
 
     if dsResult.Fields.FindField('Status') <> nil then
     begin
-      Rollback;
+      RollBack;
       raise Exception.Create(dsResult['Status']);
     end;
 
@@ -430,25 +456,38 @@ var
   dsResult: tADODataSet;
 begin
 
-  BeginTransaction;
-
-  // generate a unique code for the shopping cart
-  sShoppingCartID := userID[2];
-
-  for i := 1 to 9 do
-  begin
-    sShoppingCartID := sShoppingCartID + intToStr(random(10));
-  end;
-
-  params := tObjectDictionary<string, Variant>.Create();
-  params.Add('ShoppingCartID', sShoppingCartID);
-  params.Add('Date', Now);
-  params.Add('UserID', buyerID);
-
-  // insert user's shopping cart into database
-  sql := 'INSERT INTO ShoppingCartTB (ShoppingCartID, BuyerID, DateCreated) VALUES (:ShoppingCartID, :UserID , :Date)';
-
   try
+    BeginTransaction;
+
+    // check if user already has a cart
+    try
+      Result := getUserCart(buyerID);
+    except
+      on e: Exception do
+      begin
+        raise Exception.Create(e.Message);
+      end
+    end;
+
+    if Result <> '' then
+      Exit;
+
+    // generate a unique code for the shopping cart
+    sShoppingCartID := userID[2];
+
+    for i := 1 to 9 do
+    begin
+      sShoppingCartID := sShoppingCartID + intToStr(random(10));
+    end;
+
+    params := tObjectDictionary<string, Variant>.Create();
+    params.Add('ShoppingCartID', sShoppingCartID);
+    params.Add('Date', Now);
+    params.Add('UserID', buyerID);
+
+    // insert user's shopping cart into database
+    sql := 'INSERT INTO ShoppingCartTB (ShoppingCartID, BuyerID, DateCreated) VALUES (:ShoppingCartID, :UserID , :Date)';
+
     dsResult := runSQL(sql, params);
 
     if dsResult['Status'] <> 'Success' then
@@ -484,10 +523,6 @@ begin
   SellerTB.Connection := Connection;
   // Each ADOTable is associated with each table name in access
   SellerTB.TableName := 'SellerTB'; // table name spelled as in in MS access
-
-  // a data source is named DSTableName.
-  // each data source must be associated with the correct ADOtable
-  dsSellerTB.DataSet := SellerTB;
 
   Query.Connection := Connection;
 
@@ -582,6 +617,39 @@ begin
   end;
 end;
 
+// get the date that a user's cart was created
+function TDataModule1.getCartDate(CartID: string): tDateTime;
+var
+  sql: string;
+  params: tObjectDictionary<string, Variant>;
+  dsResult: tADODataSet;
+  MyClass: TComponent;
+begin
+
+  sql := 'SELECT DateCreated FROM ShoppingCartTB WHERE ShoppingCartID = :ShoppingCartID';
+
+  params := tObjectDictionary<string, Variant>.Create();
+
+  params.Add('ShoppingCartID', CartID);
+
+  try
+
+    dsResult := runSQL(sql, params);
+
+    // handle database errors
+    if dsResult.Fields.FindField('Status') <> nil then
+    begin
+      raise Exception.Create(dsResult['Status']);
+    end;
+
+    Result := dsResult['DateCreated'];
+
+  finally
+    FreeAndNil(params);
+    FreeAndNil(dsResult);
+  end;
+end;
+
 // get the list of items in a user's shopping cart
 function TDataModule1.getCartItems(ShoppingCartID: string): tADODataSet;
 var
@@ -654,6 +722,12 @@ begin
 
   try
     Result := runSQL(sql, params);
+
+    // handle database errors
+    if dsResult.Fields.FindField('Status') <> nil then
+    begin
+      raise Exception.Create(dsResult['Status']);
+    end;
 
     numproducts := Result.RecordCount;
 
@@ -862,6 +936,42 @@ begin
     FreeAndNil(params);
   end;
 
+end;
+
+// get the shopping cart that the current user has, if any;
+function TDataModule1.getUserCart(userID: string): string;
+var
+  sql: string;
+  params: tObjectDictionary<string, Variant>;
+  dsResult: tADODataSet;
+begin
+  //
+  sql := 'SELECT ShoppingCartID FROM ShoppingCartTB WHERE buyerId = :UserID';
+
+  params := tObjectDictionary<string, Variant>.Create();
+  params.Add('UserID', userID);
+  try
+
+    dsResult := runSQL(sql, params);
+    // handle db errors
+    if dsResult.Fields.FindField('Status') <> nil then
+    begin
+      raise Exception.Create(dsResult['Status']);
+    end;
+
+    // user has no cart
+    if dsResult.IsEmpty then
+    begin
+      Result := '';
+      Exit;
+    end;
+
+    Result := dsResult['ShoppingCartID'];
+
+  finally
+    FreeAndNil(params);
+    FreeAndNil(dsResult);
+  end;
 end;
 
 function TDataModule1.hasUserBoughtItem(itemID, userID: string): boolean;
@@ -1333,6 +1443,93 @@ begin
 
 end;
 
+// method to call to update the gui after a cart has expired
+procedure TDataModule1.resetCart;
+begin
+  warnedUser := False;
+  self.CancelCart(self.CartID);
+  self.CartID := self.CreateUserCart(self.userID);
+  if frmCHeckout.Items <> nil then
+    frmCHeckout.Items.clear;
+  showMessage('Your cart has expired! You are now using a new cart.');
+end;
+
+// to prevent users from permanently holding onto items in their cart
+// the Ttimer  will check every set interval once the user logs in
+// to check whether the user's cart has expired
+// to do this, we sened an http get request to an api to get the current time
+// for our timezone
+// the reason we do this is in case a user changes their system date and time
+// to prevent our program from returning stock.
+//LINK TO THE API: https://timeapi.io/swagger/index.html
+procedure TDataModule1.checkIFCartOutdated;
+var
+  sBody, sDate: string;
+  jsonObject: tJsonObject;
+  serverDateTime, cartDateTime, minutesSinceCartCreation: tDateTime;
+  sql: string;
+  dsResult: tADODataSet;
+
+begin
+
+  try
+
+    // this runs the code in a separate thread to prevent blocking the main
+    // thread which is responsible for gui
+    TTask.Run(
+      procedure()
+      begin
+
+        // set the timezone for the api request
+        restRequest.params[0].value := ianaTimezone;
+
+        // execute request
+        restRequest.Execute;
+
+        // extract the body of the response
+        sBody := restResponse.Content;
+
+        // parse the body of the response as a json
+        jsonObject := tJsonObject.ParseJSONValue(sBody) as tJsonObject;
+
+        // get date as string and format it correclty
+        jsonObject.Values['dateTime'].TryGetValue(sDate);
+        sDate := copy(sDate.Replace('T', ' ').Replace('-', '/'), 1,
+          LastDelimiter('.', sDate) - 1);
+
+        // convert the date from the api to a datetime object
+        serverDateTime := strtodatetime(sDate);
+
+        // get that date the cart was created
+        cartDateTime := self.getCartDate(self.CartID);
+
+        minutesSinceCartCreation := (serverDateTime - cartDateTime) * 1440;
+
+        // check if enough time has elapsed
+        if minutesSinceCartCreation > 1 then
+        begin
+          // ensure this is thread safe
+          TThread.CurrentThread.Synchronize(nil, self.resetCart);
+
+        end
+        else if (minutesSinceCartCreation < 1) and
+          (minutesSinceCartCreation > 0.5) then
+        begin
+          TThread.Current.Synchronize(nil, self.warnUser);
+        end;
+
+      end);
+
+  except
+    on e: Exception do
+    begin
+      raise e;
+    end
+
+  end;
+
+end;
+
 // this resizes an image to a certain height and returns a tpngimage
 function TDataModule1.ResizeImage(Image: tImage; width, height: integer)
   : tpngImage;
@@ -1373,7 +1570,7 @@ end;
 
 // general function that is used to send any sql to the databse and return a result
 function TDataModule1.runSQL(sql: string;
-  params: tObjectDictionary<string, Variant> = nil): tADODataSet;
+params: tObjectDictionary<string, Variant> = nil): tADODataSet;
 var
   dsOutput: tADODataSet;
   Item: TPair<string, Variant>;
@@ -1395,7 +1592,7 @@ begin
   end;
   // create output dataset to show result
   dsOutput := tADODataSet.Create(Nil);
-  dsOutput.FieldDefs.Add('Status', ftString, 100);
+  dsOutput.FieldDefs.Add('Status', TFieldType(1), 100);
   dsOutput.CreateDataSet;
   try
     try
@@ -1912,16 +2109,16 @@ begin
     end;
 
     Result := tADODataSet.Create(nil);
-    Result.FieldDefs.Add('Username', ftString, 100);
-    Result.FieldDefs.Add('UserType', ftString, 10);
+    Result.FieldDefs.Add('Username', TFieldType(1), 100);
+    Result.FieldDefs.Add('UserType', TFieldType(1), 10);
     Result.FieldDefs.Add('ProfileImage', ftBlob);
     Result.FieldDefs.Add('Balance', ftFloat);
     Result.FieldDefs.Add('Revenue', ftFloat);
-    Result.FieldDefs.Add('TotalSales', ftInteger);
+    Result.FieldDefs.Add('TotalSales', TFieldType(3));
     Result.FieldDefs.Add('TotalEU', ftFloat);
     Result.FieldDefs.Add('TotalWU', ftFloat);
     Result.FieldDefs.Add('TotalCF', ftFloat);
-    Result.FieldDefs.Add('TotalSpending', ftCurrency);
+    Result.FieldDefs.Add('TotalSpending', TFieldType(7));
     Result.CreateDataSet;
 
     // todo : clean this maybe
@@ -2048,7 +2245,7 @@ begin
     if dsResult.IsEmpty then
     begin
       dsResult.Close;
-      dsResult.FieldDefs.Add('Status', ftString, 100);
+      dsResult.FieldDefs.Add('Status', TFieldType(1), 100);
       dsResult.CreateDataSet;
       dsResult.Insert;
       dsResult['Status'] := 'Error: Item does not exist.'
@@ -2060,6 +2257,16 @@ begin
     FreeAndNil(params);
   end;
 
+end;
+
+// warns user that their cart will soon expire if they don't checkout soon
+procedure TDataModule1.warnUser;
+begin
+  if not warnedUser then
+  begin
+    warnedUser := True ;
+    showMessage('You have less than 30s before your cart expires.');
+  end;
 end;
 
 end.

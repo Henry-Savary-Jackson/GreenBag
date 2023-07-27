@@ -25,10 +25,10 @@ type
     procedure btnSignInClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnSignUpScreenClick(Sender: TObject);
-    procedure FormCreate(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
     procedure edtPasswordKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
+    procedure Button1Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -80,6 +80,7 @@ begin
     frmLogin.Hide;
     DataModule1.userID := userID;
     DataModule1.CartID := DataModule1.CreateUserCart(DataModule1.userID);
+    DataModule1.timeCheckTimer.Enabled := true;
     frmBrowse.Show;
 
   except
@@ -95,6 +96,11 @@ procedure TfrmLogin.btnSignUpScreenClick(Sender: TObject);
 begin
   frmLogin.Hide;
   frmSignUp.Show;
+end;
+
+procedure TfrmLogin.Button1Click(Sender: TObject);
+begin
+//
 end;
 
 // allow pressing enter when typing username or password to make you login
@@ -113,10 +119,5 @@ begin
 
 end;
 
-// all forms can be shown on taskbar
-procedure TfrmLogin.FormCreate(Sender: TObject);
-begin
-  Application.MainFormOnTaskbar := False;
-end;
 
 end.

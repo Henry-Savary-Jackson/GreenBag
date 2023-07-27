@@ -20,8 +20,35 @@ object DataModule1: TDataModule1
     Left = 48
     Top = 128
   end
-  object dsSellerTB: TDataSource
-    Left = 64
-    Top = 208
+  object restCLient: TRESTClient
+    Accept = 'application/json, text/plain; q=0.9, text/html;q=0.8,'
+    AcceptCharset = 'utf-8, *;q=0.8'
+    BaseURL = 'https://timeapi.io/api/Time/current'
+    Params = <>
+    Left = 480
+    Top = 112
+  end
+  object restRequest: TRESTRequest
+    Client = restCLient
+    Params = <
+      item
+        Name = 'timeZone'
+        Value = 'Africa/Johannesburg'
+      end>
+    Resource = 'zone'
+    Response = restResponse
+    SynchronizedEvents = False
+    Left = 472
+    Top = 192
+  end
+  object restResponse: TRESTResponse
+    Left = 464
+    Top = 256
+  end
+  object timeCheckTimer: TTimer
+    Enabled = False
+    OnTimer = checkIFCartOutdated
+    Left = 344
+    Top = 272
   end
 end

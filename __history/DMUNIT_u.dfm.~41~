@@ -1,0 +1,54 @@
+object DataModule1: TDataModule1
+  OldCreateOrder = False
+  OnCreate = DataModuleCreate
+  Height = 459
+  Width = 650
+  object Connection: TADOConnection
+    Left = 64
+    Top = 48
+  end
+  object Query: TADOQuery
+    Parameters = <>
+    Left = 160
+    Top = 32
+  end
+  object ItemTB: TADOTable
+    Left = 65496
+    Top = 256
+  end
+  object SellerTB: TADOTable
+    Left = 48
+    Top = 128
+  end
+  object restCLient: TRESTClient
+    Accept = 'application/json, text/plain; q=0.9, text/html;q=0.8,'
+    AcceptCharset = 'utf-8, *;q=0.8'
+    BaseURL = 'https://timeapi.io/api/Time/current'
+    Params = <>
+    Left = 480
+    Top = 112
+  end
+  object restRequest: TRESTRequest
+    Client = restCLient
+    Params = <
+      item
+        Name = 'timeZone'
+        Value = 'Africa/Johannesburg'
+      end>
+    Resource = 'zone'
+    Response = restResponse
+    SynchronizedEvents = False
+    Left = 472
+    Top = 192
+  end
+  object restResponse: TRESTResponse
+    Left = 464
+    Top = 256
+  end
+  object timeCheckTimer: TTimer
+    Interval = 300000
+    OnTimer = checkIFCartOutdated
+    Left = 344
+    Top = 272
+  end
+end

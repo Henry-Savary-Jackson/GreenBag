@@ -91,21 +91,9 @@ end;
 
 procedure TfrmYourProducts.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
-  try
-    try
-      datamodule1.CancelCart(datamodule1.CartID);
 
-    except
-      on e: exception do
-      begin
-        showMessage(e.Message);
-      end;
+  Application.Terminate;
 
-    end;
-
-  finally
-    Application.Terminate;
-  end;
 end;
 
 procedure TfrmYourProducts.FormShow(Sender: TObject);

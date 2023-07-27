@@ -3,7 +3,7 @@ object frmCheckout: TfrmCheckout
   Top = 0
   Caption = 'Checkout'
   ClientHeight = 415
-  ClientWidth = 700
+  ClientWidth = 729
   Color = 11074992
   Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
@@ -44,9 +44,9 @@ object frmCheckout: TfrmCheckout
     Caption = 'Total Energy Usage:'
   end
   object scrbxItems: TScrollBox
-    Left = 32
+    Left = 72
     Top = 47
-    Width = 616
+    Width = 609
     Height = 276
     HorzScrollBar.Tracking = True
     VertScrollBar.Tracking = True
@@ -54,7 +54,7 @@ object frmCheckout: TfrmCheckout
     object flpnlItems: TFlowPanel
       Left = 3
       Top = 3
-      Width = 598
+      Width = 599
       Height = 107
       AutoSize = True
       TabOrder = 0
@@ -84,8 +84,8 @@ object frmCheckout: TfrmCheckout
     end
   end
   object pnlHelp: TPanel
-    Left = 632
-    Top = 6
+    Left = 661
+    Top = 8
     Width = 60
     Height = 33
     BorderWidth = 1
@@ -102,7 +102,8 @@ object frmCheckout: TfrmCheckout
       Caption = '?'
       Flat = True
       OnClick = btnHelpClick
-      ExplicitTop = 0
+      ExplicitLeft = 10
+      ExplicitTop = 6
     end
   end
   object pnlCheckout: TPanel

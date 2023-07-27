@@ -103,40 +103,31 @@
         </DelphiCompile>
         <DCCReference Include="Login_u.pas">
             <Form>frmLogin</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="DMUNIT_u.pas">
             <Form>DataModule1</Form>
-            <FormType>dfm</FormType>
             <DesignClass>TDataModule</DesignClass>
         </DCCReference>
         <DCCReference Include="Signup_u.pas">
             <Form>frmSignUp</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="BrowseItems_u.pas">
             <Form>frmBrowse</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="AddItem_u.pas">
             <Form>frmAddItem</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="ViewItem_u.pas">
             <Form>frmViewItem</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="CheckOut_u.pas">
             <Form>frmCheckout</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="Profile_u.pas">
             <Form>frmProfile</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="YourProducts_u.pas">
             <Form>frmYourProducts</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <DCCReference Include="CartItem_u.pas"/>
         <DCCReference Include="ProductItem_u.pas"/>
@@ -145,7 +136,6 @@
         <DCCReference Include="SCrypt.pas"/>
         <DCCReference Include="HelpScreen_u.pas">
             <Form>frmHelp</Form>
-            <FormType>dfm</FormType>
         </DCCReference>
         <None Include="ModelSupport_GreenBag\default.txaPackage"/>
         <None Include="ModelSupport_GreenBag\default.txvpck"/>

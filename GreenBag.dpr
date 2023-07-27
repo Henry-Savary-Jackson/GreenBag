@@ -1,7 +1,7 @@
 program GreenBag;
 
 uses
-  Vcl.Forms,
+  Vcl.Forms, Vcl.dialogs, System.SysUtils, System.Classes, System.Variants,
   Login_u in 'Login_u.pas' {frmLogin},
   DMUNIT_u in 'DMUNIT_u.pas' {DataModule1: TDataModule},
   Signup_u in 'Signup_u.pas' {frmSignUp},
@@ -22,7 +22,9 @@ uses
 
 begin
   Application.Initialize;
-  Application.MainFormOnTaskbar := True;
+  // make it so that all other screens can be show on taskbar
+  Application.MainFormOnTaskbar := False;
+  // create forms
   Application.CreateForm(TfrmLogin, frmLogin);
   Application.CreateForm(TDataModule1, DataModule1);
   Application.CreateForm(TfrmSignUp, frmSignUp);
