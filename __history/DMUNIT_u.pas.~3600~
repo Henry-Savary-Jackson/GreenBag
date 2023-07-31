@@ -145,7 +145,7 @@ type
 
 var
   DataModule1: TDataModule1;
-  warnedUser : boolean;
+  warnedUser: boolean;
 
 const
   ianaTimezone = 'Africa/Johannesburg';
@@ -1446,6 +1446,7 @@ end;
 // method to call to update the gui after a cart has expired
 procedure TDataModule1.resetCart;
 begin
+  warnedUser := False;
   self.CancelCart(self.CartID);
   self.CartID := self.CreateUserCart(self.userID);
   if frmCHeckout.Items <> nil then
@@ -1460,6 +1461,7 @@ end;
 // for our timezone
 // the reason we do this is in case a user changes their system date and time
 // to prevent our program from returning stock.
+//LINK TO THE API: https://timeapi.io/swagger/index.html
 procedure TDataModule1.checkIFCartOutdated;
 var
   sBody, sDate: string;
@@ -1467,7 +1469,6 @@ var
   serverDateTime, cartDateTime, minutesSinceCartCreation: tDateTime;
   sql: string;
   dsResult: tADODataSet;
-
 
 begin
 
@@ -1502,7 +1503,7 @@ begin
         // get that date the cart was created
         cartDateTime := self.getCartDate(self.CartID);
 
-        minutesSinceCartCreation :=  (serverDateTime - cartDateTime) * 1440;
+        minutesSinceCartCreation := (serverDateTime - cartDateTime) * 1440;
 
         // check if enough time has elapsed
         if minutesSinceCartCreation > 1 then
@@ -1511,11 +1512,11 @@ begin
           TThread.CurrentThread.Synchronize(nil, self.resetCart);
 
         end
-        else if (minutesSinceCartCreation < 1) and (minutesSinceCartCreation > 0.5) then
+        else if (minutesSinceCartCreation < 1) and
+          (minutesSinceCartCreation > 0.5) then
         begin
           TThread.Current.Synchronize(nil, self.warnUser);
         end;
-
 
       end);
 
@@ -2169,7 +2170,11 @@ begin
     // for all users
     // select total spending
 
-    sql := 'SELECT IIF(Sum(Cost) IS NULL ,0 ,Sum(Cost)) AS total ' +
+    sql := 'SELECT IIF(Sum(Cost) IS NULL ,0 ,Sum(Cost)) AS totalCost, ' +
+    ' IIF(Sum(CF) IS NULL ,0 ,Sum(CF)) AS totalCF '   +
+    + 'SELECT IIF(Sum(EU) IS NULL ,0 ,Sum(EU)) AS totalEU ' +
+    + ' SELECT IIF(Sum(WU) IS NULL ,0 ,Sum(WU)) AS totalWU '+
+
       'FROM TransactionItemTB INNER JOIN TransactionTB ON TransactionTB.TransactionID = TransactionItemTB.TransactionID'
       + ' WHERE BuyerID = :UserID ';
     params.clear;
@@ -2261,7 +2266,11 @@ end;
 // warns user that their cart will soon expire if they don't checkout soon
 procedure TDataModule1.warnUser;
 begin
-showMessage('You have less than 30s before your cart expires.');
+  if not warnedUser then
+  begin
+    warnedUser := True ;
+    showMessage('You have less than 30s before your cart expires.');
+  end;
 end;
 
 end.

@@ -1461,6 +1461,7 @@ end;
 // for our timezone
 // the reason we do this is in case a user changes their system date and time
 // to prevent our program from returning stock.
+//LINK TO THE API: https://timeapi.io/swagger/index.html
 procedure TDataModule1.checkIFCartOutdated;
 var
   sBody, sDate: string;
@@ -2169,7 +2170,10 @@ begin
     // for all users
     // select total spending
 
-    sql := 'SELECT IIF(Sum(Cost) IS NULL ,0 ,Sum(Cost)) AS total ' +
+    sql := 'SELECT IIF(Sum(Cost) IS NULL ,0 ,Sum(Cost)) AS totalCost, ' +
+    ' IIF(Sum(CF) IS NULL ,0 ,Sum(CF)) AS totalCF, '   +
+    + ' IIF(Sum(EU) IS NULL ,0 ,Sum(EU)) AS totalEU,' +
+    + ' IIF(Sum(WU) IS NULL ,0 ,Sum(WU)) AS totalWU '+
       'FROM TransactionItemTB INNER JOIN TransactionTB ON TransactionTB.TransactionID = TransactionItemTB.TransactionID'
       + ' WHERE BuyerID = :UserID ';
     params.clear;
@@ -2263,8 +2267,8 @@ procedure TDataModule1.warnUser;
 begin
   if not warnedUser then
   begin
-    showMessage('You have less than 30s before your cart expires.');
     warnedUser := True ;
+    showMessage('You have less than 30s before your cart expires.');
   end;
 end;
 
