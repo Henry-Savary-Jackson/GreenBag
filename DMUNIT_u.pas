@@ -704,7 +704,6 @@ function TDataModule1.getProducts(userID: string; iMin, iMax: integer;
 var
   sql, lastItemId: string;
   params: tObjectDictionary<string, Variant>;
-  dsResult: tADODataSet;
   i: integer;
 begin
   sql := 'SELECT ItemTB.ItemID, Sales, Image, ItemName, Revenue ' +
@@ -724,9 +723,9 @@ begin
     Result := runSQL(sql, params);
 
     // handle database errors
-    if dsResult.Fields.FindField('Status') <> nil then
+    if Result.Fields.FindField('Status') <> nil then
     begin
-      raise Exception.Create(dsResult['Status']);
+      raise Exception.Create(Result['Status']);
     end;
 
     numproducts := Result.RecordCount;
@@ -1233,7 +1232,7 @@ var
   b: boolean;
 begin
 
-  sql := 'SELECT UserID, Password, Salt FROM UserTB WHERE Username = :Username';
+   sql:= 'SELECT UserID, Password, Salt FROM UserTB WHERE Username = :Username';
   params := tObjectDictionary<string, Variant>.Create();
   params.Add('Username', Username);
 

@@ -308,6 +308,7 @@ object frmProfile: TfrmProfile
         Caption = 'View your products'
         Flat = True
         OnClick = btnViewProductsClick
+        ExplicitLeft = 0
         ExplicitTop = 2
       end
     end

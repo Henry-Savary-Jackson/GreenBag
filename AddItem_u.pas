@@ -231,6 +231,7 @@ var
   imageStream: tStream;
 begin
 
+  imgItem.Picture.Graphic := nil;
   cmbCategory.Items.Clear;
 
   dsCategories := DataModule1.getCategories;

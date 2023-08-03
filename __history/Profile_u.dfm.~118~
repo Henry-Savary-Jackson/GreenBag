@@ -17,7 +17,7 @@ object frmProfile: TfrmProfile
   PixelsPerInch = 96
   TextHeight = 18
   object imgProfilePic: TImage
-    Left = 304
+    Left = 291
     Top = 0
     Width = 105
     Height = 105
@@ -25,7 +25,7 @@ object frmProfile: TfrmProfile
     OnClick = imgProfilePicClick
   end
   object lblUsername: TLabel
-    Left = 304
+    Left = 291
     Top = 111
     Width = 107
     Height = 22
@@ -104,9 +104,9 @@ object frmProfile: TfrmProfile
         Align = alClient
         Caption = 'Revenue'
         Flat = True
+        OnClick = btnRevenueClick
         ExplicitLeft = -3
         ExplicitTop = 3
-        ExplicitHeight = 20
       end
     end
     object pnlSales: TPanel
@@ -125,9 +125,9 @@ object frmProfile: TfrmProfile
         Align = alClient
         Caption = 'Sales'
         Flat = True
-        ExplicitLeft = -3
+        OnClick = btnSalesClick
+        ExplicitLeft = 5
         ExplicitTop = 3
-        ExplicitHeight = 20
       end
     end
     object pnlSpending: TPanel
@@ -146,6 +146,7 @@ object frmProfile: TfrmProfile
         Align = alClient
         Caption = 'Spending'
         Flat = True
+        OnClick = btnSpendingClick
         ExplicitLeft = 2
         ExplicitTop = 0
         ExplicitWidth = 162
@@ -168,6 +169,7 @@ object frmProfile: TfrmProfile
         Align = alClient
         Caption = 'Water Usage'
         Flat = True
+        OnClick = btnWUClick
         ExplicitLeft = 121
         ExplicitTop = -46
         ExplicitWidth = 162
@@ -306,15 +308,14 @@ object frmProfile: TfrmProfile
         Caption = 'View your products'
         Flat = True
         OnClick = btnViewProductsClick
-        ExplicitLeft = 3
         ExplicitTop = 2
       end
     end
   end
   object chrtStats: TChart
-    Left = 35
+    Left = 0
     Top = 450
-    Width = 625
+    Width = 692
     Height = 258
     Cursor = crArrow
     AllowPanning = pmHorizontal

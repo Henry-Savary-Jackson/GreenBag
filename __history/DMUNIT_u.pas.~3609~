@@ -1233,7 +1233,7 @@ var
   b: boolean;
 begin
 
-  sql := 'SELECT UserID, Password, Salt FROM UserTB WHERE Username = :Username';
+   sql:= 'SELECT UserID, Password, Salt FROM UserTB WHERE Username = :Username';
   params := tObjectDictionary<string, Variant>.Create();
   params.Add('Username', Username);
 
@@ -2171,10 +2171,9 @@ begin
     // select total spending
 
     sql := 'SELECT IIF(Sum(Cost) IS NULL ,0 ,Sum(Cost)) AS totalCost, ' +
-    ' IIF(Sum(CF) IS NULL ,0 ,Sum(CF)) AS totalCF '   +
-    + 'SELECT IIF(Sum(EU) IS NULL ,0 ,Sum(EU)) AS totalEU ' +
-    + ' SELECT IIF(Sum(WU) IS NULL ,0 ,Sum(WU)) AS totalWU '+
-
+    ' IIF(Sum(CF) IS NULL ,0 ,Sum(CF)) AS totalCF, '
+    + ' IIF(Sum(EU) IS NULL ,0 ,Sum(EU)) AS totalEU,'
+    + ' IIF(Sum(WU) IS NULL ,0 ,Sum(WU)) AS totalWU '+
       'FROM TransactionItemTB INNER JOIN TransactionTB ON TransactionTB.TransactionID = TransactionItemTB.TransactionID'
       + ' WHERE BuyerID = :UserID ';
     params.clear;
@@ -2184,37 +2183,11 @@ begin
 
     Result.Edit;
 
-    Result['TotalSpending'] := dsResult['total'];
+    Result['TotalSpending'] := dsResult['totalCost'];
+    Result['TotalCF'] := dsResult['totalCF'];
+    Result['TotalEU'] := dsResult['totalEU'];
+    Result['TotalWU'] := dsResult['totalWU'];
 
-    // select to cf
-
-    sql := 'SELECT IIF(Sum(CF) IS NULL ,0 ,Sum(CF)) AS total ' +
-      'FROM TransactionItemTB INNER JOIN TransactionTB ON TransactionTB.TransactionID = TransactionItemTB.TransactionID'
-      + ' WHERE BuyerID = :UserID ';
-
-    dsResult := runSQL(sql, params);
-
-    Result.Edit;
-    Result['TotalCF'] := dsResult['total'];
-    // select total eu
-
-    sql := 'SELECT IIF(Sum(EU) IS NULL ,0 ,Sum(EU)) AS total ' +
-      'FROM TransactionItemTB INNER JOIN TransactionTB ON TransactionTB.TransactionID = TransactionItemTB.TransactionID'
-      + ' WHERE BuyerID = :UserID ';
-
-    dsResult := runSQL(sql, params);
-    Result.Edit;
-    Result['TotalEU'] := dsResult['total'];
-
-    // select total wu
-
-    sql := 'SELECT IIF(Sum(WU) IS NULL ,0 ,Sum(WU)) AS total ' +
-      'FROM TransactionItemTB INNER JOIN TransactionTB ON TransactionTB.TransactionID = TransactionItemTB.TransactionID'
-      + ' WHERE BuyerID = :UserID ';
-
-    dsResult := runSQL(sql, params);
-    Result.Edit;
-    Result['TotalWU'] := dsResult['total'];
 
   finally
     FreeAndNil(params);
