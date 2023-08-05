@@ -21,6 +21,12 @@ object frmCheckout: TfrmCheckout
     Width = 86
     Height = 18
     Caption = 'Total Cost:'
+    Font.Charset = ANSI_CHARSET
+    Font.Color = 16384
+    Font.Height = -16
+    Font.Name = 'Arial Rounded MT Bold'
+    Font.Style = []
+    ParentFont = False
   end
   object lblTotalCF: TLabel
     Left = 56
@@ -28,6 +34,12 @@ object frmCheckout: TfrmCheckout
     Width = 185
     Height = 18
     Caption = 'Total Carbon Footprint:'
+    Font.Charset = ANSI_CHARSET
+    Font.Color = 16384
+    Font.Height = -16
+    Font.Name = 'Arial Rounded MT Bold'
+    Font.Style = []
+    ParentFont = False
   end
   object lblTotalWU: TLabel
     Left = 424
@@ -35,6 +47,12 @@ object frmCheckout: TfrmCheckout
     Width = 152
     Height = 18
     Caption = 'Total Water Usage:'
+    Font.Charset = ANSI_CHARSET
+    Font.Color = 16384
+    Font.Height = -16
+    Font.Name = 'Arial Rounded MT Bold'
+    Font.Style = []
+    ParentFont = False
   end
   object lblTotalEU: TLabel
     Left = 415
@@ -42,6 +60,12 @@ object frmCheckout: TfrmCheckout
     Width = 161
     Height = 18
     Caption = 'Total Energy Usage:'
+    Font.Charset = ANSI_CHARSET
+    Font.Color = 16384
+    Font.Height = -16
+    Font.Name = 'Arial Rounded MT Bold'
+    Font.Style = []
+    ParentFont = False
   end
   object scrbxItems: TScrollBox
     Left = 72
@@ -50,6 +74,12 @@ object frmCheckout: TfrmCheckout
     Height = 276
     HorzScrollBar.Tracking = True
     VertScrollBar.Tracking = True
+    Font.Charset = ANSI_CHARSET
+    Font.Color = 16384
+    Font.Height = -16
+    Font.Name = 'Arial Rounded MT Bold'
+    Font.Style = []
+    ParentFont = False
     TabOrder = 0
     object flpnlItems: TFlowPanel
       Left = 3
@@ -67,7 +97,13 @@ object frmCheckout: TfrmCheckout
     Height = 33
     BorderWidth = 1
     Color = 8118149
+    Font.Charset = ANSI_CHARSET
+    Font.Color = 16384
+    Font.Height = -16
+    Font.Name = 'Arial Rounded MT Bold'
+    Font.Style = []
     ParentBackground = False
+    ParentFont = False
     TabOrder = 1
     OnClick = btnBackClick
     object SpeedButton1: TSpeedButton
@@ -90,7 +126,13 @@ object frmCheckout: TfrmCheckout
     Height = 33
     BorderWidth = 1
     Color = 8249222
+    Font.Charset = ANSI_CHARSET
+    Font.Color = 16384
+    Font.Height = -16
+    Font.Name = 'Arial Rounded MT Bold'
+    Font.Style = []
     ParentBackground = False
+    ParentFont = False
     TabOrder = 2
     OnClick = btnHelpClick
     object spnHelp: TSpeedButton
@@ -112,7 +154,13 @@ object frmCheckout: TfrmCheckout
     Width = 106
     Height = 41
     Color = 8118149
+    Font.Charset = ANSI_CHARSET
+    Font.Color = 16384
+    Font.Height = -16
+    Font.Name = 'Arial Rounded MT Bold'
+    Font.Style = []
     ParentBackground = False
+    ParentFont = False
     TabOrder = 3
     object btnCheckout: TSpeedButton
       Left = 1

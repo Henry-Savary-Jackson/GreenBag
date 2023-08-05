@@ -1,0 +1,433 @@
+unit Profile_u;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
+  VclTee.TeeGDIPlus, VclTee.TeEngine, VclTee.TeeProcs, VclTee.Chart,
+  VclTee.TeeChartLayout, VclTee.Series, DmUnit_u, Data.Win.ADODB,
+  System.Generics.Collections, DateUtils, Data.DB, Vcl.Grids, Vcl.DBGrids,
+  Vcl.Buttons;
+
+type
+  TfrmProfile = class(TForm)
+    imgProfilePic: TImage;
+    lblUsername: TLabel;
+    flpnlCategories: TFlowPanel;
+    lblBalance: TLabel;
+    lblRevenueTotal: TLabel;
+    lblSales: TLabel;
+    lblSpendingTotal: TLabel;
+    lblTotalCF: TLabel;
+    lblTotalWU: TLabel;
+    lblTotalEU: TLabel;
+    pnlInfo: TPanel;
+    chrtStats: TChart;
+    chrtLayoutStats: TChartLayout;
+    srsStats: TBarSeries;
+    pnlBack: TPanel;
+    SpeedButton1: TSpeedButton;
+    pnlHelp: TPanel;
+    spnHelp: TSpeedButton;
+    pnlViewYourProducts: TPanel;
+    btnViewProducts: TSpeedButton;
+    pnlAddFunds: TPanel;
+    btnAddFunds: TSpeedButton;
+    pnlCF: TPanel;
+    btnCF: TSpeedButton;
+    pnlEu: TPanel;
+    btnEU: TSpeedButton;
+    pnlSales: TPanel;
+    btnSales: TSpeedButton;
+    pnlRevenue: TPanel;
+    btnRevenue: TSpeedButton;
+    pnlWU: TPanel;
+    btnWU: TSpeedButton;
+    pnlSpending: TPanel;
+    btnSpending: TSpeedButton;
+    pnlLeft: TPanel;
+    btnLeft: TSpeedButton;
+    pnlRight: TPanel;
+    btnRight: TSpeedButton;
+    pnlImage: TPanel;
+    pnlMain: TPanel;
+    pnlChart: TPanel;
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure btnViewProductsClick(Sender: TObject);
+    procedure btnBackClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure showTotals(UserType: string);
+    procedure categoryClickStats(caption: string);
+    procedure NameTOCategString(sName: string);
+    procedure UpdateChart();
+    procedure btnLeftClick(Sender: TObject);
+    procedure changeChartDateRange(direction: integer);
+    procedure btnRightClick(Sender: TObject);
+    procedure imgProfilePicClick(Sender: TObject);
+    procedure btnAddFundsClick(Sender: TObject);
+    procedure btnHelpClick(Sender: TObject);
+    procedure ShowCategButtons(UserType: string);
+    procedure btnCFClick(Sender: TObject);
+    procedure btnEUClick(Sender: TObject);
+    procedure btnRevenueClick(Sender: TObject);
+    procedure btnSalesClick(Sender: TObject);
+    procedure btnSpendingClick(Sender: TObject);
+    procedure btnWUClick(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  frmProfile: TfrmProfile;
+  dateRangeBegin, dateRangeEnd: tDateTime;
+  // this used by the graph to determine what kind of field to analyse
+  statType: integer;
+  balance: double;
+
+implementation
+
+uses
+  BrowseItems_u, YourProducts_u, HelpScreen_u;
+
+{$R *.dfm}
+
+procedure TfrmProfile.btnBackClick(Sender: TObject);
+begin
+  frmProfile.Hide;
+  frmBrowse.Show;
+end;
+
+procedure TfrmProfile.btnCFClick(Sender: TObject);
+begin
+  // this sets the forms statType variable to the needed value
+  statType := DataModule1.stCF;
+  // calls function to update chart based on button pressed
+  categoryClickStats(TSpeedButton(Sender).caption);
+end;
+
+procedure TfrmProfile.btnEUClick(Sender: TObject);
+begin
+  statType := DataModule1.stEU;
+  categoryClickStats(TSpeedButton(Sender).caption);
+end;
+
+procedure TfrmProfile.btnHelpClick(Sender: TObject);
+begin
+  frmHelp.frmPrevious := self;
+  frmHelp.Show;
+  self.Hide;
+end;
+
+procedure TfrmProfile.btnLeftClick(Sender: TObject);
+
+begin
+  changeChartDateRange(-1);
+  UpdateChart();
+end;
+
+procedure TfrmProfile.btnRevenueClick(Sender: TObject);
+begin
+  statType := DataModule1.stRevenue;
+  categoryClickStats(TSpeedButton(Sender).caption);
+end;
+
+procedure TfrmProfile.btnRightClick(Sender: TObject);
+begin
+  changeChartDateRange(1);
+  UpdateChart;
+end;
+
+procedure TfrmProfile.btnSalesClick(Sender: TObject);
+begin
+  statType := DataModule1.stSales;
+  categoryClickStats(TSpeedButton(Sender).caption);
+end;
+
+procedure TfrmProfile.btnSpendingClick(Sender: TObject);
+begin
+  statType := DataModule1.stSpending;
+  categoryClickStats(TSpeedButton(Sender).caption);
+end;
+
+procedure TfrmProfile.btnViewProductsClick(Sender: TObject);
+begin
+  frmProfile.Hide;
+  frmYourProducts.Show;
+end;
+
+procedure TfrmProfile.btnWUClick(Sender: TObject);
+begin
+  statType := DataModule1.stWU;
+  categoryClickStats(TSpeedButton(Sender).caption);
+end;
+
+procedure TfrmProfile.btnAddFundsClick(Sender: TObject);
+var
+  dExtra: double;
+begin
+  // get amount
+  dExtra := strtofloat(InputBox('Funds', 'Add funds:', ''));
+
+  try
+    // add that amount to user
+    DataModule1.addFunds(DataModule1.userID, dExtra);
+
+    // update gui
+    balance := balance + dExtra;
+
+    lblBalance.caption := 'Current Balance: ' + floatToStrf(balance,
+      ffCurrency, 8, 2);
+
+  except
+    on e: exception do
+    begin
+      showMessage(e.Message);
+    end;
+  end;
+end;
+
+// code for all buttons to set up the graph and populate it
+procedure TfrmProfile.categoryClickStats(caption: string);
+begin
+  // get the code for this category
+
+  chrtStats.Title.caption := 'Your ' + caption;
+
+  srsStats.XLabel[0] := caption;
+
+  if (statType = DataModule1.stRevenue) or (statType = DataModule1.stSpending)
+  then
+  begin
+    srsStats.XLabel[0] := srsStats.XLabel[0] + '(Rands)';
+  end
+  else if (statType = DataModule1.stCF) then
+  begin
+    srsStats.XLabel[0] := srsStats.XLabel[0] + ' (tonnes) ';
+  end
+  else if (statType = DataModule1.stEU) then
+  begin
+    srsStats.XLabel[0] := srsStats.XLabel[0] + ' (kWh) ';
+  end
+  else if (statType = DataModule1.stWU) then
+  begin
+    srsStats.XLabel[0] := srsStats.XLabel[0] + ' (L) ';
+  end
+  else if (statType = DataModule1.stSales) then
+  begin
+    srsStats.XLabel[0] := srsStats.XLabel[0] + ' (units) ';
+  end;
+
+  UpdateChart;
+
+end;
+
+procedure TfrmProfile.changeChartDateRange(direction: integer);
+begin
+
+  dateRangeBegin := IncMonth(dateRangeBegin, direction);
+  dateRangeEnd := IncMonth(dateRangeEnd, direction);
+end;
+
+procedure TfrmProfile.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+
+  Application.Terminate;
+
+end;
+
+procedure TfrmProfile.FormShow(Sender: TObject);
+var
+  dsResult: TADODataSet;
+  dateLowerLimit: tDateTime;
+  imageStream: tStream;
+begin
+
+  dsResult := DataModule1.userInfo(DataModule1.userID);
+
+  showTotals(dsResult['UserType']);
+  ShowCategButtons(dsResult['UserType']);
+
+  lblUsername.caption := dsResult['Username'];
+
+  balance := dsResult['Balance'];
+
+  lblBalance.caption := 'Current Balance: ' + floatToStrf(balance,
+    ffCurrency, 8, 2);
+
+  lblSpendingTotal.caption := 'Total Spending: ' +
+    floatToStrf(dsResult['TotalSpending'], ffCurrency, 8, 2);
+
+  lblTotalCF.caption := 'Total Carbon Footprint: ' +
+    floatToStrf(dsResult['TotalCF'], ffFixed, 8, 2) + ' t';
+
+  lblTotalEU.caption := 'Total Energy Usage: ' +
+    floatToStrf(dsResult['TotalEU'], ffFixed, 8, 2) + ' kWh';
+
+  lblTotalWU.caption := 'Total Water Usage: ' + floatToStrf(dsResult['TotalWU'],
+    ffFixed, 8, 2) + ' L';
+
+  if dsResult['UserType'] = 'SELLER' then
+  begin
+
+    lblRevenueTotal.caption := 'Total Revenue: ' +
+      floatToStrf(dsResult['Revenue'], ffCurrency, 8, 2);
+
+    lblSales.caption := 'Total Sales: ' + intTOstr(dsResult['TotalSales']);
+    if dsResult['TotalSales'] = 1 then
+    begin
+      lblSales.caption := lblSales.caption + ' unit'
+    end
+    else
+    begin
+      lblSales.caption := lblSales.caption + ' units'
+    end;
+
+  end;
+  // decrease current date by 9 months
+  dateLowerLimit := IncMonth(Now, -9);
+  // date is first day of the month
+  dateRangeEnd := StrToDate(intTOstr(YearOf(Now)) + '/' +
+    intTOstr(MonthOf(Now) + 1) + '/01');
+
+  // date is first day of next month
+  dateRangeBegin := StrToDate(intTOstr(YearOf(dateLowerLimit)) + '/' +
+    intTOstr(MonthOf(dateLowerLimit)) + '/01');
+
+  // init chart
+  srsStats.Marks.Visible := False;
+
+  chrtStats.Title.caption := '';
+  srsStats.Clear;
+
+  imageStream := dsResult.CreateBlobStream
+    (dsResult.FieldByName('ProfileImage'), bmRead);
+  try
+    imgProfilePic.Picture.LoadFromStream(imageStream);
+
+  finally
+    FreeAndNil(imageStream);
+
+  end;
+
+end;
+
+procedure TfrmProfile.imgProfilePicClick(Sender: TObject);
+begin
+  // open filchooser
+  DataModule1.loadImageFromFile(imgProfilePic, self);
+
+  try
+    DataModule1.setProfilePicture(DataModule1.userID, imgProfilePic);
+
+  except
+    on e: exception do
+    begin
+      showMessage(e.Message);
+    end;
+
+  end;
+
+end;
+
+// Takes the caption of the button and returns thestring value
+// that is used in the database to represent that category of stats
+procedure TfrmProfile.NameTOCategString(sName: string);
+begin
+
+  //
+end;
+
+procedure TfrmProfile.ShowCategButtons(UserType: string);
+begin
+  if UserType = 'SELLER' then
+  begin
+    pnlSales.Show;
+    pnlRevenue.Show;
+  end
+  else
+  begin
+    pnlSales.Hide;
+    pnlRevenue.Hide;
+  end;
+
+  pnlCF.Show;
+  pnlEu.Show;
+  pnlWU.Show;
+end;
+
+// show the labels showing total and hide them based on usertype
+procedure TfrmProfile.showTotals(UserType: string);
+begin
+
+  if UserType = 'SELLER' then
+  begin
+    pnlViewYourProducts.Show;
+    lblSales.Show;
+    lblRevenueTotal.Show;
+  end
+  else
+  begin
+    pnlViewYourProducts.Hide;
+    lblSales.Hide;
+    lblRevenueTotal.Hide;
+
+  end;
+  lblTotalWU.Show;
+  lblTotalEU.Show;
+  lblTotalCF.Show;
+  lblSpendingTotal.Show;
+  lblBalance.Show;
+
+end;
+
+procedure TfrmProfile.UpdateChart();
+var
+  dsResult: TADODataSet;
+  i: integer;
+  currentDate: tDateTime;
+begin
+
+  // get the statistic
+  dsResult := DataModule1.obtainStats(DataModule1.userID, statType,
+    dateRangeBegin, dateRangeEnd);
+
+  if dsResult.Fields.FindField('Status') <> nil then
+  begin
+    showMessage(dsResult['Status']);
+    FreeAndNil(dsResult);
+    Exit;
+  end;
+
+  srsStats.Clear;
+
+  dsResult.First;
+  currentDate := dateRangeBegin;
+
+  for i := 0 to 9 do
+  begin
+
+    if (YearOf(currentDate) = dsResult['y']) and
+      (MonthOf(currentDate) = dsResult['m']) then
+    begin
+      // if there is a month in that data for this month, add data to chart
+      srsStats.Add(dsResult['TotalMonth'], intTOstr(dsResult['y']) + '-' +
+        intTOstr(dsResult['m']), clTeeColor);
+      dsResult.Next;
+    end
+    else
+    begin
+      // if there is no data for that month, put 0 for that month on the chart
+      srsStats.Add(0, intTOstr(YearOf(currentDate)) + '-' +
+        intTOstr(MonthOf(currentDate)), clTeeColor);
+    end;
+
+    currentDate := IncMonth(currentDate, 1);
+
+  end;
+end;
+
+end.

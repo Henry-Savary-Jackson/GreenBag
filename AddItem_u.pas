@@ -44,14 +44,27 @@ type
     pnlSaveChanges: TPanel;
     btnSaveChanges: TSpeedButton;
     lblCFUnit: TLabel;
-    Label1: TLabel;
+    lnlCFproduceUnit: TLabel;
     lblEuUnit: TLabel;
-    Label2: TLabel;
-    Label3: TLabel;
-    Label4: TLabel;
+    lblEUProduceUnit: TLabel;
+    lblWuUnit: TLabel;
+    lblWuProduceUnit: TLabel;
     lblmaxwithdrawstockunits: TLabel;
     lblStockUnits: TLabel;
-    label67: TLabel;
+    pnlItemInfo: TPanel;
+    pnlProfileImage: TPanel;
+    pnlName: TPanel;
+    pnlCategory: TPanel;
+    pnlPrice: TPanel;
+    pnlWUProduce: TPanel;
+    pnlWU: TPanel;
+    pnlEUProduce: TPanel;
+    pnlEU: TPanel;
+    pnlCF: TPanel;
+    pnlCFProduce: TPanel;
+    pnlMaxWithdraw: TPanel;
+    pnlStock: TPanel;
+    pnlDesc: TPanel;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure imgItemClick(Sender: TObject);
     procedure btnBackClick(Sender: TObject);
@@ -124,12 +137,14 @@ begin
     Exit;
 
   stock := getFloatFromStr(edtStock.Text, 'Stock');
+  if stock = INFINITE then
+    Exit;
 
   maxWithdrawstock := getFloatFromStr(edtMaxWithdrawStock.Text,
     ' Max Withdrawable stock');
-
-  if stock = INFINITE then
+  if maxWithdrawstock = INFINITE then
     Exit;
+
 
   CF := getFloatFromStr(edtCF.Text, 'Carbon Footprint');
   if CF = INFINITE then
@@ -260,11 +275,12 @@ begin
 
     if dsResult['avgRating'] = -1 then
     begin
-      lblRating.Caption := 'Rating: No ratings';
+      lblRating.Caption := 'Average Rating: No ratings';
     end
     else
     begin
-      lblRating.Caption := 'Rating: ' + intToStr(dsResult['avgRating']);
+      lblRating.Caption := 'Average Rating: ' +
+        intToStr(dsResult['avgRating']) + '/5';
     end;
 
     edtPrice.Text := floatTOStrf(dsResult['Cost'], ffFixed, 8, 2);
@@ -338,6 +354,8 @@ begin
 
 end;
 
+// s is the string that needs to be converted, valname is the name of the field from which this value is from. the latter variable is for more user friendly error checking.
+// return INFINITE if there is an error
 function TfrmAddItem.getFloatFromStr(s, valName: string): double;
 begin
   try
@@ -346,7 +364,15 @@ begin
       Result := 0.0;
       Exit;
     end;
+
     Result := StrToFloat(s);
+
+    if Result < 0 then
+    begin
+      showMessage(Format('No negative values allowed in the %s field.',
+        [valName]));
+      Result := INFINITE;
+    end;
   Except
     on e: EConvertError do
     begin;

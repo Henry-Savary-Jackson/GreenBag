@@ -1,0 +1,22 @@
+The Profile Screen:
+
+This page is for viewing all the information regarding your account.
+
+At the top is your profile image. You can click on it to choose either a jpg or a png as your new profile image.
+
+Below, you can see your total carbon footprint, Energy consumption and Water usage and spending over your
+account's entire lifetime. 
+
+If you are a seller, you can see the total amount of units you have sold as well as the total revenue you have gathered from your entire catalogue of items.
+
+to add more funds to your balance, you can click the "Add funds button".
+
+If you are a seller, you can click the "View your products" button to view your entire catalogue of items.
+
+Below, you can see a bar chart that gives a history of your different statistics per month. 
+These include your total, Carbon footprint, energy usage, Water usage and spending per month.
+If you are a seller, you can also view your total units sold per month and revenue per month.
+
+To navigate your bar chart's history, 
+use the "<" button below to navigate backwards in time and the ">" button to go forwards.
+

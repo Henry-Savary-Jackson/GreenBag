@@ -1,0 +1,24 @@
+Sign-Up Screen:
+
+This screen is to create a new account if you don't already have one.
+
+You must choose a valid username no longer than 50 characters.
+Your password must be at least 8 characters long AND have at least one number and one special character.
+Special characters are as follows:  !@#$%^&*()-+=.,<>?\/|
+
+Choose what type of user this account will be:
+A Buyer can only buy items with their funds, as well as send reviews.
+A seller can buy other people's items as well as sell their items.
+A Seller can leave reviews only on other people's items.
+
+If you choose this account to be a seller, you must enter the verification code you were given.
+If your code has not been handed out or is invalid, you cannot create a seller account.
+
+If you are a buyer, you can ignore this code.
+
+Your home address is used for determining where your orders should be delivered to.
+
+You can choose a different profile picture from the default one if you wish.
+Valid files to choose from are Jpg files and Png files.
+
+After everything is set, you can sign up.

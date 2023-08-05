@@ -5,7 +5,9 @@ interface
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls, Vcl.Buttons;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
+  Profile_u, SignUp_u, Login_u, BrowseItems_u, ViewItem_u, YourProducts_u,
+  Checkout_u, addItem_u, Vcl.Buttons;
 
 type
   TfrmHelp = class(TForm)
@@ -14,6 +16,9 @@ type
     SpeedButton1: TSpeedButton;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnBackClick(Sender: TObject);
+    procedure showHelpText();
+    function readTextFile(path: string): string;
+    procedure FormShow(Sender: TObject);
   private
     { Private declarations }
   public
@@ -42,6 +47,80 @@ begin
 
   Application.Terminate;
 
+end;
+
+procedure TfrmHelp.FormShow(Sender: TObject);
+begin
+showHelpText;
+end;
+
+function TfrmHelp.readTextFile(path: string): string;
+var
+  fFile: textfile;
+  sLine : string;
+begin
+
+  if not FileExists(path) then
+  begin
+    showMEssage('File not found.');
+    exit;
+  end;
+
+  AssignFile(fFile, path);
+
+  reset(fFile);
+
+  while not eof(fFile) do
+  begin
+    Readln(fFile, sLine);
+    result :=
+     result + sLine + #13;
+  end;
+
+  closeFile(fFile);
+end;
+
+procedure TfrmHelp.showHelpText;
+begin
+
+  if frmPrevious is TfrmAddItem then
+  begin
+    memHelp.Lines.Text := readTextFile('help/addItem.txt')
+  end
+  else if frmPrevious is TfrmCheckout then
+  begin
+    memHelp.Lines.Text := readTextFile('help/checkout.txt')
+  end
+
+  else if frmPrevious is TfrmLogin then
+  begin
+    memHelp.Lines.Text := readTextFile('help/login.txt')
+  end
+
+  else if frmPrevious is TfrmSignUp then
+  begin
+    memHelp.Lines.Text := readTextFile('help/signup.txt')
+  end
+
+  else if frmPrevious is TfrmYourProducts then
+  begin
+    memHelp.Lines.Text  := readTextFile('help/yourProducts.txt')
+  end
+
+  else if frmPrevious is TfrmViewItem then
+  begin
+    memHelp.Lines.Text := readTextFile('help/viewItem.txt')
+  end
+
+  else if frmPrevious is TfrmBrowse then
+  begin
+    memHelp.Lines.Text := readTextFile('help/browseItems.txt')
+  end
+
+  else if frmPrevious is TfrmProfile then
+  begin
+    memHelp.Lines.Text := readTextFile('help/profile.txt')
+  end;
 end;
 
 end.

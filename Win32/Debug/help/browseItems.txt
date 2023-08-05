@@ -1,0 +1,46 @@
+Browse items Screen:
+
+This screen is used to search for any items you may want to buy.
+
+In the search bar, you can enter a string to search for a particular item name.
+The search string may not be empty.
+
+Besides that, there are several other filters you can use to narrow down your search:
+
+Below your search bar is a list of checkboxes for the various categories items are classified under.
+If none are selected, you will see results from any categories.
+If you select more than one category, you will only see results from the selected categories.
+
+To the right, there are various other filters, each one has an "Enabled" checkbox, for a filter to take effect, 
+you must enable this filter's checkbox.
+
+below is a description of all these filters:
+ 
+On the top can find a filter to specify the minimum average rating (inclusive) these items should have.
+Items without ratings are hidden if this is enabled. the maximum rating is 5 out of 5.
+
+Next, there is a filter to specify the range (inclusive) of the total Carbon footprint in which items given in
+a search query should fall. the unit is tonnes of C02 per unit of item.
+
+Next, there is a filter to specify the range (inclusive) of the total Energy usage in which items given in
+a search query should fall. The unit is kWh per unit of the item.
+
+Finally, there is a filter to specify the range (inclusive) of the total Water usage in which items given in
+a search query should fall. The unit is L/unit per unit of the item. 
+
+Below, you can see the results of your search query. Use the scroll bar to browse the results.
+Each box contains the item's picture, name and Seller username.
+You can view the summary of the item's price, carbon footprint, energy usage and water usage.
+The "View Item" button is used to access the item's page
+so that you can look at more details and add them to your cart of items.
+
+At first, you are only shown the first 10 results of your query. To view more, click the "load more items"
+button at the bottom of the results.
+
+To access your profile, click on your profile picture in the top left of the screen.
+
+Below that, you can access the checkout screen to pay for all the items that you have added to your cart.
+
+Finally, the logout button below is used to log off of your account and go back to the sign-in screen.
+
+

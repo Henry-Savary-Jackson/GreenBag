@@ -93,6 +93,7 @@ begin
   Margins.Bottom := 5;
   Align := alTop;
   TabOrder := 0;
+  ParentFont := True;
 
   // lblQuantity's properties
   lblQuantity := TLabel.Create(self.Owner);
@@ -121,6 +122,7 @@ begin
   redItemInfo.Font.Size := 9;
   redItemInfo.TabOrder := 0;
   redItemInfo.Zoom := 100;
+  redItemInfo.Color := $007DDF86;
 
   self.UpdateRedInfo;
 
@@ -138,6 +140,9 @@ begin
   imgRemoveItem.OnClick := self.onRemoveClick;
   imgRemoveItem.Center := True;
   imgRemoveItem.Picture.LoadFromFile('cross.png');
+  imgRemoveItem.ParentShowHint := false;
+  imgRemoveItem.Hint := 'Remove this item from your cart.';
+  imgRemoveItem.ShowHint := True;
 
   spnQuantity := TSpinEdit.Create(self.Owner);
   spnQuantity.Parent := self;
@@ -150,6 +155,7 @@ begin
   spnQuantity.TabOrder := 1;
   spnQuantity.Value := self.iQuantity;
   spnQuantity.OnChange := self.onSpnQuantityChange;
+  spnQuantity.Color := $007DDF86;
 
 end;
 
@@ -191,14 +197,11 @@ begin
   redItemInfo.Lines.Add('Total Cost of order : ' + FloatToStrF(itemTotalPrice,
     ffCurrency, 8, 2));
   redItemInfo.Lines.Add('Total Carbon footprint of order : ' +
-    FloatToStrF(itemTotalCF, ffFixed, 8, 2)
-    + ' t/unit');
+    FloatToStrF(itemTotalCF, ffFixed, 8, 2) + ' t/unit');
   redItemInfo.Lines.Add('Total Water usage of order : ' +
-    FloatToStrF(itemTotalWU, ffFixed, 8, 2)
-    + ' L/unit');
+    FloatToStrF(itemTotalWU, ffFixed, 8, 2) + ' L/unit');
   redItemInfo.Lines.Add('Total Energy usage of order : ' +
-    FloatToStrF(itemTotalEU, ffFixed, 8, 2)
-    + ' kWh/unit');
+    FloatToStrF(itemTotalEU, ffFixed, 8, 2) + ' kWh/unit');
 end;
 
 end.

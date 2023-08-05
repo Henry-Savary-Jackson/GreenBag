@@ -42,6 +42,11 @@ type
     btnAddToCart: TSpeedButton;
     btnSendRating: TSpeedButton;
     btnBack: TSpeedButton;
+    pnlIItemInfo: TPanel;
+    pnlDesc: TPanel;
+    pnlQuantity: TPanel;
+    pnlRating: TPanel;
+    pnlImage: TPanel;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnBackClick(Sender: TObject);
     procedure btnAddToCartClick(Sender: TObject);
@@ -191,11 +196,11 @@ begin
 
   if dsResult['avgRating'] = -1 then
   begin
-    lblRating.Caption := 'Rating: No ratings';
+    lblRating.Caption := 'Average Rating: No ratings';
   end
   else
   begin
-    lblRating.Caption := 'Rating: ' + inttostr(dsResult['avgRating']);
+    lblRating.Caption := ' Average Rating: ' + inttostr(dsResult['avgRating'])  + '/5';
   end;
 
   lblCategory.Caption := 'Category: ' + dsResult['Category'];

@@ -1,0 +1,761 @@
+object frmAddItem: TfrmAddItem
+  Left = 366
+  Top = 0
+  AutoSize = True
+  Caption = 'Add Item'
+  ClientHeight = 614
+  ClientWidth = 846
+  Color = 11074992
+  Font.Charset = ANSI_CHARSET
+  Font.Color = 16384
+  Font.Height = -15
+  Font.Name = 'Arial Rounded MT Bold'
+  Font.Style = []
+  OldCreateOrder = False
+  Position = poDesigned
+  OnClose = FormClose
+  OnShow = FormShow
+  PixelsPerInch = 96
+  TextHeight = 17
+  object pnlHelp: TPanel
+    Left = 646
+    Top = 0
+    Width = 60
+    Height = 33
+    BorderWidth = 1
+    Color = 8118149
+    ParentBackground = False
+    TabOrder = 0
+    OnClick = btnHelpClick
+    object spnHelp: TSpeedButton
+      Left = 2
+      Top = 2
+      Width = 56
+      Height = 29
+      Align = alClient
+      Caption = '?'
+      Flat = True
+      OnClick = btnHelpClick
+      ExplicitLeft = 50
+      ExplicitTop = -14
+    end
+  end
+  object pnlBack: TPanel
+    Left = 0
+    Top = 0
+    Width = 75
+    Height = 33
+    BorderWidth = 1
+    Color = 8118149
+    ParentBackground = False
+    TabOrder = 1
+    OnClick = btnBackClick
+    object SpeedButton1: TSpeedButton
+      Left = 2
+      Top = 2
+      Width = 71
+      Height = 29
+      Align = alClient
+      Caption = 'Back'
+      Flat = True
+      OnClick = btnBackClick
+      ExplicitLeft = 13
+    end
+  end
+  object pnlSaveChanges: TPanel
+    Left = 332
+    Top = 580
+    Width = 131
+    Height = 34
+    Color = 7987076
+    ParentBackground = False
+    TabOrder = 2
+    object btnSaveChanges: TSpeedButton
+      Left = 1
+      Top = 1
+      Width = 129
+      Height = 32
+      Align = alClient
+      Caption = 'Save Changes'
+      Flat = True
+      OnClick = btnSaveChangesClick
+      ExplicitLeft = 17
+    end
+  end
+  object pnlItemInfo: TPanel
+    Left = 20
+    Top = 154
+    Width = 461
+    Height = 422
+    Margins.Bottom = 1
+    TabOrder = 3
+    object lblRating: TLabel
+      AlignWithMargins = True
+      Left = 4
+      Top = 5
+      Width = 453
+      Height = 17
+      Margins.Top = 4
+      Margins.Bottom = 4
+      Align = alTop
+      Alignment = taCenter
+      Caption = 'Average Rating: '
+      Color = 11074994
+      ParentColor = False
+      ExplicitWidth = 122
+    end
+    object pnlName: TPanel
+      Left = 1
+      Top = 395
+      Width = 459
+      Height = 41
+      Align = alTop
+      TabOrder = 0
+    end
+    object pnlCatgeory: TPanel
+      Left = 1
+      Top = 354
+      Width = 459
+      Height = 41
+      Align = alTop
+      TabOrder = 1
+    end
+    object pnlPrice: TPanel
+      Left = 1
+      Top = 313
+      Width = 459
+      Height = 41
+      Align = alTop
+      TabOrder = 2
+      ExplicitTop = 272
+    end
+    object pnlWUProduce: TPanel
+      Left = 1
+      Top = 272
+      Width = 459
+      Height = 41
+      Align = alTop
+      TabOrder = 3
+      ExplicitTop = 231
+    end
+    object pnlWU: TPanel
+      Left = 1
+      Top = 231
+      Width = 459
+      Height = 41
+      Align = alTop
+      TabOrder = 4
+      ExplicitTop = 190
+    end
+    object pnlEUProduce: TPanel
+      Left = 1
+      Top = 190
+      Width = 459
+      Height = 41
+      Align = alTop
+      TabOrder = 5
+      ExplicitTop = 149
+    end
+    object pnlEU: TPanel
+      Left = 1
+      Top = 149
+      Width = 459
+      Height = 41
+      Align = alTop
+      TabOrder = 6
+      ExplicitTop = 108
+    end
+    object pnlCF: TPanel
+      Left = 1
+      Top = 108
+      Width = 459
+      Height = 41
+      Align = alTop
+      TabOrder = 7
+      ExplicitLeft = 2
+      ExplicitTop = 61
+    end
+    object pnlCFProduce: TPanel
+      Left = 1
+      Top = 67
+      Width = 459
+      Height = 41
+      Align = alTop
+      TabOrder = 8
+      ExplicitTop = 26
+    end
+    object pnlMaxWithdraw: TPanel
+      Left = 1
+      Top = 26
+      Width = 459
+      Height = 41
+      Align = alTop
+      TabOrder = 9
+    end
+  end
+  object pnlEdits: TPanel
+    Left = 487
+    Top = 173
+    Width = 229
+    Height = 407
+    TabOrder = 4
+    object edtCFProduce: TEdit
+      AlignWithMargins = True
+      Left = 11
+      Top = 123
+      Width = 207
+      Height = 25
+      Hint = 
+        'Enter your product'#39's carbon footprint during production per unit' +
+        ' with  a comma as a decimal point'
+      Margins.Left = 10
+      Margins.Top = 2
+      Margins.Right = 10
+      Align = alTop
+      Color = 7987076
+      TabOrder = 0
+      Text = '100'
+    end
+    object edtPrice: TEdit
+      AlignWithMargins = True
+      Left = 11
+      Top = 33
+      Width = 207
+      Height = 25
+      Hint = 'Enter your price per unit with  a comma as a decimal point'
+      Margins.Left = 10
+      Margins.Top = 2
+      Margins.Right = 10
+      Align = alTop
+      Color = 7987076
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 1
+      Text = '80.00'
+    end
+    object edtStock: TEdit
+      AlignWithMargins = True
+      Left = 11
+      Top = 63
+      Width = 207
+      Height = 25
+      Margins.Left = 10
+      Margins.Top = 2
+      Margins.Right = 10
+      Align = alTop
+      Color = 7987076
+      TabOrder = 2
+      Text = '80'
+    end
+    object edtCF: TEdit
+      AlignWithMargins = True
+      Left = 11
+      Top = 213
+      Width = 207
+      Height = 25
+      Hint = 
+        'Enter your product'#39's carbon footprint during consumer usage per ' +
+        'unit with  a comma as a decimal point'
+      Margins.Left = 10
+      Margins.Top = 2
+      Margins.Right = 10
+      Align = alTop
+      Color = 7987076
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 3
+      Text = '100'
+    end
+    object edtEUProduce: TEdit
+      AlignWithMargins = True
+      Left = 4
+      Top = 183
+      Width = 221
+      Height = 25
+      Hint = 
+        'Enter your product'#39's energy footprint during production per unit' +
+        ' with  a comma as a decimal point'
+      Margins.Top = 2
+      Align = alTop
+      Color = 7987076
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 4
+      Text = '100'
+    end
+    object edtEU: TEdit
+      AlignWithMargins = True
+      Left = 11
+      Top = 243
+      Width = 207
+      Height = 25
+      Hint = 
+        'Enter your product'#39's energy usage during a consumer'#39's usage per ' +
+        'unit with  a comma as a decimal point'
+      Margins.Left = 10
+      Margins.Top = 2
+      Margins.Right = 10
+      Align = alTop
+      Color = 7987076
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 5
+      Text = '100'
+    end
+    object edtWU: TEdit
+      AlignWithMargins = True
+      Left = 4
+      Top = 273
+      Width = 221
+      Height = 25
+      Hint = 
+        'Enter your product'#39's water usage during a consumer'#39's usage per u' +
+        'nit with  a comma as a decimal point'
+      Margins.Top = 2
+      Align = alTop
+      Color = 7987076
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 6
+      Text = '100'
+    end
+    object edtWUProduce: TEdit
+      AlignWithMargins = True
+      Left = 4
+      Top = 153
+      Width = 221
+      Height = 25
+      Hint = 
+        'Enter your product'#39's water usage during production per unit with' +
+        '  a comma as a decimal point'
+      Margins.Top = 2
+      Align = alTop
+      Color = 7987076
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 7
+      Text = '100'
+    end
+    object edtName: TEdit
+      AlignWithMargins = True
+      Left = 4
+      Top = 3
+      Width = 221
+      Height = 25
+      Margins.Top = 2
+      Align = alTop
+      Color = 8118149
+      TabOrder = 8
+    end
+    object cmbCategory: TComboBox
+      AlignWithMargins = True
+      Left = 4
+      Top = 303
+      Width = 221
+      Height = 25
+      Margins.Top = 2
+      Align = alTop
+      Color = 7987076
+      TabOrder = 9
+      Items.Strings = (
+        'Toileteries'
+        'Food'
+        'Electronics'
+        'Containers'
+        'Clothes'
+        'Other')
+    end
+    object redDesc: TRichEdit
+      AlignWithMargins = True
+      Left = 4
+      Top = 333
+      Width = 221
+      Height = 79
+      Hint = 
+        'Describe the details regarding your product and its production. ' +
+        'This is to help consumers make an informed decision.'
+      Margins.Top = 2
+      Align = alTop
+      Color = 7987076
+      Font.Charset = ANSI_CHARSET
+      Font.Color = clWindowText
+      Font.Height = -11
+      Font.Name = 'Tahoma'
+      Font.Style = []
+      ParentFont = False
+      ParentShowHint = False
+      ShowHint = True
+      TabOrder = 10
+      Zoom = 100
+    end
+    object edtMaxWithdrawStock: TEdit
+      AlignWithMargins = True
+      Left = 11
+      Top = 93
+      Width = 207
+      Height = 25
+      Margins.Left = 10
+      Margins.Top = 2
+      Margins.Right = 10
+      Align = alTop
+      Color = 7987076
+      TabOrder = 11
+      Text = '10'
+    end
+  end
+  object pnlUnits: TPanel
+    Left = 602
+    Top = 173
+    Width = 143
+    Height = 408
+    TabOrder = 5
+    object Label3: TLabel
+      AlignWithMargins = True
+      Left = 11
+      Top = 94
+      Width = 128
+      Height = 17
+      Margins.Left = 10
+      Margins.Top = 6
+      Margins.Bottom = 6
+      Align = alTop
+      Caption = 'L/unit'
+      Color = 16384
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = 16384
+      Font.Height = -15
+      Font.Name = 'Arial Rounded MT Bold'
+      Font.Style = []
+      ParentColor = False
+      ParentFont = False
+      ExplicitWidth = 40
+    end
+    object lblWuProduceUnit: TLabel
+      AlignWithMargins = True
+      Left = 11
+      Top = 181
+      Width = 128
+      Height = 17
+      Margins.Left = 10
+      Margins.Top = 6
+      Margins.Bottom = 6
+      Align = alTop
+      Caption = 'L/unit'
+      Color = 16384
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = 16384
+      Font.Height = -15
+      Font.Name = 'Arial Rounded MT Bold'
+      Font.Style = []
+      ParentColor = False
+      ParentFont = False
+      ExplicitWidth = 40
+    end
+    object lblStockUnits: TLabel
+      AlignWithMargins = True
+      Left = 11
+      Top = 7
+      Width = 121
+      Height = 17
+      Margins.Left = 10
+      Margins.Top = 6
+      Margins.Right = 10
+      Margins.Bottom = 6
+      Align = alTop
+      Caption = 'units'
+      Color = 16384
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = 16384
+      Font.Height = -15
+      Font.Name = 'Arial Rounded MT Bold'
+      Font.Style = []
+      ParentColor = False
+      ParentFont = False
+      ExplicitWidth = 35
+    end
+    object Label2: TLabel
+      AlignWithMargins = True
+      Left = 11
+      Top = 65
+      Width = 128
+      Height = 17
+      Margins.Left = 10
+      Margins.Top = 6
+      Margins.Bottom = 6
+      Align = alTop
+      Caption = 'kWh/unit'
+      Color = 16384
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = 16384
+      Font.Height = -15
+      Font.Name = 'Arial Rounded MT Bold'
+      Font.Style = []
+      ParentColor = False
+      ParentFont = False
+      ExplicitWidth = 63
+    end
+    object lblCFUnit: TLabel
+      AlignWithMargins = True
+      Left = 11
+      Top = 123
+      Width = 131
+      Height = 17
+      Margins.Left = 10
+      Margins.Top = 6
+      Margins.Right = 0
+      Margins.Bottom = 6
+      Align = alTop
+      Caption = 't/unit'
+      Color = 16384
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = 16384
+      Font.Height = -15
+      Font.Name = 'Arial Rounded MT Bold'
+      Font.Style = []
+      ParentColor = False
+      ParentFont = False
+      ExplicitWidth = 36
+    end
+    object lnlCFproduceUnit: TLabel
+      AlignWithMargins = True
+      Left = 11
+      Top = 36
+      Width = 121
+      Height = 17
+      Margins.Left = 10
+      Margins.Top = 6
+      Margins.Right = 10
+      Margins.Bottom = 6
+      Align = alTop
+      Caption = 't/unit'
+      Color = 16384
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = 16384
+      Font.Height = -15
+      Font.Name = 'Arial Rounded MT Bold'
+      Font.Style = []
+      ParentColor = False
+      ParentFont = False
+      ExplicitWidth = 36
+    end
+    object lblEuUnit: TLabel
+      AlignWithMargins = True
+      Left = 11
+      Top = 152
+      Width = 121
+      Height = 17
+      Margins.Left = 10
+      Margins.Top = 6
+      Margins.Right = 10
+      Margins.Bottom = 6
+      Align = alTop
+      Caption = 'kWh/unit'
+      Color = 16384
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = 16384
+      Font.Height = -15
+      Font.Name = 'Arial Rounded MT Bold'
+      Font.Style = []
+      ParentColor = False
+      ParentFont = False
+      ExplicitWidth = 63
+    end
+  end
+  object pnlProfileImage: TPanel
+    Left = 324
+    Top = 0
+    Width = 105
+    Height = 105
+    TabOrder = 6
+    object imgItem: TImage
+      Left = 0
+      Top = 0
+      Width = 105
+      Height = 105
+      Hint = 'Choose your item'#39's image'
+      Center = True
+      ParentShowHint = False
+      ShowHint = True
+      Stretch = True
+      OnClick = imgItemClick
+    end
+  end
+  object flpnlInfo: TFlowPanel
+    Left = 195
+    Top = 8
+    Width = 651
+    Height = 145
+    FlowStyle = fsLeftRightBottomTop
+    TabOrder = 7
+    DesignSize = (
+      651
+      145)
+    object lblCategory: TLabel
+      AlignWithMargins = True
+      Left = 4
+      Top = 121
+      Width = 72
+      Height = 17
+      Margins.Top = 5
+      Margins.Bottom = 6
+      Alignment = taRightJustify
+      Caption = 'Category:'
+    end
+    object lblCF: TLabel
+      AlignWithMargins = True
+      Left = 89
+      Top = 121
+      Width = 199
+      Height = 17
+      Margins.Left = 10
+      Margins.Top = 5
+      Margins.Right = 10
+      Margins.Bottom = 6
+      Alignment = taRightJustify
+      Caption = 'Carbon FootPrint of its use:'
+    end
+    object lblCFProduce: TLabel
+      AlignWithMargins = True
+      Left = 308
+      Top = 121
+      Width = 252
+      Height = 17
+      Margins.Left = 10
+      Margins.Top = 5
+      Margins.Right = 10
+      Margins.Bottom = 6
+      Alignment = taRightJustify
+      Caption = 'Carbon FootPrint of its production:'
+    end
+    object lblDesc: TLabel
+      AlignWithMargins = True
+      Left = 4
+      Top = 93
+      Width = 89
+      Height = 17
+      Margins.Top = 5
+      Margins.Bottom = 6
+      Alignment = taRightJustify
+      Caption = 'Description:'
+    end
+    object lblEU: TLabel
+      AlignWithMargins = True
+      Left = 106
+      Top = 93
+      Width = 176
+      Height = 17
+      Margins.Left = 10
+      Margins.Top = 5
+      Margins.Right = 10
+      Margins.Bottom = 6
+      Alignment = taRightJustify
+      Caption = 'Energy Usage of its use:'
+    end
+    object lblEUProduce: TLabel
+      AlignWithMargins = True
+      Left = 295
+      Top = 93
+      Width = 229
+      Height = 17
+      Margins.Top = 5
+      Margins.Bottom = 6
+      Alignment = taRightJustify
+      Caption = 'Energy Usage of its production:'
+    end
+    object lblName: TLabel
+      AlignWithMargins = True
+      Left = 530
+      Top = 94
+      Width = 47
+      Height = 17
+      Margins.Top = 8
+      Margins.Bottom = 5
+      Alignment = taRightJustify
+      Caption = 'Name:'
+    end
+    object lblPrice: TLabel
+      AlignWithMargins = True
+      Left = 11
+      Top = 63
+      Width = 59
+      Height = 17
+      Margins.Left = 10
+      Margins.Top = 5
+      Margins.Right = 10
+      Margins.Bottom = 6
+      Alignment = taRightJustify
+      Caption = 'Price: R'
+    end
+    object lblStock: TLabel
+      AlignWithMargins = True
+      Left = 90
+      Top = 63
+      Width = 47
+      Height = 17
+      Margins.Left = 10
+      Margins.Top = 5
+      Margins.Right = 10
+      Margins.Bottom = 6
+      Alignment = taRightJustify
+      Caption = 'Stock:'
+    end
+    object lblWaterUsage: TLabel
+      AlignWithMargins = True
+      Left = 150
+      Top = 63
+      Width = 168
+      Height = 17
+      Margins.Top = 5
+      Margins.Bottom = 6
+      Alignment = taRightJustify
+      Caption = 'Water Usage of its use:'
+    end
+    object lblWUProduce: TLabel
+      AlignWithMargins = True
+      Left = 324
+      Top = 63
+      Width = 221
+      Height = 17
+      Margins.Top = 5
+      Margins.Bottom = 6
+      Alignment = taRightJustify
+      Caption = 'Water Usage of its production:'
+    end
+    object lblMaxWithdrawStock: TLabel
+      AlignWithMargins = True
+      Left = 11
+      Top = 35
+      Width = 219
+      Height = 17
+      Margins.Left = 10
+      Margins.Top = 5
+      Margins.Right = 10
+      Margins.Bottom = 6
+      Alignment = taRightJustify
+      Anchors = []
+      Caption = 'Maximum withdrawable stock:'
+    end
+    object lblmaxwithdrawstockunits: TLabel
+      AlignWithMargins = True
+      Left = 250
+      Top = 35
+      Width = 35
+      Height = 17
+      Margins.Left = 10
+      Margins.Top = 30
+      Margins.Right = 10
+      Margins.Bottom = 6
+      Align = alTop
+      Anchors = []
+      Caption = 'units'
+      Color = 16384
+      Font.Charset = DEFAULT_CHARSET
+      Font.Color = 16384
+      Font.Height = -15
+      Font.Name = 'Arial Rounded MT Bold'
+      Font.Style = []
+      ParentColor = False
+      ParentFont = False
+    end
+  end
+end

@@ -84,7 +84,9 @@ object frmSignUp: TfrmSignUp
     Top = 8
     Width = 113
     Height = 113
+    Hint = 'Choose your profile picture. Otherwise, this is the default.'
     Center = True
+    ParentShowHint = False
     Picture.Data = {
       0954506E67496D61676589504E470D0A1A0A0000000D49484452000007460000
       09600804000000B6719C740000000467414D410000B18F0BFC61050000000173
@@ -1667,6 +1669,7 @@ object frmSignUp: TfrmSignUp
       B15E8F4F6FFC3F5D57E3EB4CCEE7E62BC5ABB2BAFB63723EAF6CC45DF3D2BAEE
       7F6BF8A36BF3F8C38D785C55FA7F0400D4D5FF0706A55E94F0937FF500000000
       49454E44AE426082}
+    ShowHint = True
     Stretch = True
     OnClick = imgPfpClick
   end
@@ -1677,7 +1680,7 @@ object frmSignUp: TfrmSignUp
     Height = 59
     Color = 7987076
     Font.Charset = ANSI_CHARSET
-    Font.Color = 11371036
+    Font.Color = 16384
     Font.Height = -16
     Font.Name = 'Arial Rounded MT Bold'
     Font.Style = []
@@ -1714,8 +1717,11 @@ object frmSignUp: TfrmSignUp
     Top = 298
     Width = 121
     Height = 26
+    Hint = 'Enter the code we gave you here if you'#39're a seller.'
     Color = 8118149
     Enabled = False
+    ParentShowHint = False
+    ShowHint = True
     TabOrder = 3
     OnKeyDown = FormKeyDown
   end
@@ -1768,7 +1774,13 @@ object frmSignUp: TfrmSignUp
     Height = 33
     BorderWidth = 1
     Color = 8249222
+    Font.Charset = ANSI_CHARSET
+    Font.Color = 16384
+    Font.Height = -16
+    Font.Name = 'Arial Rounded MT Bold'
+    Font.Style = []
     ParentBackground = False
+    ParentFont = False
     TabOrder = 6
     OnClick = btnHelpClick
     object btnSignIn: TSpeedButton
@@ -1791,7 +1803,13 @@ object frmSignUp: TfrmSignUp
     Height = 33
     BorderWidth = 1
     Color = 8249222
+    Font.Charset = ANSI_CHARSET
+    Font.Color = 16384
+    Font.Height = -16
+    Font.Name = 'Arial Rounded MT Bold'
+    Font.Style = []
     ParentBackground = False
+    ParentFont = False
     TabOrder = 7
     OnClick = btnHelpClick
     object btnSignUp: TSpeedButton

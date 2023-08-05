@@ -51,6 +51,9 @@ type
     btnLeft: TSpeedButton;
     pnlRight: TPanel;
     btnRight: TSpeedButton;
+    pnlImage: TPanel;
+    pnlMain: TPanel;
+    pnlChart: TPanel;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnViewProductsClick(Sender: TObject);
     procedure btnBackClick(Sender: TObject);
@@ -167,7 +170,15 @@ var
   dExtra: double;
 begin
   // get amount
-  dExtra := strtofloat(InputBox('Funds', 'Add funds:', ''));
+  try
+    dExtra := strtofloat(InputBox('Funds', 'Add funds:', ''));
+  except
+    on e: ECONVERTERROR do
+    begin
+      showMessage('Please format your extra funds as a valid number. Remember to use commas as a decimal point.');
+      exit;
+    end;
+  end;
 
   try
     // add that amount to user
@@ -396,7 +407,7 @@ begin
   begin
     showMessage(dsResult['Status']);
     FreeAndNil(dsResult);
-    Exit;
+    exit;
   end;
 
   srsStats.Clear;

@@ -1,0 +1,5 @@
+Login Screen:
+
+This is the screen to log in if you already have an account, otherwise, navigate to the Sign Up Screen.
+Enter your username in the username edit box.
+Enter your password in the password edit box.

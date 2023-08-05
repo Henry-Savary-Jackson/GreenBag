@@ -47,8 +47,18 @@ type
     pnlLogout: TPanel;
     sbtnLogout: TSpeedButton;
     lblCFUnit: TLabel;
-    Label1: TLabel;
+    lblWUUnit: TLabel;
     lblEuUnit: TLabel;
+    lblSearchHeading: TLabel;
+    pnlLeftHeader: TPanel;
+    pnlRightHeader: TPanel;
+    pnlRating: TPanel;
+    pnlCF: TPanel;
+    pnlEU: TPanel;
+    pnlWU: TPanel;
+    lblProfile: TLabel;
+    lblCat: TLabel;
+    lblHeadingFilters: TLabel;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnLogoutClick(Sender: TObject);
     procedure btnProfileClick(Sender: TObject);
@@ -70,6 +80,7 @@ type
     procedure btnHelpClick(Sender: TObject);
     procedure btnLoadMoreItemsClick(Sender: TObject);
     procedure addQueryResult(dsResult: tAdoDataset; numResults: integer);
+    procedure srchSearchItemsChange(Sender: TObject);
 
   private
     { Private declarations }
@@ -296,6 +307,8 @@ begin
       currentCheckbox := TCheckBox.Create(self);
       currentCheckbox.Parent := flpnlCategories;
       currentCheckbox.Caption := categoryList[i];
+      currentCheckBox.AlignWithMargins:= True ;
+      currentCheckbox.Margins.Left:= 10;
       categoryCheckboxes.Add(currentCheckbox);
 
       dsResult.Next;
@@ -474,6 +487,11 @@ begin
   end;
 
   spnWUMax.Enabled := spnWUMax.MinValue <> spnWUMax.MaxValue
+end;
+
+procedure TfrmBrowse.srchSearchItemsChange(Sender: TObject);
+begin
+
 end;
 
 // procedure given to all browse item containers

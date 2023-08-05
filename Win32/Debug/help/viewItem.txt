@@ -1,0 +1,27 @@
+The View Item Screen:
+
+This screen is exclusively seen by users who are not the item's seller.
+
+This screen is used to show all the details regarding an item.
+
+You can see how much of the item is in stock. Please note that attempting to withdraw more items than the stock will fail.
+Moreover, the "Maximum Stock you can withdraw at once" value tells you how many units you can hold in a given 
+shopping cart. 
+
+The three values, Carbon footprint to produce, Energy usage to produce and  Water usage to produce tells
+you about the ecological impact the item has during its production per unit.
+
+The three values, Carbon footprint through usage, Energy consumption through usage and water consumption
+through usage tells you about the ecological impact per unit of the item throughout its usage by a buyer.
+
+The description of the item is a detailed description of the item given by a seller. Here, you can find 
+additionally, details relating to the item's manufacturing and use.
+
+To add this item to your cart, select the quantity by changing the "Quantity" spinedit, then click the
+"Add item" button.
+
+You can also view the average rating of the item out of five.
+You can select a rating out of five to rate the item and click the "send rating" button to send your rating.
+
+Please note that you cannot send a rating to an item you have not already bought.
+

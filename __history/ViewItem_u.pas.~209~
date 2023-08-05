@@ -1,0 +1,238 @@
+unit ViewItem_u;
+
+interface
+
+uses
+  Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+  System.Classes, Vcl.Graphics,
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls,
+  Vcl.ExtCtrls,
+  Vcl.Samples.Spin, DMUnit_u, System.Generics.Collections, Data.Win.ADODB,
+  Vcl.Imaging.pngimage, Data.DB, Vcl.Buttons;
+
+type
+  TfrmViewItem = class(TForm)
+    imgItem: TImage;
+    redDesc: TRichEdit;
+    lblDesc: TLabel;
+    lblCategory: TLabel;
+    lblCFProduce: TLabel;
+    lblEUProduce: TLabel;
+    lblWUProduce: TLabel;
+    lblPrice: TLabel;
+    lblName: TLabel;
+    lblSeller: TLabel;
+    spnQuantity: TSpinEdit;
+    lblQuantity: TLabel;
+    lblRating: TLabel;
+    trcRating: TTrackBar;
+    lblYourRating: TLabel;
+    lblCF: TLabel;
+    lblEU: TLabel;
+    lblWU: TLabel;
+    lblStock: TLabel;
+    lblMaxWithdraw: TLabel;
+    lbl5: TLabel;
+    lbl0: TLabel;
+    pnlBack: TPanel;
+    pnlHelp: TPanel;
+    spnHelp: TSpeedButton;
+    pnlSendRating: TPanel;
+    pnlAddToCart: TPanel;
+    btnAddToCart: TSpeedButton;
+    btnSendRating: TSpeedButton;
+    btnBack: TSpeedButton;
+    pnlIItemInfo: TPanel;
+    pnlDesc: TPanel;
+    pnlQuantity: TPanel;
+    pnlRating: TPanel;
+    pnlImage: TPanel;
+    procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure btnBackClick(Sender: TObject);
+    procedure btnAddToCartClick(Sender: TObject);
+    procedure FormShow(Sender: TObject);
+    procedure btnSendRatingClick(Sender: TObject);
+    procedure btnHelpClick(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+    itemID: string;
+    stock: integer;
+    price: double;
+  end;
+
+var
+  frmViewItem: TfrmViewItem;
+
+implementation
+
+uses
+  BrowseItems_u, HelpScreen_u;
+
+{$R *.dfm}
+
+procedure TfrmViewItem.btnAddToCartClick(Sender: TObject);
+var
+  quantity: integer;
+  cartQuantity: integer;
+begin;
+
+  quantity := spnQuantity.Value;
+
+  // make sure user doesn't take more
+  if stock - quantity < 0 then
+  begin
+    showMessage('Not enough stock.');
+    Exit;
+  end;
+
+  try
+    DataModule1.addToCart(DataModule1.CartID, itemID, quantity);
+    frmViewItem.Hide;
+    frmBrowse.Show;
+
+  except
+    on e: exception do
+    begin
+      showMessage(e.Message);
+    end;
+
+  end;
+end;
+
+procedure TfrmViewItem.btnBackClick(Sender: TObject);
+begin
+  frmViewItem.Hide;
+  frmBrowse.Show;
+end;
+
+procedure TfrmViewItem.btnHelpClick(Sender: TObject);
+begin
+  frmHelp.frmPrevious := self;
+  self.Hide;
+  frmHelp.Show;
+end;
+
+procedure TfrmViewItem.btnSendRatingClick(Sender: TObject);
+var
+  rating: integer;
+
+begin
+  rating := trcRating.Position;
+  try
+    DataModule1.sendRating(DataModule1.userID, itemID, rating);
+
+    showMessage('Your feedback has been sent.');
+
+  except
+    on e: exception do
+    begin
+
+      showMessage(e.Message);
+      Exit;
+    end;
+  end;
+end;
+
+procedure TfrmViewItem.FormClose(Sender: TObject; var Action: TCloseAction);
+begin
+
+  Application.Terminate;
+end;
+
+procedure TfrmViewItem.FormShow(Sender: TObject);
+var
+  dsResult: TADODataSet;
+  imageStream: tStream;
+begin
+  // get the info of the item
+  dsResult := DataModule1.viewItem(itemID);
+
+  if dsResult.Fields.FindField('Status') <> nil then
+  begin
+    showMessage(dsResult['Status']);
+    FreeAndNil(dsResult);
+    Exit;
+  end;
+
+  // write dtaa to gui
+  lblName.Caption := 'Name :' + dsResult['ItemName'];
+  lblSeller.Caption := 'Seller: ' + dsResult['SellerName'];
+  lblPrice.Caption := 'Price: ' + floatToStrf(dsResult['Cost'],
+    ffCurrency, 8, 2);
+
+  price := dsResult['Cost'];
+
+  lblStock.Caption := 'Stock: ' + inttostr(dsResult['Stock']);
+  if dsResult['Stock'] = 1 then
+  begin
+    lblStock.Caption := lblStock.Caption + ' unit'
+  end
+  else
+  begin
+    lblStock.Caption := lblStock.Caption + ' units'
+  end;
+
+  stock := dsResult['Stock'];
+  lblCF.Caption := 'Carbon footprint through usage: ' +
+    floatToStrf(dsResult['CarbonFootprintUsage'], fffixed, 8, 2) + ' t/unit';
+
+  lblEU.Caption := 'Energy consumption through usage: ' +
+    floatToStrf(dsResult['EnergyFootprintUsage'], fffixed, 8, 2) + ' kWh/unit';
+
+  lblWU.Caption := 'Water consumption through usage:' +
+    floatToStrf(dsResult['WaterFootprintUsage'], fffixed, 8, 2) + ' L/unit';
+
+  lblCFProduce.Caption := 'Carbon footprint for production: ' +
+    floatToStrf(dsResult['CarbonFootprintProduction'], fffixed, 8, 2) +
+    't/unit';
+
+  lblEUProduce.Caption := 'Energy usage for production: ' +
+    floatToStrf(dsResult['EnergyUsageProduction'], fffixed, 8, 2) + ' kWh/unit';
+
+  lblWUProduce.Caption := 'Water usage for production:' +
+    floatToStrf(dsResult['WaterUsageProduction'], fffixed, 8, 2) + ' L/unit';
+
+  if dsResult['avgRating'] = -1 then
+  begin
+    lblRating.Caption := 'Average Rating: No ratings';
+  end
+  else
+  begin
+    lblRating.Caption := ' Average Rating: ' + inttostr(dsResult['avgRating']  + ' /5');
+  end;
+
+  lblCategory.Caption := 'Category: ' + dsResult['Category'];
+
+  lblMaxWithdraw.Caption := 'Maximum Stock you can withdraw at once: ' +
+    inttostr(dsResult['MaxWithdrawableStock']);
+
+  if dsResult['MaxWithdrawableStock'] = 1 then
+  begin
+    lblMaxWithdraw.Caption := lblMaxWithdraw.Caption + ' unit'
+  end
+  else
+  begin
+    lblMaxWithdraw.Caption := lblMaxWithdraw.Caption + ' units'
+  end;
+
+  if dsResult['Description'] <> NULL then
+    redDesc.Lines.Add(dsResult['Description']);
+
+  imageStream := dsResult.CreateBlobStream
+    (dsResult.FieldByName('Image'), bmRead);
+  try
+    imgItem.Picture.LoadFromStream(imageStream);
+
+  finally
+    FreeAndNil(imageStream);
+
+  end;
+
+  spnQuantity.Value := 1;
+  trcRating.Position := 0;
+
+end;
+
+end.

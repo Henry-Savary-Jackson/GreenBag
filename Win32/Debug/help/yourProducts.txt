@@ -1,0 +1,16 @@
+The Your Products Screen:
+
+This screen shows your entire catalogue of items. You can also see how many items you are selling in total.
+To browse your catalogue, use the scrollbar.
+
+At first, you are only shown at most ten items. To view more of your catalogue, click the "load more items" button.
+
+For each item, you are shown its name, image as well as the total sales and revenue you got from it.
+To view more of the item's details and to edit them, click on the "view item" buttons.
+
+If you want to create a new item, click the "Add item" button to take you to the add item screen.
+
+To remove an item from your catalogue, click on the red cross to the right of the item. Please note that
+this doesn't remove the item sales from the database but only makes it unavailable for further purchase and editing.
+
+

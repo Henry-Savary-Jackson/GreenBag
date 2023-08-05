@@ -148,6 +148,9 @@ begin
   imgRemoveProduct.Picture.LoadFromFile('cross.png');
   imgRemoveProduct.Center := True;
   imgRemoveProduct.OnClick := self.onRemoveClick;
+  imgRemoveProduct.Hint := 'Remove this item from your catalogue.';
+  imgRemoveProduct.ParentShowHint := false;
+  imgRemoveProduct.ShowHint := true;
 
 end;
 

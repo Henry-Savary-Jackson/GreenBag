@@ -1,0 +1,14 @@
+The Add Item Screen:
+
+This screen is exclusively viewed by the owner of the item.
+
+Here you can either add the details of a new item or edit the details of an existing item.
+
+To view explanations of what each of the fields means, go to the View Item Section of this help screen.
+
+Each of these fields must be filled. This includes choosing an image for your item.
+You must also choose one category for this item from the Combobox.
+
+Once you are finished, click the "Save changes" button to create the item or to save the changes you have saved.
+
+The Rating value tells you the average rating that users have given this item out of 5.

@@ -1,0 +1,18 @@
+The Checkout Screen:
+
+This screen shows all the items and their quantity in your cart.
+For each item, you can view a summary of its basic information for that quantity of items.
+
+If you wish to increase or decrease an item's quantity, you can change the quantity spin edit.
+Note that you cannot withdraw more than the item's maximum withdrawable amount per user.
+
+If you wish to remove an item from your cart, simply click on the red cross on the right.
+
+Below, you can see the total cost, carbon footprint, energy usage and water usage of your entire shopping cart.
+
+Once you are satisfied, you can click the "Checkout" button.
+Please note that you cannot check out an empty cart.
+Moreover, if you do not have enough funds to purchase the entire cart, none of the payments will go through.
+
+In that case, please check your balance and add more funds to The Profile Screen.
+
