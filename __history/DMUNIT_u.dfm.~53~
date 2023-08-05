@@ -46,10 +46,13 @@ object DataModule1: TDataModule1
     Top = 256
   end
   object timeCheckTimer: TTimer
-    Enabled = False
     Interval = 10000
     OnTimer = checkIFCartOutdated
     Left = 344
     Top = 272
+  end
+  object ADOTable1: TADOTable
+    Left = 312
+    Top = 216
   end
 end

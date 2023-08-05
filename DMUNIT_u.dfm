@@ -12,10 +12,6 @@ object DataModule1: TDataModule1
     Left = 160
     Top = 32
   end
-  object ItemTB: TADOTable
-    Left = 65496
-    Top = 256
-  end
   object SellerTB: TADOTable
     Left = 48
     Top = 128
@@ -50,5 +46,9 @@ object DataModule1: TDataModule1
     OnTimer = checkIFCartOutdated
     Left = 344
     Top = 272
+  end
+  object ItemTB: TADOTable
+    Left = 328
+    Top = 200
   end
 end

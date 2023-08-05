@@ -1502,9 +1502,11 @@ begin
         serverDateTime := strtodatetime(sDate);
 
         // get that date the cart was created
-        // erro is here
 
-        cartDateTime := self.getCartDate(self.CartID);
+        TThread.CurrentThread.Synchronize(nil, procedure ()
+        begin
+           cartDateTime := self.getCartDate(self.CartID);
+        end  );
 
         minutesSinceCartCreation := ((serverDateTime - cartDateTime) * 1440);
 

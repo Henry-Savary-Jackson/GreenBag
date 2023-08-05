@@ -15,12 +15,12 @@ type
   TDataModule1 = class(TDataModule)
     Connection: TADOConnection;
     Query: TADOQuery;
-    ItemTB: TADOTable;
     SellerTB: TADOTable;
     restCLient: TRESTClient;
     restRequest: TRESTRequest;
     restResponse: TRESTResponse;
     timeCheckTimer: TTimer;
+    ItemTB: TADOTable;
     procedure DataModuleCreate(Sender: TObject);
     procedure checkIFCartOutdated(Sender: TObject);
   private
@@ -523,8 +523,11 @@ begin
   // Connection for every table you have
   // ADOTable1 must be named ADOtablename(your associated table)
   SellerTB.Connection := Connection;
+  ItemTB.Connection:= Connection;
   // Each ADOTable is associated with each table name in access
   SellerTB.TableName := 'SellerTB'; // table name spelled as in in MS access
+  ItemTB.TableName := ''
+
 
   Query.Connection := Connection;
 
@@ -1502,7 +1505,11 @@ begin
         serverDateTime := strtodatetime(sDate);
 
         // get that date the cart was created
-        cartDateTime := self.getCartDate(self.CartID);
+
+        TThread.CurrentThread.Synchronize(nil, procedure ()
+        begin
+           cartDateTime := self.getCartDate(self.CartID);
+        end  );
 
         minutesSinceCartCreation := ((serverDateTime - cartDateTime) * 1440);
 
