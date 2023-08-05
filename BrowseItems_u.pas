@@ -193,7 +193,6 @@ end;
 procedure TfrmBrowse.btnLogoutClick(Sender: TObject);
 begin
   try
-    DataModule1.CancelCart(DataModule1.CartID);
 
     if items <> nil then
       items.Clear;
