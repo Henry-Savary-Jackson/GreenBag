@@ -160,13 +160,4 @@ object frmLogin: TfrmLogin
     TabOrder = 5
     OnClick = Button1Click
   end
-  object Button2: TButton
-    Left = 400
-    Top = 278
-    Width = 75
-    Height = 27
-    Caption = 'Button2'
-    TabOrder = 6
-    OnClick = Button2Click
-  end
 end

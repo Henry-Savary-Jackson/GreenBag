@@ -22,6 +22,9 @@ type
     pnlSignup: TPanel;
     sbtnSignUp: TSpeedButton;
     spnHelp: TSpeedButton;
+    Image1: TImage;
+    Button1: TButton;
+    Button2: TButton;
     procedure btnSignInClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnSignUpScreenClick(Sender: TObject);
@@ -29,6 +32,7 @@ type
     procedure edtPasswordKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
     procedure Button1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -101,6 +105,13 @@ end;
 procedure TfrmLogin.Button1Click(Sender: TObject);
 begin
 //
+DataModule1.getImage(inputbox('','enter image id',''), Image1);
+end;
+
+procedure TfrmLogin.Button2Click(Sender: TObject);
+begin
+//AA51811025
+DataModule1.addImage(inputbox('','enter id',''), Image1);
 end;
 
 // allow pressing enter when typing username or password to make you login

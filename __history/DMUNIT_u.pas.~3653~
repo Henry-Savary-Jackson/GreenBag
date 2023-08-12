@@ -141,6 +141,10 @@ type
 
     procedure warnUser();
 
+    procedure addImage(itemID: string; Image: tImage);
+
+    procedure getImage(itemID:string; Image:tImage);
+
   end;
 
 var
@@ -187,6 +191,16 @@ begin
 end;
 
 // add an item to a user's shopping cart
+procedure TDataModule1.addImage(itemID: string; Image: tImage);
+begin
+  ItemTB.Locate('ItemID', itemID, []);
+  ItemTB.FieldByName('Image').Assign(Image.Picture);
+  ItemTB.Post;
+  ItemTB.Refresh;
+
+end;
+
+
 function TDataModule1.addToCart(ShoppingCartID, itemID: string;
   quantity: integer): string;
 var
@@ -438,7 +452,7 @@ end;
 function TDataModule1.CloneRecordset(const Data: _Recordset): _Recordset;
 var
   newRec: _Recordset;
-  stm: Stream;
+  stm: stream;
 begin
   newRec := CoRecordset.Create as _Recordset;
   stm := CoStream.Create;
@@ -523,16 +537,16 @@ begin
   // Connection for every table you have
   // ADOTable1 must be named ADOtablename(your associated table)
   SellerTB.Connection := Connection;
-  ItemTB.Connection:= Connection;
+  ItemTB.Connection := Connection;
   // Each ADOTable is associated with each table name in access
   SellerTB.TableName := 'SellerTB'; // table name spelled as in in MS access
-  ItemTB.TableName := ''
-
+  ItemTB.TableName := 'ItemTB';
 
   Query.Connection := Connection;
 
   // open dataset
   SellerTB.Open;
+  ItemTB.Open;
 
   // There reason many tables and datasets are not here is because they were
   // never used without sql, so they are unnecessary and would use
@@ -776,7 +790,7 @@ var
   sql: string;
   params: tObjectDictionary<string, Variant>;
   dsResult: tADODataSet;
-  imageStream: tStream;
+  imageStream: tstream;
 begin
 
   sql := 'SELECT ProfileImage FROM UserTB WHERE UserID = :UserID';
@@ -1029,6 +1043,18 @@ end;
 // returns the shoppingcartItemID of a particular item in a user's cart
 // this is so that the program can properly update and read that record
 // in the shoppingcartItemTb
+procedure TDataModule1.getImage(itemID: string; Image: tImage);
+var
+stream : tStream;
+begin
+
+ItemTb.Locate('ItemID', itemid, []);
+stream := ItemTB.CreateBlobStream(ItemTB.FieldByName('Image'), bmRead);
+image.Picture.LoadFromStream(stream);
+
+
+end;
+
 function TDataModule1.getItemInCart(itemID, ShoppingCartID: string): STRING;
 var
   sql: string;
@@ -1237,7 +1263,7 @@ var
   b: boolean;
 begin
 
-   sql:= 'SELECT UserID, Password, Salt FROM UserTB WHERE Username = :Username';
+  sql := 'SELECT UserID, Password, Salt FROM UserTB WHERE Username = :Username';
   params := tObjectDictionary<string, Variant>.Create();
   params.Add('Username', Username);
 
@@ -1465,7 +1491,7 @@ end;
 // for our timezone
 // the reason we do this is in case a user changes their system date and time
 // to prevent our program from returning stock.
-//LINK TO THE API: https://timeapi.io/swagger/index.html
+// LINK TO THE API: https://timeapi.io/swagger/index.html
 procedure TDataModule1.checkIFCartOutdated;
 var
   sBody, sDate: string;
@@ -1506,10 +1532,11 @@ begin
 
         // get that date the cart was created
 
-        TThread.CurrentThread.Synchronize(nil, procedure ()
-        begin
-           cartDateTime := self.getCartDate(self.CartID);
-        end  );
+        TThread.CurrentThread.Synchronize(nil,
+          procedure()
+          begin
+            cartDateTime := self.getCartDate(self.CartID);
+          end);
 
         minutesSinceCartCreation := ((serverDateTime - cartDateTime) * 1440);
 
@@ -1520,7 +1547,7 @@ begin
           TThread.CurrentThread.Synchronize(nil, self.resetCart);
 
         end
-        else if (minutesSinceCartCreation < maxTimewithCart) and
+        else if (minutesSinceCartCreation < maxTimeWithCart) and
           (minutesSinceCartCreation > timeUntilWarn) then
         begin
           TThread.Current.Synchronize(nil, self.warnUser);
@@ -1602,7 +1629,7 @@ begin
   dsOutput := tADODataSet.Create(Nil);
   dsOutput.FieldDefs.Add('Status', TFieldType(1), 100);
   dsOutput.CreateDataSet;
- // dsOutput.ExecuteOptions := [eoAsyncExecute, eoAsyncFetchNonBlocking];
+  // dsOutput.ExecuteOptions := [eoAsyncExecute, eoAsyncFetchNonBlocking];
   try
     try
       begin
@@ -2180,9 +2207,9 @@ begin
     // select total spending
 
     sql := 'SELECT IIF(Sum(Cost) IS NULL ,0 ,Sum(Cost)) AS totalCost, ' +
-    ' IIF(Sum(CF) IS NULL ,0 ,Sum(CF)) AS totalCF, '
-    + ' IIF(Sum(EU) IS NULL ,0 ,Sum(EU)) AS totalEU,'
-    + ' IIF(Sum(WU) IS NULL ,0 ,Sum(WU)) AS totalWU '+
+      ' IIF(Sum(CF) IS NULL ,0 ,Sum(CF)) AS totalCF, ' +
+      ' IIF(Sum(EU) IS NULL ,0 ,Sum(EU)) AS totalEU,' +
+      ' IIF(Sum(WU) IS NULL ,0 ,Sum(WU)) AS totalWU ' +
       'FROM TransactionItemTB INNER JOIN TransactionTB ON TransactionTB.TransactionID = TransactionItemTB.TransactionID'
       + ' WHERE BuyerID = :UserID ';
     params.clear;
@@ -2196,7 +2223,6 @@ begin
     Result['TotalCF'] := dsResult['totalCF'];
     Result['TotalEU'] := dsResult['totalEU'];
     Result['TotalWU'] := dsResult['totalWU'];
-
 
   finally
     FreeAndNil(params);
@@ -2250,7 +2276,7 @@ procedure TDataModule1.warnUser;
 begin
   if not warnedUser then
   begin
-    warnedUser := True ;
+    warnedUser := True;
     showMessage('You have less than 30s before your cart expires.');
   end;
 end;

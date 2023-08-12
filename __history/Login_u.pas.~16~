@@ -22,6 +22,7 @@ type
     pnlSignup: TPanel;
     sbtnSignUp: TSpeedButton;
     spnHelp: TSpeedButton;
+    Image1: TImage;
     Button1: TButton;
     procedure btnSignInClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -81,6 +82,7 @@ begin
     frmLogin.Hide;
     DataModule1.userID := userID;
     DataModule1.CartID := DataModule1.CreateUserCart(DataModule1.userID);
+    DataModule1.timeCheckTimer.Enabled := true;
     frmBrowse.Show;
 
   except
@@ -100,7 +102,8 @@ end;
 
 procedure TfrmLogin.Button1Click(Sender: TObject);
 begin
-showMessage();
+//
+DataModule1.getImage(inputbox('','enter image id',''), Image1);
 end;
 
 // allow pressing enter when typing username or password to make you login
