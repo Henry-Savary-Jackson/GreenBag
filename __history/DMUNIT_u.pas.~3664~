@@ -141,9 +141,6 @@ type
 
     procedure warnUser();
 
-    procedure addImage(itemID: string; Image: tImage);
-
-    procedure getImage(itemID:string; Image:tImage);
 
   end;
 
@@ -194,12 +191,12 @@ end;
 procedure TDataModule1.addImage(itemID: string; Image: tImage);
 begin
   ItemTB.Locate('ItemID', itemID, []);
+  ItemTB.Edit;
   ItemTB.FieldByName('Image').Assign(Image.Picture);
   ItemTB.Post;
   ItemTB.Refresh;
 
 end;
-
 
 function TDataModule1.addToCart(ShoppingCartID, itemID: string;
   quantity: integer): string;
@@ -1043,16 +1040,7 @@ end;
 // returns the shoppingcartItemID of a particular item in a user's cart
 // this is so that the program can properly update and read that record
 // in the shoppingcartItemTb
-procedure TDataModule1.getImage(itemID: string; Image: tImage);
-var
-stream : tStream;
-begin
 
-ItemTb.Locate('ItemID', itemid, []);
-stream := ItemTB.CreateBlobStream(ItemTB.FieldByName('Image'), bmRead);
-image.Picture.LoadFromStream(stream);
-
-end;
 
 function TDataModule1.getItemInCart(itemID, ShoppingCartID: string): STRING;
 var
@@ -1542,14 +1530,34 @@ begin
         // check if enough time has elapsed
         if minutesSinceCartCreation > maxTimeWithCart then
         begin
+          // return cart once it has expired
           // ensure this is thread safe with gui rendering screen
-          TThread.CurrentThread.Synchronize(nil, self.resetCart);
+          TThread.CurrentThread.Synchronize(nil,
+            procedure
+            begin
+              warnedUser := False;
+              self.CancelCart(self.CartID);
+              self.CartID := self.CreateUserCart(self.userID);
+              if frmCHeckout.Items <> nil then
+                frmCHeckout.Items.clear;
+              showMessage
+                ('Your cart has expired! You are now using a new cart.');
+            end);
 
         end
         else if (minutesSinceCartCreation < maxTimeWithCart) and
           (minutesSinceCartCreation > timeUntilWarn) then
         begin
-          TThread.Current.Synchronize(nil, self.warnUser);
+          TThread.Current.Synchronize(nil,
+            procedure()
+            begin
+              // warn user their cart is soon expiring \
+              if not warnedUser then
+              begin
+                warnedUser := True;
+                showMessage('You have less than 30s before your cart expires.');
+              end;
+            end);
         end;
 
       end);

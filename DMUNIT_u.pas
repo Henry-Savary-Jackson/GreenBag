@@ -141,9 +141,6 @@ type
 
     procedure warnUser();
 
-    procedure addImage(itemID: string; Image: tImage);
-
-    procedure getImage(itemID: string; Image: tImage);
 
   end;
 
@@ -190,16 +187,6 @@ begin
   end;
 end;
 
-// add an item to a user's shopping cart
-procedure TDataModule1.addImage(itemID: string; Image: tImage);
-begin
-  ItemTB.Locate('ItemID', itemID, []);
-  ItemTB.Edit;
-  ItemTB.FieldByName('Image').Assign(Image.Picture);
-  ItemTB.Post;
-  ItemTB.Refresh;
-
-end;
 
 function TDataModule1.addToCart(ShoppingCartID, itemID: string;
   quantity: integer): string;
@@ -1043,16 +1030,7 @@ end;
 // returns the shoppingcartItemID of a particular item in a user's cart
 // this is so that the program can properly update and read that record
 // in the shoppingcartItemTb
-procedure TDataModule1.getImage(itemID: string; Image: tImage);
-var
-  stream: tstream;
-begin
 
-  ItemTB.Locate('ItemID', itemID, []);
-  stream := ItemTB.CreateBlobStream(ItemTB.FieldByName('Image'), bmRead);
-  Image.Picture.LoadFromStream(stream);
-
-end;
 
 function TDataModule1.getItemInCart(itemID, ShoppingCartID: string): STRING;
 var
