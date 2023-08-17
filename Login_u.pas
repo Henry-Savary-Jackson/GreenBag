@@ -28,8 +28,6 @@ type
     procedure btnHelpClick(Sender: TObject);
     procedure edtPasswordKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
-    procedure Button1Click(Sender: TObject);
-    procedure Button2Click(Sender: TObject);
 
   private
     { Private declarations }
@@ -99,17 +97,6 @@ begin
   frmSignUp.Show;
 end;
 
-procedure TfrmLogin.Button1Click(Sender: TObject);
-begin
-//
-DataModule1.getImage(inputbox('','enter image id',''), Image1);
-end;
-
-procedure TfrmLogin.Button2Click(Sender: TObject);
-begin
-//AA51811025
-DataModule1.addImage(inputbox('','enter id',''), Image1);
-end;
 
 // allow pressing enter when typing username or password to make you login
 procedure TfrmLogin.edtPasswordKeyDown(Sender: TObject; var Key: Word;
