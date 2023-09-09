@@ -141,9 +141,9 @@ type
 
     procedure warnUser();
 
-    procedure addImage(itemID: string; Image: tImage);
+    function sendRequest(url: string): TRESTResponse;
 
-    procedure getImage(itemID: string; Image: tImage);
+    function responseBodyToDataset(body: string): tADODataSet;
 
   end;
 
@@ -152,9 +152,12 @@ var
   warnedUser: boolean;
 
 const
+
   ianaTimezone = 'Africa/Johannesburg';
   maxTimeWithCart = 5;
   timeUntilWarn = 4.5;
+
+  baseUrl = 'https://localhost:8080';
 
 implementation
 
@@ -188,17 +191,6 @@ begin
     FreeAndNil(dsResult);
     FreeAndNil(params);
   end;
-end;
-
-// add an item to a user's shopping cart
-procedure TDataModule1.addImage(itemID: string; Image: tImage);
-begin
-  ItemTB.Locate('ItemID', itemID, []);
-  ItemTB.Edit;
-  ItemTB.FieldByName('Image').Assign(Image.Picture);
-  ItemTB.Post;
-  ItemTB.Refresh;
-
 end;
 
 function TDataModule1.addToCart(ShoppingCartID, itemID: string;
@@ -1043,16 +1035,6 @@ end;
 // returns the shoppingcartItemID of a particular item in a user's cart
 // this is so that the program can properly update and read that record
 // in the shoppingcartItemTb
-procedure TDataModule1.getImage(itemID: string; Image: tImage);
-var
-  stream: tstream;
-begin
-
-  ItemTB.Locate('ItemID', itemID, []);
-  stream := ItemTB.CreateBlobStream(ItemTB.FieldByName('Image'), bmRead);
-  Image.Picture.LoadFromStream(stream);
-
-end;
 
 function TDataModule1.getItemInCart(itemID, ShoppingCartID: string): STRING;
 var
@@ -1616,6 +1598,40 @@ begin
 
 end;
 
+function TDataModule1.responseBodyToDataset(body: string): tADODataSet;
+var
+  bodyJson: tJsonObject;
+  dataFields : TJSONArray;
+  outDataset: TADODataSet;
+
+begin
+  //
+  bodyJson := tJsonObject.create;
+
+
+
+  outDataset := TADODataSet.Create(nil);
+
+
+  if body.IsEmpty then
+  begin
+    Result := outDataSet;
+    Exit;
+  end;
+
+  outDataset.CreateDataSet;
+
+  bodyJson.ParseJSONValue(body);
+
+  dataFields := bodyJson.GetValue('dataFields') as TJsonArray;
+
+  data := bodyJson.get
+
+
+
+
+end;
+
 procedure TDataModule1.RollBack;
 begin
   // Rollbacks any transactions
@@ -1732,6 +1748,11 @@ begin
     end;
 
   end;
+
+end;
+
+function TDataModule1.sendRequest(url: string): TRESTResponse;
+begin
 
 end;
 

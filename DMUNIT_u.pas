@@ -141,6 +141,9 @@ type
 
     procedure warnUser();
 
+    function sendRequest(url: string): TRESTResponse;
+
+    function responseBodyToDataset(body: string): tADODataSet;
 
   end;
 
@@ -149,9 +152,12 @@ var
   warnedUser: boolean;
 
 const
+
   ianaTimezone = 'Africa/Johannesburg';
   maxTimeWithCart = 5;
   timeUntilWarn = 4.5;
+
+  baseUrl = 'https://localhost:8080';
 
 implementation
 
@@ -186,7 +192,6 @@ begin
     FreeAndNil(params);
   end;
 end;
-
 
 function TDataModule1.addToCart(ShoppingCartID, itemID: string;
   quantity: integer): string;
@@ -1031,7 +1036,6 @@ end;
 // this is so that the program can properly update and read that record
 // in the shoppingcartItemTb
 
-
 function TDataModule1.getItemInCart(itemID, ShoppingCartID: string): STRING;
 var
   sql: string;
@@ -1594,6 +1598,56 @@ begin
 
 end;
 
+function TDataModule1.responseBodyToDataset(body: string): tADODataSet;
+var
+  bodyJson: tJsonObject;
+  dataFields : TJSONArray;
+  outDataset: TADODataSet;
+  jsonValue : tJsonValue;
+  currentFieldName : string;
+
+begin
+  //
+  bodyJson := tJsonObject.create;
+
+
+
+  outDataset := TADODataSet.Create(nil);
+
+
+  if body.IsEmpty then
+  begin
+    Result := outDataSet;
+    Exit;
+  end;
+
+  outDataset.CreateDataSet;
+
+  bodyJson.ParseJSONValue(body);
+
+  if bodyJson.get('error') is not nil then
+  begin
+    Result := outDataset;
+    Exit;
+  end;
+
+
+  dataFields := bodyJson.GetValue('dataFields') as TJsonArray;
+
+  data := bodyJson.GetValue('data') as TJSONArray;
+
+  for jsonValue in dataFields do
+  begin
+    currentFieldName := jsonValue as String;
+
+  end;
+
+
+
+
+
+end;
+
 procedure TDataModule1.RollBack;
 begin
   // Rollbacks any transactions
@@ -1710,6 +1764,11 @@ begin
     end;
 
   end;
+
+end;
+
+function TDataModule1.sendRequest(url: string): TRESTResponse;
+begin
 
 end;
 
