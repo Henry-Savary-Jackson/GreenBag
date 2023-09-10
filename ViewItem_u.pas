@@ -88,7 +88,7 @@ begin;
   end;
 
   try
-    DataModule1.addToCart(DataModule1.CartID, itemID, quantity);
+    DataModule1.addToCart(DataModule1.username,itemID,DataModule1.jwtToken, quantity);
     frmViewItem.Hide;
     frmBrowse.Show;
 
@@ -121,7 +121,7 @@ var
 begin
   rating := trcRating.Position;
   try
-    DataModule1.sendRating(DataModule1.userID, itemID, rating);
+    DataModule1.sendRating(DataModule1.username, itemID, DataModule1.jwtToken, rating);
 
     showMessage('Your feedback has been sent.');
 

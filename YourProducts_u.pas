@@ -119,7 +119,7 @@ begin
     [mbYes, mbNo], 0, mbNo) = mryes then
   begin
     // delete itme from database
-    datamodule1.deleteItem(itemID);
+    datamodule1.deleteItem(itemID, DataModule1.jwtToken);
     // remove from gui
     items.TryGetValue(itemID, itemToBeDeleted);
     itemToBeDeleted.Hide;
@@ -142,7 +142,7 @@ begin
 
     try
       // get info on your products in a range
-      dsResult := datamodule1.getProducts(datamodule1.userID, scrollRangeMin,
+      dsResult := datamodule1.getProducts(datamodule1.username, scrollRangeMin,
         scrollRangeMax, numProducts);
 
       lblNumberProducts.Caption := 'Number of products: ' +

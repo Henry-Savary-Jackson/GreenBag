@@ -93,11 +93,6 @@ type
     // button to allow use to load more items
     btnLoadMoreitems: tButton;
 
-  const
-    // all the current categories
-    categoryList: array [0 .. 5] of string = ('Toileteries', 'Food',
-      'Electronics', 'Containers', 'Clothes', 'Other');
-
     { Public declarations }
 
   end;
@@ -219,8 +214,6 @@ begin
       btnLoadMoreitems := nil;
     end;
 
-    DataModule1.timeCheckTimer.Enabled := false;
-
     frmBrowse.Hide;
     frmLogin.Show;
 
@@ -278,46 +271,32 @@ end;
 
 procedure TfrmBrowse.FormShow(Sender: TObject);
 var
-  dsResult: tAdoDataset;
   currentCheckbox: TCheckBox;
   i: integer;
 begin
 
   // add all the categories to gui
-  dsResult := DataModule1.getCategories;
 
-  if dsResult.Fields.FindField('Status') <> nil then
+  if categoryCheckboxes <> nil then
+    FreeAndNil(categoryCheckboxes);
+
+  categoryCheckboxes := TObjectList<TCheckBox>.Create();
+
+  // add the checkboxes
+  for i := 0 to length(DataModule1.categoryList) - 1 do
+
   begin
-    showMessage(dsResult['Status']);
-  end
-  else
-  begin
-    dsResult.First;
+    currentCheckbox := TCheckBox.Create(self);
+    currentCheckbox.Parent := flpnlCategories;
+    currentCheckbox.Caption := DataModule1.categoryList[i];
+    currentCheckbox.AlignWithMargins := True;
+    currentCheckbox.Margins.Left := 10;
+    categoryCheckboxes.Add(currentCheckbox);
 
-    if categoryCheckboxes <> nil then
-      FreeAndNil(categoryCheckboxes);
-
-    categoryCheckboxes := TObjectList<TCheckBox>.Create();
-
-    // add the checkboxes
-    for i := 0 to length(categoryList) - 1 do
-
-    begin
-      currentCheckbox := TCheckBox.Create(self);
-      currentCheckbox.Parent := flpnlCategories;
-      currentCheckbox.Caption := categoryList[i];
-      currentCheckBox.AlignWithMargins:= True ;
-      currentCheckbox.Margins.Left:= 10;
-      categoryCheckboxes.Add(currentCheckbox);
-
-      dsResult.Next;
-    end;
-
-    FreeAndNil(dsResult);
-
-    // load profile picture
-    DataModule1.loadProfilePicture(DataModule1.userID, imgProfile);
   end;
+
+  // load profile picture
+  DataModule1.loadProfilePicture(DataModule1.username, imgProfile);
 
 end;
 
@@ -497,7 +476,8 @@ end;
 // if the user is the object's seller, rather show them the screen that allows them to edit
 procedure TfrmBrowse.ViewItem(sellerID, itemID: string);
 begin
-  if DataModule1.userID = sellerID then
+// TODO: fix this
+  if DataModule1.username = sellerID then
   begin
     frmAddItem.itemID := itemID;
     frmAddItem.Show;

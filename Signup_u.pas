@@ -190,11 +190,9 @@ begin
 
   try
     // try to create user
-    UserId := DataModule1.SignUp(userName, password, userType, homeaddress,
+    DataModule1.SignUp(userName, password, userType, homeaddress,
       certificationCode, imgPfp);
 
-    DataModule1.UserId := UserId;
-    DataModule1.CartID := DataModule1.CreateUserCart(DataModule1.UserId);
     frmSignUp.Hide;
     frmBrowse.Show;
 

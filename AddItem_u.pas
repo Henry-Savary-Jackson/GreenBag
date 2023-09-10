@@ -191,25 +191,18 @@ begin
 
       if itemID = '' then
       begin
-        // if this is a new item
-        itemID := UpperCase(DataModule1.userID[2] + sName[1]);
 
-        for I := 1 to 8 do
-        begin
-          itemID := itemID + intToStr(random(10))
-        end;
-
-        DataModule1.insertItem(itemID, sName, DataModule1.userID, category,
+        DataModule1.insertItem( sName, category,
           sDesc, Price, stock, maxWithdrawstock, CF, EU, WU, CFProduce,
-          EUProduce, WUProduce, imgItem);
+          EUProduce, WUProduce,DataModule1.jwtToken ,imgItem);
 
       end
       else
       begin
         // if this is updating an existing item
-        DataModule1.updateItem(itemID, sName, DataModule1.userID, category,
+        DataModule1.updateItem( sName, DataModule1.username, category,
           sDesc, Price, stock, maxWithdrawstock, CF, EU, WU, CFProduce,
-          EUProduce, WUProduce, imgItem);
+          EUProduce, WUProduce,DataModule1.jwtToken,imgItem);
 
       end;
 
@@ -242,24 +235,18 @@ end;
 procedure TfrmAddItem.FormShow(Sender: TObject);
 var
   dsResult: tAdoDataset;
-  dsCategories: tAdoDataset;
   imageStream: tStream;
+  i : integer;
 begin
 
   imgItem.Picture.Graphic := nil;
   cmbCategory.Items.Clear;
 
-  dsCategories := DataModule1.getCategories;
-
-  dsCategories.First;
-
-  while not dsCategories.Eof do
+  for i := 0 to length(DataModule1.categoryList)-1 do
   begin
-    cmbCategory.Items.Add(dsCategories['Category']);
-    dsCategories.Next;
+    cmbCategory.Items.Add(DataModule1.categoryList[i]);
   end;
 
-  dsCategories.Free;
 
   if itemID <> '' then
   begin

@@ -67,9 +67,9 @@ begin
       Exit;
     end;
 
-    DataModule1.CheckoutCart(DataModule1.CartID);
+    DataModule1.CheckoutCart(DataModule1.username, DataModule1.jwtToken);
     // delete the user's cart and create a new one
-    DataModule1.CartID := DataModule1.CreateUserCart(DataModule1.userID);
+    DataModule1.CreateUserCart(DataModule1.username, DataModule1.jwtToken);
     frmCheckout.Hide;
     frmBrowse.Show;
 
@@ -108,7 +108,7 @@ procedure TfrmCheckout.removeItem(shoppingCartItemID: string);
 begin
   try
     // change db
-    DataModule1.removeFromCart(shoppingCartItemID);
+    DataModule1.removeFromCart(shoppingCartItemID, DataModule1.jwtToken);
     updateDisplay;
 
   except
@@ -133,7 +133,7 @@ begin
 
   items := tObjectList<CartItem>.create();
 
-  dsCartItems := DataModule1.getCartItems(DataModule1.CartID);
+  dsCartItems := DataModule1.getCartItems(DataModule1.username, DataModule1.jwtToken);
 
   dsCartItems.First;
 
@@ -156,7 +156,7 @@ procedure TfrmCheckout.updateItemQuantity(itemID: string; iQuantity: integer;
   Cost: double);
 begin
   try
-    DataModule1.addToCart(DataModule1.CartID, itemID, iQuantity);
+    DataModule1.addToCart(DataModule1.username, itemID, DataModule1.jwtToken, iQuantity);
     updateLabels;
 
   except

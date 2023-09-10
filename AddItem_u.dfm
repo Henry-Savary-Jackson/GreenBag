@@ -101,9 +101,7 @@ object frmAddItem: TfrmAddItem
       Caption = 'Average Rating: '
       Color = 11074994
       ParentColor = False
-      ExplicitLeft = 5
-      ExplicitTop = 2
-      ExplicitWidth = 561
+      ExplicitWidth = 122
     end
     object pnlName: TPanel
       Left = 1
@@ -240,7 +238,7 @@ object frmAddItem: TfrmAddItem
         AlignWithMargins = True
         Left = 477
         Top = 9
-        Width = 552
+        Width = 40
         Height = 17
         Margins.Left = 10
         Margins.Top = 6
@@ -354,7 +352,7 @@ object frmAddItem: TfrmAddItem
         AlignWithMargins = True
         Left = 469
         Top = 9
-        Width = 344
+        Width = 63
         Height = 17
         Margins.Left = 10
         Margins.Top = 6
@@ -413,7 +411,7 @@ object frmAddItem: TfrmAddItem
         AlignWithMargins = True
         Left = 469
         Top = 9
-        Width = 100
+        Width = 63
         Height = 17
         Margins.Left = 10
         Margins.Top = 6
@@ -475,7 +473,7 @@ object frmAddItem: TfrmAddItem
         AlignWithMargins = True
         Left = 477
         Top = 9
-        Width = 90
+        Width = 36
         Height = 17
         Margins.Left = 10
         Margins.Top = 6
@@ -522,9 +520,9 @@ object frmAddItem: TfrmAddItem
       ExplicitWidth = 459
       object lblCFProduce: TLabel
         AlignWithMargins = True
-        Left = 5
+        Left = 1
         Top = 15
-        Width = 248
+        Width = 252
         Height = 17
         Margins.Left = 10
         Margins.Top = 5
@@ -585,9 +583,9 @@ object frmAddItem: TfrmAddItem
         41)
       object lblMaxWithdrawStock: TLabel
         AlignWithMargins = True
-        Left = 27
+        Left = 34
         Top = 8
-        Width = 226
+        Width = 219
         Height = 17
         Margins.Left = 10
         Margins.Top = 5
@@ -596,13 +594,12 @@ object frmAddItem: TfrmAddItem
         Alignment = taRightJustify
         Anchors = []
         Caption = 'Maximum withdrawable stock:'
-        ExplicitLeft = 25
       end
       object lblmaxwithdrawstockunits: TLabel
         AlignWithMargins = True
         Left = 477
         Top = 15
-        Width = 100
+        Width = 35
         Height = 17
         Margins.Left = 10
         Margins.Top = 30
@@ -658,7 +655,7 @@ object frmAddItem: TfrmAddItem
         AlignWithMargins = True
         Left = 477
         Top = 9
-        Width = 100
+        Width = 35
         Height = 17
         Margins.Left = 10
         Margins.Top = 6

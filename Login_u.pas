@@ -22,6 +22,8 @@ type
     pnlSignup: TPanel;
     sbtnSignUp: TSpeedButton;
     spnHelp: TSpeedButton;
+    Button1: TButton;
+    DBGrid1: TDBGrid;
     procedure btnSignInClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnSignUpScreenClick(Sender: TObject);
@@ -76,13 +78,12 @@ begin
   end;
 
   try
-    userID := DataModule1.Login(userName, password);
+    DataModule1.Login(userName, password);
+    showMessage(DataModule1.jwtToken);
     // set global app variables
     frmLogin.Hide;
-    DataModule1.userID := userID;
-    DataModule1.CartID := DataModule1.CreateUserCart(DataModule1.userID);
-    DataModule1.timeCheckTimer.Enabled := true;
     frmBrowse.Show;
+
 
   except
     on e: Exception do
@@ -100,15 +101,21 @@ begin
 end;
 
 procedure TfrmLogin.Button1Click(Sender: TObject);
+var
+ds : tDataset;
+datasrc : tDataSource;
 begin
-//
-DataModule1.getImage(inputbox('','enter image id',''), Image1);
+ds := DataModule1.viewItem('RE9562810');
+
+ds.First;
+ dataSrc := TDataSource.Create(self);
+ datasrc.DataSet := ds;
+ DBGrid1.DataSource := datasrc;
 end;
 
 procedure TfrmLogin.Button2Click(Sender: TObject);
 begin
 //AA51811025
-DataModule1.addImage(inputbox('','enter id',''), Image1);
 end;
 
 // allow pressing enter when typing username or password to make you login

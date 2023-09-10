@@ -134,7 +134,7 @@ object frmProfile: TfrmProfile
         AlignWithMargins = True
         Left = 9
         Top = 9
-        Width = 352
+        Width = 115
         Height = 18
         Align = alTop
         Alignment = taCenter
@@ -145,13 +145,12 @@ object frmProfile: TfrmProfile
         Font.Name = 'Arial Rounded MT Bold'
         Font.Style = []
         ParentFont = False
-        ExplicitWidth = 115
       end
       object lblRevenueTotal: TLabel
         AlignWithMargins = True
         Left = 9
         Top = 153
-        Width = 352
+        Width = 120
         Height = 18
         Align = alTop
         Alignment = taCenter
@@ -162,13 +161,12 @@ object frmProfile: TfrmProfile
         Font.Name = 'Arial Rounded MT Bold'
         Font.Style = []
         ParentFont = False
-        ExplicitWidth = 120
       end
       object lblSales: TLabel
         AlignWithMargins = True
         Left = 9
         Top = 129
-        Width = 352
+        Width = 93
         Height = 18
         Align = alTop
         Alignment = taCenter
@@ -179,13 +177,12 @@ object frmProfile: TfrmProfile
         Font.Name = 'Arial Rounded MT Bold'
         Font.Style = []
         ParentFont = False
-        ExplicitWidth = 93
       end
       object lblSpendingTotal: TLabel
         AlignWithMargins = True
         Left = 9
         Top = 33
-        Width = 352
+        Width = 124
         Height = 18
         Align = alTop
         Alignment = taCenter
@@ -196,13 +193,12 @@ object frmProfile: TfrmProfile
         Font.Name = 'Arial Rounded MT Bold'
         Font.Style = []
         ParentFont = False
-        ExplicitWidth = 124
       end
       object lblTotalCF: TLabel
         AlignWithMargins = True
         Left = 9
         Top = 57
-        Width = 352
+        Width = 185
         Height = 18
         Align = alTop
         Alignment = taCenter
@@ -213,13 +209,12 @@ object frmProfile: TfrmProfile
         Font.Name = 'Arial Rounded MT Bold'
         Font.Style = []
         ParentFont = False
-        ExplicitWidth = 185
       end
       object lblTotalEU: TLabel
         AlignWithMargins = True
         Left = 9
         Top = 81
-        Width = 352
+        Width = 161
         Height = 18
         Align = alTop
         Alignment = taCenter
@@ -230,13 +225,12 @@ object frmProfile: TfrmProfile
         Font.Name = 'Arial Rounded MT Bold'
         Font.Style = []
         ParentFont = False
-        ExplicitWidth = 161
       end
       object lblTotalWU: TLabel
         AlignWithMargins = True
         Left = 9
         Top = 105
-        Width = 352
+        Width = 152
         Height = 18
         Align = alTop
         Alignment = taCenter
@@ -247,7 +241,6 @@ object frmProfile: TfrmProfile
         Font.Name = 'Arial Rounded MT Bold'
         Font.Style = []
         ParentFont = False
-        ExplicitWidth = 152
       end
       object pnlAddFunds: TPanel
         Left = 6
@@ -627,7 +620,6 @@ object frmProfile: TfrmProfile
           Charts = <>
         end
         object srsStats: TBarSeries
-          HoverElement = []
           Marks.Font.OutLine.Visible = True
           Marks.Font.Shadow.Visible = False
           Marks.Visible = False
@@ -638,7 +630,6 @@ object frmProfile: TfrmProfile
           YValues.Name = 'Bar'
           YValues.Order = loNone
           Data = {0000000000}
-          Detail = {0000000000}
         end
       end
       object pnlRight: TPanel

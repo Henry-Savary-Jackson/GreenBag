@@ -182,7 +182,7 @@ begin
 
   try
     // add that amount to user
-    DataModule1.addFunds(DataModule1.userID, dExtra);
+    DataModule1.addFunds(DataModule1.username, DataModule1.jwtToken, dExtra);
 
     // update gui
     balance := balance + dExtra;
@@ -254,7 +254,7 @@ var
   imageStream: tStream;
 begin
 
-  dsResult := DataModule1.userInfo(DataModule1.userID);
+  dsResult := DataModule1.userInfo(DataModule1.username);
 
   showTotals(dsResult['UserType']);
   ShowCategButtons(dsResult['UserType']);
@@ -329,7 +329,7 @@ begin
   DataModule1.loadImageFromFile(imgProfilePic, self);
 
   try
-    DataModule1.setProfilePicture(DataModule1.userID, imgProfilePic);
+    DataModule1.setProfilePicture(DataModule1.username, DataModule1.jwtToken, imgProfilePic);
 
   except
     on e: exception do
@@ -400,7 +400,7 @@ var
 begin
 
   // get the statistic
-  dsResult := DataModule1.obtainStats(DataModule1.userID, statType,
+  dsResult := DataModule1.obtainStats(DataModule1.username, DataModule1.jwtToken, statType,
     dateRangeBegin, dateRangeEnd);
 
   if dsResult.Fields.FindField('Status') <> nil then

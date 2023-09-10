@@ -4,7 +4,7 @@ object frmLogin: TfrmLogin
   BorderWidth = 3
   Caption = 'Login'
   ClientHeight = 357
-  ClientWidth = 336
+  ClientWidth = 660
   Color = 11074992
   Font.Charset = ANSI_CHARSET
   Font.Color = 16384
@@ -144,5 +144,26 @@ object frmLogin: TfrmLogin
       OnClick = btnSignUpScreenClick
       ExplicitTop = 4
     end
+  end
+  object Button1: TButton
+    Left = 241
+    Top = 277
+    Width = 75
+    Height = 25
+    Caption = 'Button1'
+    TabOrder = 5
+    OnClick = Button1Click
+  end
+  object DBGrid1: TDBGrid
+    Left = 328
+    Top = 112
+    Width = 664
+    Height = 237
+    TabOrder = 6
+    TitleFont.Charset = ANSI_CHARSET
+    TitleFont.Color = 16384
+    TitleFont.Height = -16
+    TitleFont.Name = 'Arial Rounded MT Bold'
+    TitleFont.Style = []
   end
 end
