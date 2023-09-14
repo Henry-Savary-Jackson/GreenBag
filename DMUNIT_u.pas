@@ -13,10 +13,6 @@ uses
 
 type
   TDataModule1 = class(TDataModule)
-    restCLient: TRESTClient;
-    restRequest: TRESTRequest;
-    restResponse: TRESTResponse;
-    procedure DataModuleCreate(Sender: TObject);
     procedure checkIFCartOutdated(Sender: TObject);
   private
     { Private declarations }
@@ -52,6 +48,10 @@ type
     procedure SignUp(username, password, usertype, homeAddress,
       certificationcode: string; imgPfp: tImage);
 
+    procedure Changeusername(oldusername, newusername, token: string);
+
+    procedure changePassword(username, oldpassword, newpassword: string);
+
     procedure loadProfilePicture(username: string; Image: tImage);
 
     procedure setProfilePicture(username, token: string; imgPfp: tImage);
@@ -67,15 +67,15 @@ type
 
     function viewItem(itemid: string): tADODataSet;
 
-    procedure insertItem( Name, category, Desc: string;
+    procedure insertItem(Name, category, Desc: string;
       Price, stock, maxwithdrawstock, CF, EU, WU, CFProduce, EUProduce,
-      WUProduce: double; token:string; Image: tImage = nil);
+      WUProduce: double; token: string; Image: tImage = nil);
 
     procedure updateItem(itemid, Name, category, Desc: string;
       Price, stock, maxwithdrawstock, CF, EU, WU, CFProduce, EUProduce,
-      WUProduce: double;token:string; Image: tImage = nil);
+      WUProduce: double; token: string; Image: tImage = nil);
 
-    procedure deleteItem(itemid, token :string);
+    procedure deleteItem(itemid, token: string);
 
     procedure sendRating(username, itemid, token: string; rating: integer);
 
@@ -83,7 +83,7 @@ type
       var numproducts: integer): tADODataSet;
 
     function getSearchResults(searchQuery: string; categories: TList<string>;
-      CFRange, EURange, WURange, resultRange: array of integer;
+      CFRange, EURange, WURange, resultRange, ratingRange: array of integer;
       var numResults: integer): tADODataSet;
 
     // methods relating to transaction management
@@ -93,18 +93,16 @@ type
 
     procedure CheckoutCart(buyerusername, token: string);
 
-    function addToCart(buyerusername: string; itemid, token: string;
-      quantity: integer): string;
+    procedure addToCart(buyerusername: string; itemid, token: string;
+      quantity: integer);
 
     function getCartItems(buyerusername, token: string): tADODataSet;
 
-    procedure removeFromCart(ShoppingCartItemID, token: string);
+    procedure removeFromCart(ShoppingCartItemID, token, buyerusername: string);
 
     procedure loadImageFromFile(img: tImage; window: TForm);
 
     procedure addFunds(username, token: string; amount: double);
-
-    function CloneRecordset(const Data: _Recordset): _Recordset;
 
     function ResizeImage(Image: tImage; width, height: integer): tpngImage;
 
@@ -112,7 +110,8 @@ type
 
     function sendRequest(url: string; method: trestrequestmethod = rmGET;
       body: TObject = nil; authorization: string = '';
-      contentType: TRESTContentType = ctAPPLICATION_JSON): TRESTResponse;
+      contentType: TRESTContentType = ctAPPLICATION_JSON;
+      queryParams: TList < TPair < String, variant >> = nil): TRESTResponse;
 
     function responseBodyToDataset(body: string): tADODataSet;
 
@@ -142,25 +141,31 @@ var
   responseJson, body: tJsonObject;
 begin
 
-  url := format('%s/u/%/cart/return', [baseUrl, username]);
+  url := format('%s/users/%s/funds', [baseUrl, username]);
 
   body := tJsonObject.Create;
 
   body.AddPair('Username', username);
   body.AddPair('Funds', TJSONNumber.Create(amount));
 
-  response := sendRequest(url, rmPOST, body, token);
+  try
+    response := sendRequest(url, rmPUT, body, token);
 
-  if response.StatusCode <> 200 then
-  begin
-    responseJson := tJsonObject.ParseJSONValue(response.Content) as tJsonObject;
-    raise Exception.Create((responseJson.P['error'] as tJsonString).Value);
+    if response.StatusCode <> 200 then
+    begin
+      responseJson := tJsonObject.ParseJSONValue(response.Content)
+        as tJsonObject;
+      raise Exception.Create((responseJson.P['error'] as tJsonString).Value);
+    end;
+
+  finally
+    freeandnil(response);
   end;
 
 end;
 
-function TDataModule1.addToCart(buyerusername: string; itemid, token: string;
-      quantity: integer): string;
+procedure TDataModule1.addToCart(buyerusername: string; itemid, token: string;
+  quantity: integer);
 var
   ShoppingCartItemID, url: string;
 
@@ -169,24 +174,26 @@ var
   responseJson, body: tJsonObject;
 begin
 
-  url := format('%s/u/%/cart/return', [baseUrl, buyerusername]);
+  url := format('%s/users/%s/cart/items', [baseUrl, buyerusername]);
 
   body := tJsonObject.Create;
 
   body.AddPair('ItemID', itemid);
   body.AddPair('Quantity', TJSONNumber.Create(quantity));
 
-  response := sendRequest(url, rmPOST, body, token);
+  try
+    response := sendRequest(url, rmPOST, body, token);
 
-  responseJson := tJsonObject.ParseJSONValue(response.Content) as tJsonObject;
+    responseJson := tJsonObject.ParseJSONValue(response.Content) as tJsonObject;
 
-  if response.StatusCode <> 200 then
-  begin
-    raise Exception.Create((responseJson.P['error'] as tJsonString).Value);
+    if response.StatusCode <> 200 then
+    begin
+      raise Exception.Create((responseJson.P['error'] as tJsonString).Value);
+    end;
+
+  finally
+    freeandnil(response);
   end;
-
-  Result := (responseJson.P['data[0].ShoppingCartItemID'] as tJsonString).Value;
-
 end;
 
 // removes the user's current cart from the database
@@ -197,9 +204,40 @@ var
   responseJson: tJsonObject;
 begin
 
-  url := format('%s/u/%/cart/return', [baseUrl, buyerusername]);
+  url := format('%s/users/%/cart/return', [baseUrl, buyerusername]);
 
-  response := sendRequest(url, rmDelete, nil, token);
+  try
+    response := sendRequest(url, rmDelete, nil, token);
+
+    if response.StatusCode <> 200 then
+    begin
+      responseJson := tJsonObject.ParseJSONValue(response.Content)
+        as tJsonObject;
+      raise Exception.Create((responseJson.P['error'] as tJsonString).Value);
+    end;
+
+  finally
+    freeandnil(response);
+  end;
+
+end;
+
+procedure TDataModule1.changePassword(username, oldpassword,
+  newpassword: string);
+var
+  url: string;
+  response: TRESTResponse;
+  responseJson, body: tJsonObject;
+begin
+
+  url := format('%s/users/%s/reset', [baseUrl, username]);
+
+  body := tJsonObject.Create;
+
+  body.AddPair('oldPassword', oldpassword);
+  body.AddPair('newPassword', newpassword);
+
+  response := sendRequest(url, rmPUT, body);
 
   if response.StatusCode <> 200 then
   begin
@@ -209,6 +247,40 @@ begin
 
 end;
 
+procedure TDataModule1.Changeusername(oldusername, newusername, token: string);
+var
+  url: string;
+  response: TRESTResponse;
+  responseJson, body: tJsonObject;
+begin
+
+  url := format('%s/users/%s/change', [baseUrl, oldusername]);
+
+  body := tJsonObject.Create;
+
+  body.AddPair('oldUsername', oldusername);
+  body.AddPair('newUsername', newusername);
+
+  try
+    response := sendRequest(url, rmPUT, body, token);
+
+    if response.StatusCode <> 200 then
+    begin
+      responseJson := tJsonObject.ParseJSONValue(response.Content)
+        as tJsonObject;
+      raise Exception.Create((responseJson.P['error'] as tJsonString).Value);
+    end;
+
+    username := newusername;
+
+  finally
+
+    freeandnil(response);
+  end;
+
+end;
+
+// send a request to see if cart has expired
 procedure TDataModule1.checkIFCartOutdated(Sender: TObject);
 begin
   //
@@ -222,47 +294,56 @@ var
   responseJson: tJsonObject;
 begin
 
-end;
+  url := format('%s/users/%s/cart/checkout', [baseUrl, buyerusername]);
 
-// creates a deep copy of a recordset so as to copy the data from on dataset
-// to another
-// thanks stack overflow
-function TDataModule1.CloneRecordset(const Data: _Recordset): _Recordset;
-var
-  newRec: _Recordset;
-  stm: stream;
-begin
-  newRec := CoRecordset.Create as _Recordset;
-  stm := CoStream.Create;
-  Data.Save(stm, adPersistADTG);
-  newRec.Open(stm, EmptyParam, CursorTypeEnum(adOpenUnspecified),
-    LockTypeEnum(adLockUnspecified), 0);
-  Result := newRec;
+  try
+    response := sendRequest(url, rmPOST, nil, token, ctAPPLICATION_JSON);
+
+    if response.StatusCode <> 200 then
+    begin
+      responseJson := tJsonObject.ParseJSONValue(response.Content)
+        as tJsonObject;
+      raise Exception.Create((responseJson.P['error'] as tJsonString).Value);
+    end;
+
+  finally
+    freeandnil(response);
+  end;
+
 end;
 
 // once the user has checked out a cart or has logged in
 // generate a new shopping cart for the user
 function TDataModule1.CreateUserCart(buyerusername, token: string): string;
 var
-  sShoppingCartID, sql: string;
-  i: integer;
-  params: tObjectDictionary<string, Variant>;
-  dsResult: tADODataSet;
+  url: string;
+  response: TRESTResponse;
+  responseJson: tJsonObject;
 begin
 
+  url := format('%s/users/%s/cart/create', [baseUrl, buyerusername]);
+
+  try
+    response := sendRequest(url, rmPOST, nil, token, ctAPPLICATION_JSON);
+
+    if response.StatusCode <> 200 then
+    begin
+      responseJson := tJsonObject.ParseJSONValue(response.Content)
+        as tJsonObject;
+      raise Exception.Create((responseJson.P['error'] as tJsonString).Value);
+    end;
+
+  finally
+    freeandnil(response);
+  end;
 end;
 
-procedure TDataModule1.DataModuleCreate(Sender: TObject);
-begin
-  //
-
-end;
 
 // Mark an item as deleted
 // do not remove any actual records, we need to maintain referential integrity
 // between other tables
 
-procedure TDataModule1.deleteItem(itemid, token :string);
+procedure TDataModule1.deleteItem(itemid, token: string);
 var
   url: string;
   body, responseJson: tJsonObject;
@@ -272,12 +353,18 @@ begin
 
   url := format('%s/item/%s', [baseUrl, itemid]);
 
-  response := sendRequest(url, rmDelete, nil, token);
+  try
+    response := sendRequest(url, rmDelete, nil, token);
 
-  if response.StatusCode <> 200 then
-  begin
-    responseJson := tJsonObject.ParseJSONValue(response.Content) as tJsonObject;
-    raise Exception.Create((responseJson.P['error'] as tJsonString).Value);
+    if response.StatusCode <> 200 then
+    begin
+      responseJson := tJsonObject.ParseJSONValue(response.Content)
+        as tJsonObject;
+      raise Exception.Create((responseJson.P['error'] as tJsonString).Value);
+    end;
+
+  finally
+    freeandnil(response);
   end;
 
 end;
@@ -291,19 +378,23 @@ var
 
 begin
 
-  url := format('%s/u/%s/cart', [baseUrl, buyerusername]);
+  url := format('%s/users/%s/cart', [baseUrl, buyerusername]);
 
-  response := sendRequest(url, rmget, nil, token);
+  try
+    response := sendRequest(url, rmGET, nil, token);
 
+    if response.StatusCode <> 200 then
+    begin
+      responseJson := tJsonObject.ParseJSONValue(response.Content)
+        as tJsonObject;
+      raise Exception.Create((responseJson.P['error'] as tJsonString).Value);
+    end;
 
-  if response.StatusCode <> 200 then
-  begin
-    responseJson := tJsonObject.ParseJSONValue(response.Content) as tJsonObject;
-    raise Exception.Create((responseJson.P['error'] as tJsonString).Value);
+    Result := responseBodyToDataset(response.Content);
+
+  finally
+    freeandnil(response);
   end;
-
-  Result := responseBodyToDataset(response.Content);
-
 
 end;
 
@@ -338,9 +429,24 @@ end;
 function TDataModule1.getProducts(username: string; iMin, iMax: integer;
   var numproducts: integer): tADODataSet;
 var
-  sql, url, lastItemId: string;
+  url: string;
+  response: TRESTResponse;
+  responseJson: tJsonObject;
 begin
   //
+
+  url := format('%s/users/%s/products', [baseUrl, username]);
+
+  response := sendRequest(url);
+
+  if response.StatusCode <> 200 then
+  begin
+    responseJson := tJsonObject.ParseJSONValue(response.Content) as tJsonObject;
+    raise Exception.Create((responseJson.P['error'] as tJsonString).Value);
+  end;
+
+  Result := responseBodyToDataset(response.Content);
+  numproducts := Result.RecordCount;
 
 end;
 
@@ -352,47 +458,120 @@ var
   stream: tBytesStream;
 
 begin
-  url := format('%s/u/%s/profileImage', [baseUrl, username]);
-
-  response := sendRequest(url);
-
-  if response.StatusCode <> 200 then
-  begin
-    responseJson := tJsonObject.ParseJSONValue(response.Content) as tJsonObject;
-    raise Exception.Create((responseJson.P['error'] as tJsonString).Value);
-  end;
+  url := format('%s/users/%s/profileImage', [baseUrl, username]);
 
   try
-    stream := tBytesStream.Create(BytesOf(response.Content));
-    Image.Picture.LoadFromStream(stream);
+    response := sendRequest(url);
+
+    if response.StatusCode <> 200 then
+    begin
+      responseJson := tJsonObject.ParseJSONValue(response.Content)
+        as tJsonObject;
+      raise Exception.Create((responseJson.P['error'] as tJsonString).Value);
+    end;
+
+    try
+      stream := tBytesStream.Create(BytesOf(response.Content));
+      Image.Picture.LoadFromStream(stream);
+    finally
+
+      stream.Free;
+    end;
   finally
 
-    stream.Free;
+    freeandnil(response);
   end;
 
 end;
 
 // Search for items with a specific string and category
 function TDataModule1.getSearchResults(searchQuery: string;
-  categories: TList<string>; CFRange, EURange, WURange,
-  resultRange: array of integer; var numResults: integer): tADODataSet;
+  categories: TList<string>; CFRange, EURange, WURange, resultRange,
+  ratingRange: array of integer; var numResults: integer): tADODataSet;
 var
-  url: string;
+  url, currentCateg: string;
+  body, responseJson: tJsonObject;
   response: TRESTResponse;
-  responseJson: tJsonObject;
+  queryParams: TList<TPair<String, variant>>;
 
 begin
 
   url := format('%s/search', [baseUrl]);
 
+  queryParams := TList < TPair < String, variant >>.Create;
 
+  if length(resultRange) <> 0 then
+  begin
+    queryParams.Add(TPair<String, variant>.Create('indexRange',
+      resultRange[0]));
+    queryParams.Add(TPair<String, variant>.Create('indexRange',
+      resultRange[1]));
+
+  end;
+
+  if length(ratingRange) <> 0 then
+  begin
+    queryParams.Add(TPair<String, variant>.Create('ratingRange',
+      ratingRange[0]));
+
+  end;
+
+  if length(CFRange) <> 0 then
+  begin
+    queryParams.Add(TPair<String, variant>.Create('CFRange', CFRange[0]));
+    queryParams.Add(TPair<String, variant>.Create('CFRange', CFRange[1]));
+
+  end;
+
+  if length(EURange) <> 0 then
+  begin
+    queryParams.Add(TPair<String, variant>.Create('EURange', EURange[0]));
+    queryParams.Add(TPair<String, variant>.Create('EURange', EURange[1]));
+
+  end;
+
+  if length(WURange) <> 0 then
+  begin
+    queryParams.Add(TPair<String, variant>.Create('WURange', WURange[0]));
+    queryParams.Add(TPair<String, variant>.Create('WURange', WURange[1]));
+
+  end;
+
+  if categories <> nil then
+  begin
+
+    for currentCateg in categories do
+    begin
+
+      queryParams.Add(TPair<String, variant>.Create('categories',
+        currentCateg));
+
+    end;
+
+  end;
+
+  queryParams.Add(TPair<String, variant>.Create('query', searchQuery));
+
+  try
+    response := sendRequest(url, rmGET, nil, '', ctAPPLICATION_JSON,
+      queryParams);
+
+    Result := responseBodyToDataset(response.Content);
+
+    numResults := Result.RecordCount;
+
+  finally
+
+    freeandnil(response);
+
+  end;
 
 end;
 
 // procedure to insert a new item into the database
-procedure TDataModule1.insertItem( Name, category, Desc: string;
-      Price, stock, maxwithdrawstock, CF, EU, WU, CFProduce, EUProduce,
-      WUProduce: double; token:string; Image: tImage = nil);
+procedure TDataModule1.insertItem(Name, category, Desc: string;
+  Price, stock, maxwithdrawstock, CF, EU, WU, CFProduce, EUProduce,
+  WUProduce: double; token: string; Image: tImage = nil);
 var
   url: string;
   body, responseJson: tJsonObject;
@@ -417,17 +596,25 @@ begin
   body.AddPair('Stock', TJSONNumber.Create(stock));
   body.AddPair('MaxWithdrawableStock', TJSONNumber.Create(maxwithdrawstock));
 
-  response := sendRequest(url, rmPOST, body, token);
+  try
 
-  if response.StatusCode <> 200 then
-  begin
-    responseJson := tJsonObject.ParseJSONValue(response.Content) as tJsonObject;
-    raise Exception.Create((responseJson.P['error'] as tJsonString).Value);
-  end;
+    response := sendRequest(url, rmPOST, body, token);
 
-  if Image <> nil then
-  begin
-    // send request to update image if indicated
+    if response.StatusCode <> 200 then
+    begin
+      responseJson := tJsonObject.ParseJSONValue(response.Content)
+        as tJsonObject;
+      raise Exception.Create((responseJson.P['error'] as tJsonString).Value);
+    end;
+
+    if Image <> nil then
+    begin
+      // send request to update image if indicated
+    end;
+
+  finally
+
+    freeandnil(response);
   end;
 
 end;
@@ -453,7 +640,7 @@ begin
       showMessage('Please choose a file');
     end;
   finally
-    FreeAndNil(fileChooser);
+    freeandnil(fileChooser);
   end;
 
 end;
@@ -466,22 +653,33 @@ var
   stream: tBytesStream;
 begin
 
-  url := format('%s/u/%s/image', [baseUrl, itemid]);
-
-  response := sendRequest(url);
-
-  if response.StatusCode <> 200 then
-  begin
-    responseJson := tJsonObject.ParseJSONValue(response.Content) as tJsonObject;
-    raise Exception.Create((responseJson.P['error'] as tJsonString).Value);
-  end;
+  url := format('%s/item/%s/image', [baseUrl, itemid]);
 
   try
+
+    response := sendRequest(url);
+
+    if response.StatusCode <> 200 then
+    begin
+      responseJson := tJsonObject.ParseJSONValue(response.Content)
+        as tJsonObject;
+      raise Exception.Create((responseJson.P['error'] as tJsonString).Value);
+    end;
+
+    if response.Content.Equals('') then
+      Exit;
+
     stream := tBytesStream.Create(BytesOf(response.Content));
-    Image.Picture.LoadFromStream(stream);
+    try
+      Image.Picture.LoadFromStream(stream);
+    finally
+      freeandnil(stream);
+    end;
+
   finally
 
-    stream.Free;
+    if assigned(response) then
+      freeandnil(response);
   end;
 end;
 
@@ -501,21 +699,27 @@ begin
 
   body.AddPair('Password', password);
 
-  response := sendRequest(url, rmPOST, body);
+  try
 
-  responseBody := tJsonObject.ParseJSONValue(response.Content) as tJsonObject;
+    response := sendRequest(url, rmPOST, body);
 
-  if response.StatusCode <> 200 then
-  begin
-    raise Exception.Create((responseBody.GetValue('error')
-      as tJsonString).Value);
-    Exit
+    responseBody := tJsonObject.ParseJSONValue(response.Content) as tJsonObject;
+
+    if response.StatusCode <> 200 then
+    begin
+      raise Exception.Create
+        ((responseBody.GetValue('error') as tJsonString).Value);
+      Exit
+    end;
+
+    // get the jwt token from the succsful login attempt
+    jwtToken := (responseBody.P['data[0].token'] as tJsonString).Value;
+    self.username := username;
+
+  finally
+
+    freeandnil(response);
   end;
-
-  showMessage(responseBody.ToString);
-  // get the jwt token from the succsful login attempt
-  jwtToken := (responseBody.P['data[0].token'] as tJsonString).Value;
-  self.username := username;
 
 end;
 
@@ -523,25 +727,88 @@ end;
 // and calculated fields, so i deleted the table and instead calculated using
 // transaction history
 function TDataModule1.obtainStats(username, token: string; statType: integer;
-      DateBegin, DateEnd: tDateTime): tADODataSet;
+  DateBegin, DateEnd: tDateTime): tADODataSet;
 var
-  fieldToAnalyse: string;
-  sql: string;
-  params: tObjectDictionary<string, Variant>;
+
+  url, statTypeString: string;
+  body, responseJson: tJsonObject;
+  response: TRESTResponse;
+  queryParams: TList<TPair<String, variant>>;
 
 begin;
-  //
+  // based on stat, convert into
+  case statType of
+    stRevenue:
+      statTypeString := 'REV';
+    stSales:
+      statTypeString := 'SAL';
+    stCF:
+      statTypeString := 'CF';
+    stSpending:
+      statTypeString := 'SPE';
+    stEU:
+      statTypeString := 'EU';
+    stWU:
+      statTypeString := 'WU';
+  end;
+
+  url := format('%s/users/%s/stats/%s', [baseUrl, username, statTypeString]);
+
+  queryParams := TList < TPair < string, variant >>.Create;
+
+  // specify the range of dates to queyr stats from
+  queryParams.Add(TPair<string, variant>.Create('monthBegin',
+    FormatDateTime('yyyy-mm-dd', DateBegin)));
+  queryParams.Add(TPair<string, variant>.Create('monthEnd',
+    FormatDateTime('yyyy-mm-dd', DateEnd)));
+
+  try
+    response := sendRequest(url, rmGET, nil, token, ctAPPLICATION_JSON,
+      queryParams);
+
+    if response.StatusCode <> 200 then
+    begin
+      responseJson := tJsonObject.ParseJSONValue(response.Content)
+        as tJsonObject;
+      raise Exception.Create((responseJson.P['error'] as tJsonString).Value);
+    end;
+
+    Result := responseBodyToDataset(response.Content);
+
+  finally
+
+    freeandnil(response);
+  end;
 end;
 
 // remove an item from a user's cart
-procedure TDataModule1.removeFromCart(ShoppingCartItemID, token: string);
+procedure TDataModule1.removeFromCart(ShoppingCartItemID, token,
+  buyerusername: string);
 var
-  sql: string;
-  dsResult, dsResultItemInfo: tADODataSet;
-  params: tObjectDictionary<string, Variant>;
-  quantity: integer;
+  url: string;
+  dsResult: tADODataSet;
+  response: TRESTResponse;
+  params: tObjectDictionary<string, variant>;
+  body: tJsonObject;
   itemid: string;
 begin
+
+  url := format('%s/users/%s/cart/items', [baseUrl, buyerusername]);
+
+  body := tJsonObject.Create;
+
+  body.AddPair('ShoppingCartItemID', ShoppingCartItemID);
+
+  try
+
+    response := sendRequest(url, rmDelete, body, token);
+
+
+    // handle errors
+
+  finally
+    freeandnil(response);
+  end;
 
 end;
 
@@ -571,7 +838,7 @@ begin
   finally
 
     // free allocated memory
-    FreeAndNil(ResizedImage);
+    freeandnil(ResizedImage);
 
   end;
 
@@ -607,7 +874,7 @@ begin
 
   bodyJson := tJsonObject.ParseJSONValue(body) as tJsonObject;
 
-  // if the body details an error
+  // if the body details are an error
 
   if not(bodyJson.get('error') = nil) then
   begin
@@ -622,6 +889,7 @@ begin
 
   Data := bodyJson.GetValue('data') as Tjsonarray;
 
+  // define the columns of the dataset from the json response
   datafieldsEnumerator := dataFields.GetEnumerator;
   while datafieldsEnumerator.MoveNext do
   begin
@@ -634,7 +902,7 @@ begin
     // for string you MUST  specify size
     if currentFieldType.Equals('string') then
     begin
-      Result.FieldDefs.Find(currentFieldName).Size := 100;
+      Result.FieldDefs.Find(currentFieldName).Size := 256;
     end;
 
   end;
@@ -644,10 +912,8 @@ begin
   // add data as records
   for currentJsonValue in Data do
   begin
-    Result.Insert;
-    Result.Last;
+    Result.Append;
     currentJsonObj := currentJsonValue as tJsonObject;
-
     for currField in Result.Fields do
     begin
 
@@ -683,7 +949,8 @@ begin
 end;
 
 // allows a user to send a rating from 1 to 5 on an item
-procedure TDataModule1.sendRating(username, itemid, token: string; rating: integer);
+procedure TDataModule1.sendRating(username, itemid, token: string;
+  rating: integer);
 var
   dsResult: tADODataSet;
   requestBody: tJsonObject;
@@ -694,44 +961,87 @@ end;
 function TDataModule1.sendRequest(url: string;
   method: trestrequestmethod = rmGET; body: TObject = nil;
   authorization: string = '';
-  contentType: TRESTContentType = ctAPPLICATION_JSON): TRESTResponse;
+  contentType: TRESTContentType = ctAPPLICATION_JSON;
+  queryParams: TList < TPair < String, variant >> = nil): TRESTResponse;
 var
   AParameter: TRESTRequestParameter;
+  urlBuilder: tStringBuilder;
+  currQueryParam: TPair<String, variant>;
+  restCLient: TRESTClient;
+  restRequest: TRESTRequest;
+  i: integer;
 begin
+  // set up client, request and response objects
 
-  restCLient.baseUrl := url;
+  restCLient := TRESTClient.Create(url);
 
-  restRequest.params.clear;
+  // the ref to self will free once program closes
+  restRequest := TRESTRequest.Create(nil);
 
-  // TODO : figure out how to modularly handle query params
+  Result := TRESTResponse.Create(nil);
 
-  restRequest.method := method;
+  restRequest.Client := restCLient;
+  restRequest.response := Result;
 
-  restRequest.body.ClearBody;
+  try
 
-  if body <> nil then
-  begin
-
-    if body is tJsonObject then
-      restRequest.body.Add(body.ToString, ctAPPLICATION_JSON);
-
-    if contentType = ctIMAGE_PNG then
+    if queryParams <> nil then
     begin
+      urlBuilder := tStringBuilder.Create(url).Append('?');
+      // add all query params
+      for i := 0 to queryParams.Count - 1 do
 
-      restRequest.body.Add(body as tBytesStream, contentType);
+      begin
+        currQueryParam := queryParams.Items[i];
+        urlBuilder.Append(currQueryParam.Key).Append('=')
+          .Append(Vartostr(currQueryParam.Value));
+
+        if queryParams.Count - 1 > i then
+          urlBuilder.Append('&')
+
+      end;
+
+      restCLient.baseUrl := urlBuilder.ToString;
+
     end;
 
+    // decide on method to use
+    restRequest.method := method;
+
+    if body <> nil then
+    begin
+
+      // add a json body
+      if body is tJsonObject then
+        restRequest.body.Add(body.ToString, ctAPPLICATION_JSON);
+
+      // add an image body
+      if contentType = ctIMAGE_PNG then
+      begin
+
+        restRequest.body.Add(body as tBytesStream, contentType);
+      end;
+
+    end;
+
+    if authorization <> '' then
+    begin
+      // podonot encode ensures white spaces dont get encoded as %20
+      restRequest.params.AddItem('Authorization', 'Bearer ' + authorization,
+        pkHttpHeader, [poDoNotEncode]);
+    end;
+
+    restRequest.Execute;
+
+    // return result  as rest response
+
+  finally
+
+    // free allocated memory
+    freeandnil(restRequest);
+    freeandnil(restCLient);
+
   end;
-
-  if authorization <> '' then
-  begin
-    restRequest.params.AddItem('Authorization', 'Bearer ' + authorization,
-      pkHttpHeader, [poDonotEncode]);
-  end;
-
-  restRequest.Execute;
-
-  Result := restResponse;
 end;
 
 // set the profile picture of a given use using a given image
@@ -747,7 +1057,7 @@ begin
   try
     Image.Picture.SaveToStream(strmImageBytes);
 
-    url := format('%s/u/%s/profileImage', [baseUrl, username]);
+    url := format('%s/users/%s/profileImage', [baseUrl, username]);
 
     response := sendRequest(url, rmPOST, strmImageBytes, token,
       TRESTContentType.ctIMAGE_PNG);
@@ -765,7 +1075,8 @@ begin
 
 end;
 
-procedure TDataModule1.setProfilePicture(username, token: string; imgPfp: tImage);
+procedure TDataModule1.setProfilePicture(username, token: string;
+  imgPfp: tImage);
 var
   strmImageBytes: tBytesStream;
   url: string;
@@ -777,7 +1088,7 @@ begin
   try
     imgPfp.Picture.SaveToStream(strmImageBytes);
 
-    url := format('%s/u/%s/profileImage', [baseUrl, username]);
+    url := format('%s/users/%s/profileImage', [baseUrl, username]);
 
     response := sendRequest(url, rmPOST, strmImageBytes, token,
       TRESTContentType.ctIMAGE_PNG);
@@ -800,7 +1111,7 @@ procedure TDataModule1.SignUp(username, password, usertype, homeAddress,
   certificationcode: string; imgPfp: tImage);
 var
   url: string;
-  restResponse: TRESTResponse;
+  response: TRESTResponse;
   bodyJson, responseJson: tJsonObject;
 begin
 
@@ -813,27 +1124,31 @@ begin
   bodyJson.AddPair('UserType', usertype);
   bodyJson.AddPair('HomeAddress', homeAddress);
 
-  restResponse := sendRequest(url, rmPOST, bodyJson);
+  try
+    response := sendRequest(url, rmPOST, bodyJson);
 
-  responseJson := tJsonObject.ParseJSONValue(restResponse.Content)
-    as tJsonObject;
+    responseJson := tJsonObject.ParseJSONValue(response.Content) as tJsonObject;
 
-  if restResponse.StatusCode <> 200 then
-  begin
-    raise Exception.Create((responseJson.GetValue('error')
-      as tJsonString).Value);
+    if response.StatusCode <> 200 then
+    begin
+      raise Exception.Create
+        ((responseJson.GetValue('error') as tJsonString).Value);
+    end;
+
+    jwtToken := (responseJson.P['data[0].token'] as tJsonString).Value;
+
+    // set the profile picture
+    setProfilePicture(username, jwtToken, imgPfp);
+
+  finally
+    freeandnil(response);
   end;
-
-  jwtToken := (responseJson.P['data[0].token'] as tJsonString).Value;
-
-  // set the profile picture
-  setProfilePicture(username, jwtToken, imgPfp);
 
 end;
 
 procedure TDataModule1.updateItem(itemid, Name, category, Desc: string;
-      Price, stock, maxwithdrawstock, CF, EU, WU, CFProduce, EUProduce,
-      WUProduce: double;token:string; Image: tImage = nil);
+  Price, stock, maxwithdrawstock, CF, EU, WU, CFProduce, EUProduce,
+  WUProduce: double; token: string; Image: tImage = nil);
 var
   url: string;
   response: TRESTResponse;
@@ -847,27 +1162,34 @@ begin
   body.AddPair('ItemName', name);
   body.AddPair('Description', Desc);
   body.AddPair('Category', category);
-  body.AddPair('CarbonFootprintProduction', TJSONNumber.Create(CFProduce));
-  body.AddPair('WaterUsageProduction', TJSONNumber.Create(WUProduce));
-  body.AddPair('EnergyUsageProduction', TJSONNumber.Create(EUProduce));
-  body.AddPair('WaterFootprintUsage', TJSONNumber.Create(WU));
-  body.AddPair('EnergyFootprintUsage', TJSONNumber.Create(EU));
-  body.AddPair('CarbonFootprintUsage', TJSONNumber.Create(CF));
+  body.AddPair('CFProduce', TJSONNumber.Create(CFProduce));
+  body.AddPair('WUProduce', TJSONNumber.Create(WUProduce));
+  body.AddPair('EUProduce', TJSONNumber.Create(EUProduce));
+  body.AddPair('WUUsage', TJSONNumber.Create(WU));
+  body.AddPair('EUUsage', TJSONNumber.Create(EU));
+  body.AddPair('CFUsage', TJSONNumber.Create(CF));
   body.AddPair('Cost', TJSONNumber.Create(CFProduce));
   body.AddPair('Stock', TJSONNumber.Create(stock));
   body.AddPair('MaxWithdrawableStock', TJSONNumber.Create(maxwithdrawstock));
 
-  response := sendRequest(url, rmPUT, body, token);
+  try
+    response := sendRequest(url, rmPUT, body, token);
 
-  if response.StatusCode <> 200 then
-  begin
-    responseJson := tJsonObject.ParseJSONValue(response.Content) as tJsonObject;
-    raise Exception.Create((responseJson.P['error'] as tJsonString).Value);
-  end;
+    if response.StatusCode <> 200 then
+    begin
+      responseJson := tJsonObject.ParseJSONValue(response.Content)
+        as tJsonObject;
+      raise Exception.Create((responseJson.P['error'] as tJsonString).Value);
+    end;
 
-  if Image <> nil then
-  begin
-    // send request to update image if indicated
+    if Image <> nil then
+    begin
+      // send request to update image if indicated
+      setItemImage(itemid, token, Image);
+
+    end;
+  finally
+    freeandnil(response);
   end;
 
 end;
@@ -878,16 +1200,21 @@ var
   response: TRESTResponse;
 begin;
 
-  url := format('%s/u/%s', [baseUrl, username]);
+  url := format('%s/users/%s', [baseUrl, username]);
 
-  response := sendRequest(url, rmGET);
+  try
+    response := sendRequest(url);
 
-  Result := responseBodyToDataset(response.Content);
+    Result := responseBodyToDataset(response.Content);
 
-  if Result.Fields.FindField('Status') <> nil then
-  begin
-    showMessage(Result['Status']);
-    Exit;
+    if Result.Fields.FindField('Status') <> nil then
+    begin
+      showMessage(Result['Status']);
+      Exit;
+    end;
+
+  finally
+    freeandnil(response);
   end;
 
 end;
@@ -897,20 +1224,26 @@ end;
 function TDataModule1.viewItem(itemid: string): tADODataSet;
 var
   sql, url: string;
-  restResponse: TRESTResponse;
-  params: tObjectDictionary<string, Variant>;
+  response: TRESTResponse;
+  params: tObjectDictionary<string, variant>;
 begin
 
   url := format('%s/item/%s', [baseUrl, itemid]);
 
-  restResponse := sendRequest(url);
+  try
+    response := sendRequest(url);
 
-  Result := responseBodyToDataset(restResponse.Content);
+    Result := responseBodyToDataset(response.Content);
 
-  if Result.Fields.FindField('Status') <> nil then
-  begin
-    showMessage(Result['Status']);
-    Exit;
+    if Result.Fields.FindField('Status') <> nil then
+    begin
+      showMessage(Result['Status']);
+      Exit;
+    end;
+
+  finally
+    freeandnil(response);
+
   end;
 
 end;

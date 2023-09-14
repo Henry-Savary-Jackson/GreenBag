@@ -60,8 +60,7 @@ begin;
 
   self.viewProcedure := viewProcedure;
 
-  imageStream := ItemData.CreateBlobStream
-    (ItemData.FieldByName('Image'), bmRead);
+  DataModule1.loadItemImage(itemid, imgItem);
 
   Inherited Create(Owner, Parent, itemID);
 
@@ -136,13 +135,6 @@ begin
   imgItem.Height := 165;
   imgItem.Center := true;
   imgItem.Stretch := true;
-
-  try
-    imgItem.Picture.LoadFromStream(imageStream);
-
-  finally
-    imageStream.Free;
-  end;
 
   pnlViewItem := TPanel.Create(self.Owner);
   pnlViewItem.ParentBackground := false;

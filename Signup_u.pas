@@ -193,6 +193,20 @@ begin
     DataModule1.SignUp(userName, password, userType, homeaddress,
       certificationCode, imgPfp);
 
+    try
+      DataModule1.getCartItems(DataModule1.userName, DataModule1.jwtToken);
+
+    except
+      on e: Exception do
+      begin
+        if e.Message.Equals('User doesn''t have a cart.') then
+          DataModule1.CreateUserCart(DataModule1.userName,
+            DataModule1.jwtToken);
+
+      end;
+
+    end;
+
     frmSignUp.Hide;
     frmBrowse.Show;
 

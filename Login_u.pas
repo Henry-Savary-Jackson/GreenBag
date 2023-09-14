@@ -79,11 +79,26 @@ begin
 
   try
     DataModule1.Login(userName, password);
-    showMessage(DataModule1.jwtToken);
+
+    // create cart is user doesn't have one
+
+    try
+      DataModule1.getCartItems(DataModule1.userName, DataModule1.jwtToken);
+
+    except
+      on e: Exception do
+      begin
+        if e.Message.Equals('User doesn''t have a cart.') then
+          DataModule1.CreateUserCart(DataModule1.userName,
+            DataModule1.jwtToken);
+
+      end;
+
+    end;
+
     // set global app variables
     frmLogin.Hide;
     frmBrowse.Show;
-
 
   except
     on e: Exception do
@@ -102,27 +117,27 @@ end;
 
 procedure TfrmLogin.Button1Click(Sender: TObject);
 var
-ds : tDataset;
-datasrc : tDataSource;
+  ds: tDataset;
+  datasrc: tDataSource;
 begin
-ds := DataModule1.viewItem('RE9562810');
+  ds := DataModule1.viewItem('RE9562810');
 
-ds.First;
- dataSrc := TDataSource.Create(self);
- datasrc.DataSet := ds;
- DBGrid1.DataSource := datasrc;
+  ds.First;
+  datasrc := tDataSource.Create(self);
+  datasrc.DataSet := ds;
+  DBGrid1.DataSource := datasrc;
 end;
 
 procedure TfrmLogin.Button2Click(Sender: TObject);
 begin
-//AA51811025
+  // AA51811025
 end;
 
 // allow pressing enter when typing username or password to make you login
 procedure TfrmLogin.edtPasswordKeyDown(Sender: TObject; var Key: Word;
   Shift: TShiftState);
 begin
-  if key = VK_RETURN then
+  if Key = VK_RETURN then
   begin
     sbtnSignIn.Click;
   end;
@@ -133,6 +148,5 @@ begin
   Application.Terminate;
 
 end;
-
 
 end.

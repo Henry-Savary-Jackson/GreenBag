@@ -179,11 +179,6 @@ begin
 
   category := cmbCategory.Items[cmbCategory.ItemIndex];
 
-  if imgItem.Picture.Graphic = NIL then
-  begin
-    showMessage('Please assign a picture to this item.');
-    Exit;
-  end;
 
   try
 
@@ -200,7 +195,7 @@ begin
       else
       begin
         // if this is updating an existing item
-        DataModule1.updateItem( sName, DataModule1.username, category,
+        DataModule1.updateItem(itemid, sName, category,
           sDesc, Price, stock, maxWithdrawstock, CF, EU, WU, CFProduce,
           EUProduce, WUProduce,DataModule1.jwtToken,imgItem);
 
@@ -276,19 +271,19 @@ begin
     if dsResult['Stock'] = 1 then
       lblStockUnits.Caption := 'unit';
 
-    edtCF.Text := floatTOStrf(dsResult['CarbonFootprintUsage'], ffFixed, 8, 2);
-    edtEU.Text := floatTOStrf(dsResult['EnergyFootprintUsage'], ffFixed, 8, 2);
-    edtWU.Text := floatTOStrf(dsResult['WaterFootprintUsage'], ffFixed, 8, 2);
+    edtCF.Text := floatTOStrf(dsResult['CFUsage'], ffFixed, 8, 2);
+    edtEU.Text := floatTOStrf(dsResult['EUUsage'], ffFixed, 8, 2);
+    edtWU.Text := floatTOStrf(dsResult['WUUsage'], ffFixed, 8, 2);
 
-    edtCFProduce.Text := floatTOStrf(dsResult['CarbonFootprintUsage'],
+    edtCFProduce.Text := floatTOStrf(dsResult['CFProduce'],
       ffFixed, 8, 2);
-    edtEUProduce.Text := floatTOStrf(dsResult['EnergyFootprintUsage'],
+    edtEUProduce.Text := floatTOStrf(dsResult['EUProduce'],
       ffFixed, 8, 2);
-    edtWUProduce.Text := floatTOStrf(dsResult['WaterFootprintUsage'],
+    edtWUProduce.Text := floatTOStrf(dsResult['WUProduce'],
       ffFixed, 8, 2);
 
-    if dsResult['Description'] <> NUll then
-      redDesc.lines.Add(dsResult['Description']);
+//    if dsResult['Description'] <> NUll then
+//      redDesc.lines.Add(dsResult['Description']);
 
     cmbCategory.ItemIndex := cmbCategory.Items.IndexOf(dsResult['Category']);
 
@@ -300,14 +295,7 @@ begin
 
     end;
 
-    imageStream := dsResult.CreateBlobStream
-      (dsResult.FieldByName('Image'), bmRead);
-    try
-      imgItem.Picture.LoadFromStream(imageStream);
-
-    finally
-      imageStream.Free;
-    end;
+    DataModule1.loadItemImage(itemid, imgItem);
 
     dsResult.Free;
   end

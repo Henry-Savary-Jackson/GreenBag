@@ -108,7 +108,7 @@ procedure TfrmCheckout.removeItem(shoppingCartItemID: string);
 begin
   try
     // change db
-    DataModule1.removeFromCart(shoppingCartItemID, DataModule1.jwtToken);
+    DataModule1.removeFromCart(shoppingCartItemID, DataModule1.jwtToken, DataModule1.username);
     updateDisplay;
 
   except

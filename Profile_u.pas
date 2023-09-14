@@ -282,7 +282,7 @@ begin
   begin
 
     lblRevenueTotal.caption := 'Total Revenue: ' +
-      floatToStrf(dsResult['Revenue'], ffCurrency, 8, 2);
+      floatToStrf(dsResult['revenue'], ffCurrency, 8, 2);
 
     lblSales.caption := 'Total Sales: ' + intTOstr(dsResult['TotalSales']);
     if dsResult['TotalSales'] = 1 then
@@ -311,15 +311,7 @@ begin
   chrtStats.Title.caption := '';
   srsStats.Clear;
 
-  imageStream := dsResult.CreateBlobStream
-    (dsResult.FieldByName('ProfileImage'), bmRead);
-  try
-    imgProfilePic.Picture.LoadFromStream(imageStream);
-
-  finally
-    FreeAndNil(imageStream);
-
-  end;
+  DataModule1.loadProfilePicture(DataModule1.username, imgProfilePic);
 
 end;
 

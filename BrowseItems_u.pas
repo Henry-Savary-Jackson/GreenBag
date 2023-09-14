@@ -125,32 +125,23 @@ begin
     iMinRating := -1;
   end;
 
-  FreeAndNil(btnLoadMoreitems);
+  if assigned(btnLoadMoreItems) then
+    FreeAndNil(btnLoadMoreitems);
 
   dsResult.First;
 
   // add the items to gui
   while not dsResult.Eof do
   begin
-    if not(chbRatingsEnable.Enabled and dsResult['avgRating'] >= iMinRating)
-    then
-    begin
-      dsResult.Next;
-      continue;
-    end
-    else if not(chbRatingsEnable.Enabled) then
-    begin
-      dsResult.Next;
-      continue;
-    end;
 
     items.Add(BrowseItem.Create(self, flpnlItems, dsResult, self.ViewItem));
     dsResult.Next;
 
   end;
 
+
   // only add the load more button if this is not the end of the items in the query
-  if (numResults > items.Count) and (items.Count <> 0) then
+  if numResults <> 0 then
   begin
     btnLoadMoreitems := tButton.Create(self.Owner);
     btnLoadMoreitems.Caption := 'load More items';
@@ -161,6 +152,8 @@ begin
 
   scrollRangeMin := scrollRangeMin + 10;
   scrollRangeMax := scrollRangeMin + 10;
+
+
 
 end;
 
@@ -341,7 +334,7 @@ var
   searchQuery: string;
   arrCategories: TList<string>;
   i, iNumResults: integer;
-  cfRange, euRange, wuRange: array of integer;
+  cfRange, euRange, wuRange, ratingRange: array of integer;
 
 begin
 
@@ -390,12 +383,19 @@ begin
 
   end;
 
+  if chbRatingsEnable.Checked then
+  begin
+     SetLength(ratingRange, 1);
+    ratingRange[0] := spnMinRating.Value;
+
+  end;
+
   try
     try
       // get results as table
       dsResult := DataModule1.getSearchResults(searchQuery, arrCategories,
-        cfRange, euRange, wuRange, [scrollRangeMin, scrollRangeMax],
-        iNumResults);
+        cfRange, euRange, wuRange, [scrollRangeMin, scrollRangeMax], ratingRange
+        ,iNumResults);
 
       if items = nil then
         items := TObjectList<BrowseItem>.Create();
@@ -403,11 +403,6 @@ begin
       if dsResult.Fields.FindField('Status') <> nil then
       begin
         showMessage(dsResult['Status']);
-        Exit;
-      end;
-
-      if dsResult.IsEmpty then
-      begin
         Exit;
       end;
 

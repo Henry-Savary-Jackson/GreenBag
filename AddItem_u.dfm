@@ -110,9 +110,6 @@ object frmAddItem: TfrmAddItem
       Height = 41
       Align = alTop
       TabOrder = 0
-      ExplicitLeft = 2
-      ExplicitTop = 5
-      ExplicitWidth = 459
       object lblName: TLabel
         AlignWithMargins = True
         Left = 204
@@ -142,9 +139,6 @@ object frmAddItem: TfrmAddItem
       Height = 41
       Align = alTop
       TabOrder = 1
-      ExplicitLeft = 2
-      ExplicitTop = 89
-      ExplicitWidth = 459
       object lblCategory: TLabel
         AlignWithMargins = True
         Left = 179
@@ -181,9 +175,6 @@ object frmAddItem: TfrmAddItem
       Height = 41
       Align = alTop
       TabOrder = 2
-      ExplicitLeft = 6
-      ExplicitTop = 66
-      ExplicitWidth = 459
       object lblPrice: TLabel
         AlignWithMargins = True
         Left = 192
@@ -221,8 +212,6 @@ object frmAddItem: TfrmAddItem
       Height = 41
       Align = alTop
       TabOrder = 3
-      ExplicitTop = 231
-      ExplicitWidth = 459
       object lblWUProduce: TLabel
         AlignWithMargins = True
         Left = 30
@@ -277,9 +266,6 @@ object frmAddItem: TfrmAddItem
       Height = 41
       Align = alTop
       TabOrder = 4
-      ExplicitLeft = 6
-      ExplicitTop = 299
-      ExplicitWidth = 459
       object lblWaterUsage: TLabel
         AlignWithMargins = True
         Left = 82
@@ -334,9 +320,6 @@ object frmAddItem: TfrmAddItem
       Height = 41
       Align = alTop
       TabOrder = 5
-      ExplicitLeft = 2
-      ExplicitTop = 298
-      ExplicitWidth = 459
       object lblEUProduce: TLabel
         AlignWithMargins = True
         Left = 22
@@ -391,9 +374,6 @@ object frmAddItem: TfrmAddItem
       Height = 41
       Align = alTop
       TabOrder = 6
-      ExplicitLeft = 2
-      ExplicitTop = 262
-      ExplicitWidth = 459
       object lblEU: TLabel
         AlignWithMargins = True
         Left = 75
@@ -453,9 +433,6 @@ object frmAddItem: TfrmAddItem
       Height = 41
       Align = alTop
       TabOrder = 7
-      ExplicitLeft = 2
-      ExplicitTop = 223
-      ExplicitWidth = 459
       object lblCF: TLabel
         AlignWithMargins = True
         Left = 52
@@ -515,9 +492,6 @@ object frmAddItem: TfrmAddItem
       Height = 41
       Align = alTop
       TabOrder = 8
-      ExplicitLeft = 6
-      ExplicitTop = 339
-      ExplicitWidth = 459
       object lblCFProduce: TLabel
         AlignWithMargins = True
         Left = 1
@@ -575,9 +549,6 @@ object frmAddItem: TfrmAddItem
       Height = 41
       Align = alTop
       TabOrder = 9
-      ExplicitLeft = 2
-      ExplicitTop = 130
-      ExplicitWidth = 459
       DesignSize = (
         575
         41)
@@ -636,8 +607,6 @@ object frmAddItem: TfrmAddItem
       Height = 41
       Align = alTop
       TabOrder = 10
-      ExplicitLeft = -119
-      ExplicitWidth = 567
       object lblStock: TLabel
         AlignWithMargins = True
         Left = 189
@@ -692,7 +661,6 @@ object frmAddItem: TfrmAddItem
       Height = 91
       Align = alTop
       TabOrder = 11
-      ExplicitWidth = 567
       object lblDesc: TLabel
         AlignWithMargins = True
         Left = 44

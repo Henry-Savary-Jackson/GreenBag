@@ -52,8 +52,7 @@ begin
   Sales := productData['Sales'];
   // calculate revenue
 
-  imageStream := productData.CreateBlobStream
-    (productData.FieldByName('Image'), bmRead);
+  DataModule1.loadItemImage(itemid, imgItem);
 
   revenue := productData['Revenue'];
 
@@ -85,13 +84,6 @@ begin
   imgItem.Width := 110;
   imgItem.Height := 110;
   imgItem.Stretch := True;
-
-  try
-    imgItem.Picture.LoadFromStream(imageStream);
-
-  finally
-    imageStream.Free;
-  end;
 
   lblName := TLabel.Create(self.Owner);
   lblName.Parent := self;

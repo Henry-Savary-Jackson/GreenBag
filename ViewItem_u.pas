@@ -88,7 +88,8 @@ begin;
   end;
 
   try
-    DataModule1.addToCart(DataModule1.username,itemID,DataModule1.jwtToken, quantity);
+    DataModule1.addToCart(DataModule1.username, itemID, DataModule1.jwtToken,
+      quantity);
     frmViewItem.Hide;
     frmBrowse.Show;
 
@@ -121,7 +122,8 @@ var
 begin
   rating := trcRating.Position;
   try
-    DataModule1.sendRating(DataModule1.username, itemID, DataModule1.jwtToken, rating);
+    DataModule1.sendRating(DataModule1.username, itemID,
+      DataModule1.jwtToken, rating);
 
     showMessage('Your feedback has been sent.');
 
@@ -176,23 +178,22 @@ begin
 
   stock := dsResult['Stock'];
   lblCF.Caption := 'Carbon footprint through usage: ' +
-    floatToStrf(dsResult['CarbonFootprintUsage'], fffixed, 8, 2) + ' t/unit';
+    floatToStrf(dsResult['CFUsage'], fffixed, 8, 2) + ' t/unit';
 
   lblEU.Caption := 'Energy consumption through usage: ' +
-    floatToStrf(dsResult['EnergyFootprintUsage'], fffixed, 8, 2) + ' kWh/unit';
+    floatToStrf(dsResult['EUUsage'], fffixed, 8, 2) + ' kWh/unit';
 
   lblWU.Caption := 'Water consumption through usage:' +
-    floatToStrf(dsResult['WaterFootprintUsage'], fffixed, 8, 2) + ' L/unit';
+    floatToStrf(dsResult['WUUsage'], fffixed, 8, 2) + ' L/unit';
 
   lblCFProduce.Caption := 'Carbon footprint for production: ' +
-    floatToStrf(dsResult['CarbonFootprintProduction'], fffixed, 8, 2) +
-    't/unit';
+    floatToStrf(dsResult['CFProduce'], fffixed, 8, 2) + 't/unit';
 
   lblEUProduce.Caption := 'Energy usage for production: ' +
-    floatToStrf(dsResult['EnergyUsageProduction'], fffixed, 8, 2) + ' kWh/unit';
+    floatToStrf(dsResult['EUProduce'], fffixed, 8, 2) + ' kWh/unit';
 
   lblWUProduce.Caption := 'Water usage for production:' +
-    floatToStrf(dsResult['WaterUsageProduction'], fffixed, 8, 2) + ' L/unit';
+    floatToStrf(dsResult['WUProduce'], fffixed, 8, 2) + ' L/unit';
 
   if dsResult['avgRating'] = -1 then
   begin
@@ -200,7 +201,8 @@ begin
   end
   else
   begin
-    lblRating.Caption := ' Average Rating: ' + inttostr(dsResult['avgRating'])  + '/5';
+    lblRating.Caption := ' Average Rating: ' +
+      inttostr(dsResult['avgRating']) + '/5';
   end;
 
   lblCategory.Caption := 'Category: ' + dsResult['Category'];
@@ -220,15 +222,7 @@ begin
   if dsResult['Description'] <> NULL then
     redDesc.Lines.Add(dsResult['Description']);
 
-  imageStream := dsResult.CreateBlobStream
-    (dsResult.FieldByName('Image'), bmRead);
-  try
-    imgItem.Picture.LoadFromStream(imageStream);
-
-  finally
-    FreeAndNil(imageStream);
-
-  end;
+  DataModule1.loadItemImage(itemID, imgItem);
 
   spnQuantity.Value := 1;
   trcRating.Position := 0;
