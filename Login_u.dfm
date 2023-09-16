@@ -3,7 +3,7 @@ object frmLogin: TfrmLogin
   Top = 0
   BorderWidth = 3
   Caption = 'Login'
-  ClientHeight = 357
+  ClientHeight = 323
   ClientWidth = 323
   Color = 11074992
   Font.Charset = ANSI_CHARSET
