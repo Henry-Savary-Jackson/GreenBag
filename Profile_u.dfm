@@ -130,7 +130,6 @@ object frmProfile: TfrmProfile
       Padding.Bottom = 5
       TabOrder = 0
       VerticalAlignment = taAlignTop
-      ExplicitWidth = 370
       object lblBalance: TLabel
         AlignWithMargins = True
         Left = 9
@@ -262,7 +261,6 @@ object frmProfile: TfrmProfile
         Color = 8118149
         ParentBackground = False
         TabOrder = 0
-        ExplicitWidth = 358
         object btnAddFunds: TSpeedButton
           Left = 1
           Top = 1
@@ -291,7 +289,6 @@ object frmProfile: TfrmProfile
         Color = 7987076
         ParentBackground = False
         TabOrder = 1
-        ExplicitWidth = 358
         object btnViewProducts: TSpeedButton
           Left = 1
           Top = 1
@@ -323,7 +320,6 @@ object frmProfile: TfrmProfile
       AutoWrap = False
       TabOrder = 1
       VerticalAlignment = taAlignTop
-      ExplicitWidth = 690
       object pnlCF: TPanel
         Left = 1
         Top = 1
@@ -511,7 +507,6 @@ object frmProfile: TfrmProfile
       Height = 313
       Align = alTop
       TabOrder = 2
-      ExplicitWidth = 690
       object chrtStats: TChart
         Left = -6
         Top = 13
@@ -700,6 +695,62 @@ object frmProfile: TfrmProfile
           ExplicitTop = 10
         end
       end
+    end
+  end
+  object pnlChangeUsername: TPanel
+    Left = 421
+    Top = 47
+    Width = 196
+    Height = 33
+    BorderWidth = 1
+    Color = 8249222
+    ParentBackground = False
+    TabOrder = 4
+    OnClick = btnBackClick
+    object btnChangePassword: TSpeedButton
+      Left = 2
+      Top = 2
+      Width = 192
+      Height = 29
+      Align = alClient
+      Caption = 'Change Password'
+      Flat = True
+      Font.Charset = ANSI_CHARSET
+      Font.Color = 16384
+      Font.Height = -16
+      Font.Name = 'Arial Rounded MT Bold'
+      Font.Style = []
+      ParentFont = False
+      OnClick = btnChangePasswordClick
+      ExplicitTop = 26
+    end
+  end
+  object Panel1: TPanel
+    Left = 423
+    Top = 86
+    Width = 196
+    Height = 33
+    BorderWidth = 1
+    Color = 8249222
+    ParentBackground = False
+    TabOrder = 5
+    OnClick = btnBackClick
+    object btnChangeUsername: TSpeedButton
+      Left = 2
+      Top = 2
+      Width = 192
+      Height = 29
+      Align = alClient
+      Caption = 'Change Username'
+      Flat = True
+      Font.Charset = ANSI_CHARSET
+      Font.Color = 16384
+      Font.Height = -16
+      Font.Name = 'Arial Rounded MT Bold'
+      Font.Style = []
+      ParentFont = False
+      OnClick = btnChangeUsernameClick
+      ExplicitTop = 0
     end
   end
 end

@@ -31,7 +31,6 @@ type
     procedure btnSignUpClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure rgpUserClick(Sender: TObject);
-    function securePassword(password: string): integer;
     function verifyCertificationCode(code: string): integer;
     procedure imgPfpClick(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
@@ -44,20 +43,6 @@ type
 
 var
   frmSignUp: TfrmSignUp;
-
-const
-  success = 1;
-  // const for passwords
-
-  tooShort = 4;
-  noSpecial = 2;
-  noNums = 3;
-  // consts for cert code
-  invalidChar = 5;
-  notInFile = 6;
-
-  nums = '0123456789';
-  special = '!@#$%^&*()-+=.,<>?\/|';
 
 implementation
 
@@ -107,20 +92,20 @@ begin
   end;
 
   // hanlde password input validation
-  case securePassword(password) of
-    noSpecial:
+  case DataModule1.securePassword(password) of
+    DataModule1.noSpecial:
       begin
         showMessage('Your password must have atleast one special character.');
         Exit;
 
       end;
-    noNums:
+    DataModule1.noNums:
       begin
         showMessage('Your password must have atleast one number.');
         Exit;
 
       end;
-    tooShort:
+    DataModule1.tooShort:
       begin
         showMessage('Your password must have be atleast 8 characters long.');
         Exit;
@@ -166,14 +151,14 @@ begin
     end;
 
     case verifyCertificationCode(certificationCode) of
-      notInFile:
+      DataModule1.notInFile:
         begin
           showMessage
             ('Your certification code doesn''t exist. Please correctly enter your code. If that doesn''t work, please ensure you have properly applied to be a seller.');
           Exit;
 
         end;
-      invalidChar:
+      DataModule1.invalidChar:
         begin
           showMessage('Your certification code must only consist of numbers.');
           Exit;
@@ -254,45 +239,7 @@ begin
   edtCertification.Enabled := rgpUser.ItemIndex = 0
 end;
 
-function TfrmSignUp.securePassword(password: string): integer;
-var
-  i: integer;
 
-begin
-
-  if length(password) < 8 then
-  begin
-    Result := tooShort;
-    Exit;
-  end;
-
-  Result := noNums;
-
-  for i := 1 to length(password) do
-  begin
-    if not(pos(password[i], nums) = 0) then
-    begin
-      Result := success
-    end;
-
-  end;
-
-  if Result = noNums then
-  begin
-    Exit;
-  end;
-
-  Result := noSpecial;
-
-  for i := 1 to length(password) do
-  begin
-    if not(pos(password[i], special) = 0) then
-    begin
-      Result := success
-    end;
-
-  end;
-end;
 
 // make sure the verification code was in the text file
 function TfrmSignUp.verifyCertificationCode(code: string): integer;
@@ -304,14 +251,14 @@ begin
 
   for i := 1 to 10 do
   begin
-    if pos(code[i], nums) = 0 then
+    if pos(code[i], DataModule1.nums) = 0 then
     begin
-      Result := invalidChar;
+      Result := DataModule1.invalidChar;
       Exit;
     end;
   end;
 
-  Result := notInFile;
+  Result := DataModule1.notInFile;
 
   if fileExists('SellerCertificationCodes.txt') then
   begin
@@ -323,7 +270,7 @@ begin
       readln(fFile, sLine);
       if sLine = code then
       begin
-        Result := success;
+        Result := DataModule1.success;
         CloseFile(fFile);
         Exit;
       end;

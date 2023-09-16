@@ -54,6 +54,10 @@ type
     pnlImage: TPanel;
     pnlMain: TPanel;
     pnlChart: TPanel;
+    pnlChangeUsername: TPanel;
+    btnChangePassword: TSpeedButton;
+    Panel1: TPanel;
+    btnChangeUsername: TSpeedButton;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnViewProductsClick(Sender: TObject);
     procedure btnBackClick(Sender: TObject);
@@ -75,6 +79,8 @@ type
     procedure btnSalesClick(Sender: TObject);
     procedure btnSpendingClick(Sender: TObject);
     procedure btnWUClick(Sender: TObject);
+    procedure btnChangePasswordClick(Sender: TObject);
+    procedure btnChangeUsernameClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -107,6 +113,70 @@ begin
   statType := DataModule1.stCF;
   // calls function to update chart based on button pressed
   categoryClickStats(TSpeedButton(Sender).caption);
+end;
+
+procedure TfrmProfile.btnChangePasswordClick(Sender: TObject);
+var
+  sOldPassword, sNewPassword: string;
+begin
+  sOldPassword := InputBox('Password Change', 'Enter your old password', '');
+
+  if sOldPassword.IsEmpty then
+  begin
+    showMessage('Cannot enter an empty password');
+    exit;
+  end;
+
+  sNewPassword := InputBox('Password Change', 'Enter your new password', '');
+
+  case DataModule1.securePassword(sNewPassword) of
+    DataModule1.noSpecial:
+      begin
+        showMessage('Your password must have atleast one special character.');
+        exit;
+
+      end;
+    DataModule1.noNums:
+      begin
+        showMessage('Your password must have atleast one number.');
+        exit;
+
+      end;
+    DataModule1.tooShort:
+      begin
+        showMessage('Your password must have be atleast 8 characters long.');
+        exit;
+
+      end;
+  end;
+
+  DataModule1.changePassword(DataModule1.username, sOldPassword, sNewPassword);
+
+  showMessage('Changed your password successfully');
+
+end;
+
+procedure TfrmProfile.btnChangeUsernameClick(Sender: TObject);
+var
+  snewusername: string;
+begin
+  //
+  snewusername := InputBox('Change username', 'Enter your new username', '');
+
+  if snewusername.IsEmpty then
+  begin
+    showMessage('Your username cannot be empty');
+    exit
+  end;
+
+  DataModule1.Changeusername(DataModule1.username, snewusername,
+    DataModule1.jwtToken);
+
+  showMessage('Successfully changed username');
+
+  lblUsername.Caption := snewusername;
+  DataModule1.username := snewusername;
+
 end;
 
 procedure TfrmProfile.btnEUClick(Sender: TObject);
@@ -175,7 +245,8 @@ begin
   except
     on e: ECONVERTERROR do
     begin
-      showMessage('Please format your extra funds as a valid number. Remember to use commas as a decimal point.');
+      showMessage
+        ('Please format your extra funds as a valid number. Remember to use commas as a decimal point.');
       exit;
     end;
   end;
@@ -321,7 +392,8 @@ begin
   DataModule1.loadImageFromFile(imgProfilePic, self);
 
   try
-    DataModule1.setProfilePicture(DataModule1.username, DataModule1.jwtToken, imgProfilePic);
+    DataModule1.setProfilePicture(DataModule1.username, DataModule1.jwtToken,
+      imgProfilePic);
 
   except
     on e: exception do
@@ -392,8 +464,8 @@ var
 begin
 
   // get the statistic
-  dsResult := DataModule1.obtainStats(DataModule1.username, DataModule1.jwtToken, statType,
-    dateRangeBegin, dateRangeEnd);
+  dsResult := DataModule1.obtainStats(DataModule1.username,
+    DataModule1.jwtToken, statType, dateRangeBegin, dateRangeEnd);
 
   if dsResult.Fields.FindField('Status') <> nil then
   begin

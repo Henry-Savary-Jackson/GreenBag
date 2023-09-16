@@ -44,6 +44,22 @@ type
     stEU = 4;
     stWU = 5;
 
+  const
+    baseUrl = 'https://localhost:8080';
+
+    success = 1;
+    // const for passwords
+
+    tooShort = 4;
+    noSpecial = 2;
+    noNums = 3;
+    // consts for cert code
+    invalidChar = 5;
+    notInFile = 6;
+
+    nums = '0123456789';
+    special = '!@#$%^&*()-+=.,<>?\/|';
+
     procedure Login(username, password: string);
     procedure SignUp(username, password, usertype, homeAddress,
       certificationcode: string; imgPfp: tImage);
@@ -118,14 +134,13 @@ type
 
     function getFtTypefromString(s: string): tFieldType;
 
+    function securePassword(password: string): integer;
+
   end;
 
 var
   DataModule1: TDataModule1;
   warnedUser: boolean;
-
-const
-  baseUrl = 'https://localhost:8080';
 
 implementation
 
@@ -714,12 +729,52 @@ begin
 
 end;
 
+function TDataModule1.securePassword(password: string): integer;
+var
+  i: integer;
+
+begin
+
+  if length(password) < 8 then
+  begin
+    Result := tooShort;
+    Exit;
+  end;
+
+  Result := noNums;
+
+  for i := 1 to length(password) do
+  begin
+    if not(pos(password[i], nums) = 0) then
+    begin
+      Result := success
+    end;
+
+  end;
+
+  if Result = noNums then
+  begin
+    Exit;
+  end;
+
+  Result := noSpecial;
+
+  for i := 1 to length(password) do
+  begin
+    if not(pos(password[i], special) = 0) then
+    begin
+      Result := success
+    end;
+
+  end;
+end;
+
 procedure TDataModule1.loadItemImage(itemid: string; Image: tImage);
 var
   url: string;
   body, responseJson: tJsonObject;
   response: TRESTResponse;
-  stream: TMemoryStream;
+  stream: tMemoryStream;
 begin
 
   url := format('%s/item/%s/image', [baseUrl, itemid]);
