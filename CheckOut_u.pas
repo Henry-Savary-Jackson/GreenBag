@@ -24,11 +24,14 @@ type
     SpeedButton1: TSpeedButton;
     btnCheckout: TSpeedButton;
     pnlCheckout: TPanel;
+    Panel1: TPanel;
+    btnReturn: TSpeedButton;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnBackClick(Sender: TObject);
     procedure btnCheckoutClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
+    procedure btnReturnClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -87,6 +90,15 @@ begin
   frmHelp.frmPrevious := self;
   self.Hide;
   frmHelp.Show;
+end;
+
+procedure TfrmCheckout.btnReturnClick(Sender: TObject);
+begin
+
+  DataModule1.CancelCart(DataModule1.username, DataModule1.jwtToken);
+  DataModule1.CreateUserCart(DataModule1.username, DataModule1.jwtToken);
+  items.Clear;
+  updateDisplay;
 end;
 
 procedure TfrmCheckout.FormClose(Sender: TObject; var Action: TCloseAction);

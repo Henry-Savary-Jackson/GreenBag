@@ -170,7 +170,9 @@ var
 begin
   // update gui when the quantity is changed
   oldQuantity := self.iQuantity;
+
   self.iQuantity := spnQuantity.Value;
+
   self.updateInfo;
   self.UpdateRedInfo;
   self.updateQuantityProcedure(itemID, self.iQuantity - oldQuantity, itemPrice);

@@ -52,8 +52,6 @@ begin
   Sales := productData['Sales'];
   // calculate revenue
 
-  DataModule1.loadItemImage(itemid, imgItem);
-
   revenue := productData['Revenue'];
 
   Inherited Create(Owner, Parent, itemID);
@@ -143,6 +141,10 @@ begin
   imgRemoveProduct.Hint := 'Remove this item from your catalogue.';
   imgRemoveProduct.ParentShowHint := false;
   imgRemoveProduct.ShowHint := true;
+
+  // load image
+
+  DataModule1.loadItemImage(itemid, imgItem);
 
 end;
 

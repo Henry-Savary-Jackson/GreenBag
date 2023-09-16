@@ -125,7 +125,7 @@ begin
     iMinRating := -1;
   end;
 
-  if assigned(btnLoadMoreItems) then
+  if assigned(btnLoadMoreitems) then
     FreeAndNil(btnLoadMoreitems);
 
   dsResult.First;
@@ -139,7 +139,6 @@ begin
 
   end;
 
-
   // only add the load more button if this is not the end of the items in the query
   if numResults <> 0 then
   begin
@@ -152,8 +151,6 @@ begin
 
   scrollRangeMin := scrollRangeMin + 10;
   scrollRangeMax := scrollRangeMin + 10;
-
-
 
 end;
 
@@ -321,10 +318,7 @@ begin
   scrollRangeMin := 0;
   scrollRangeMax := 10;
   SearchItems;
-  if items.Count = 0 then
-  begin
-    showMessage('There are no items matching your query');
-  end;
+
 end;
 
 // use this to get the query info from gui and get a tadodataset with search results
@@ -385,7 +379,7 @@ begin
 
   if chbRatingsEnable.Checked then
   begin
-     SetLength(ratingRange, 1);
+    SetLength(ratingRange, 1);
     ratingRange[0] := spnMinRating.Value;
 
   end;
@@ -394,8 +388,8 @@ begin
     try
       // get results as table
       dsResult := DataModule1.getSearchResults(searchQuery, arrCategories,
-        cfRange, euRange, wuRange, [scrollRangeMin, scrollRangeMax], ratingRange
-        ,iNumResults);
+        cfRange, euRange, wuRange, [scrollRangeMin, scrollRangeMax],
+        ratingRange, iNumResults);
 
       if items = nil then
         items := TObjectList<BrowseItem>.Create();
@@ -409,6 +403,11 @@ begin
       // add to gui
       addQueryResult(dsResult, iNumResults);
 
+      if items.Count = 0 then
+      begin
+        showMessage('There are no items matching your query');
+      end;
+
     except
       on e: exception do
       begin
@@ -418,7 +417,7 @@ begin
     end;
 
   finally
-    if Assigned(dsResult) then
+    if assigned(dsResult) then
       FreeAndNil(dsResult);
   end;
 
@@ -471,7 +470,7 @@ end;
 // if the user is the object's seller, rather show them the screen that allows them to edit
 procedure TfrmBrowse.ViewItem(sellerID, itemID: string);
 begin
-// TODO: fix this
+  // TODO: fix this
   if DataModule1.username = sellerID then
   begin
     frmAddItem.itemID := itemID;

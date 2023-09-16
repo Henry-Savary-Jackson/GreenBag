@@ -4,7 +4,7 @@ object frmProfile: TfrmProfile
   AutoSize = True
   Caption = 'Your Profile'
   ClientHeight = 765
-  ClientWidth = 692
+  ClientWidth = 713
   Color = 11074992
   Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
@@ -110,7 +110,7 @@ object frmProfile: TfrmProfile
   object pnlMain: TPanel
     Left = 0
     Top = 147
-    Width = 692
+    Width = 713
     Height = 618
     AutoSize = True
     TabOrder = 3
@@ -118,7 +118,7 @@ object frmProfile: TfrmProfile
       AlignWithMargins = True
       Left = 161
       Top = 4
-      Width = 370
+      Width = 391
       Height = 263
       Margins.Left = 160
       Margins.Right = 160
@@ -130,11 +130,12 @@ object frmProfile: TfrmProfile
       Padding.Bottom = 5
       TabOrder = 0
       VerticalAlignment = taAlignTop
+      ExplicitWidth = 370
       object lblBalance: TLabel
         AlignWithMargins = True
         Left = 9
         Top = 9
-        Width = 352
+        Width = 373
         Height = 18
         Align = alTop
         Alignment = taCenter
@@ -151,7 +152,7 @@ object frmProfile: TfrmProfile
         AlignWithMargins = True
         Left = 9
         Top = 153
-        Width = 352
+        Width = 373
         Height = 18
         Align = alTop
         Alignment = taCenter
@@ -168,7 +169,7 @@ object frmProfile: TfrmProfile
         AlignWithMargins = True
         Left = 9
         Top = 129
-        Width = 352
+        Width = 373
         Height = 18
         Align = alTop
         Alignment = taCenter
@@ -185,7 +186,7 @@ object frmProfile: TfrmProfile
         AlignWithMargins = True
         Left = 9
         Top = 33
-        Width = 352
+        Width = 373
         Height = 18
         Align = alTop
         Alignment = taCenter
@@ -202,7 +203,7 @@ object frmProfile: TfrmProfile
         AlignWithMargins = True
         Left = 9
         Top = 57
-        Width = 352
+        Width = 373
         Height = 18
         Align = alTop
         Alignment = taCenter
@@ -219,7 +220,7 @@ object frmProfile: TfrmProfile
         AlignWithMargins = True
         Left = 9
         Top = 81
-        Width = 352
+        Width = 373
         Height = 18
         Align = alTop
         Alignment = taCenter
@@ -236,7 +237,7 @@ object frmProfile: TfrmProfile
         AlignWithMargins = True
         Left = 9
         Top = 105
-        Width = 352
+        Width = 373
         Height = 18
         Align = alTop
         Alignment = taCenter
@@ -252,7 +253,7 @@ object frmProfile: TfrmProfile
       object pnlAddFunds: TPanel
         Left = 6
         Top = 174
-        Width = 358
+        Width = 379
         Height = 41
         Margins.Top = 10
         Margins.Bottom = 10
@@ -261,10 +262,11 @@ object frmProfile: TfrmProfile
         Color = 8118149
         ParentBackground = False
         TabOrder = 0
+        ExplicitWidth = 358
         object btnAddFunds: TSpeedButton
           Left = 1
           Top = 1
-          Width = 356
+          Width = 377
           Height = 39
           Align = alClient
           Caption = 'Add Funds'
@@ -283,16 +285,17 @@ object frmProfile: TfrmProfile
       object pnlViewYourProducts: TPanel
         Left = 6
         Top = 215
-        Width = 358
+        Width = 379
         Height = 42
         Align = alTop
         Color = 7987076
         ParentBackground = False
         TabOrder = 1
+        ExplicitWidth = 358
         object btnViewProducts: TSpeedButton
           Left = 1
           Top = 1
-          Width = 356
+          Width = 377
           Height = 40
           Align = alClient
           Caption = 'View your products'
@@ -313,13 +316,14 @@ object frmProfile: TfrmProfile
     object flpnlCategories: TFlowPanel
       Left = 1
       Top = 270
-      Width = 690
+      Width = 711
       Height = 34
       Align = alTop
       AutoSize = True
       AutoWrap = False
       TabOrder = 1
       VerticalAlignment = taAlignTop
+      ExplicitWidth = 690
       object pnlCF: TPanel
         Left = 1
         Top = 1
@@ -503,14 +507,15 @@ object frmProfile: TfrmProfile
     object pnlChart: TPanel
       Left = 1
       Top = 304
-      Width = 690
+      Width = 711
       Height = 313
       Align = alTop
       TabOrder = 2
+      ExplicitWidth = 690
       object chrtStats: TChart
         Left = -6
         Top = 13
-        Width = 692
+        Width = 717
         Height = 260
         Cursor = crArrow
         AllowPanning = pmHorizontal
@@ -614,9 +619,9 @@ object frmProfile: TfrmProfile
           11842740
           11009707)
         object chrtLayoutStats: TChartLayout
-          Left = 583
+          Left = 664
           Top = -34
-          Width = 245
+          Width = 164
           Height = 356
           HorzScrollBar.Smooth = True
           HorzScrollBar.Tracking = True

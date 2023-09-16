@@ -4,7 +4,7 @@ object frmLogin: TfrmLogin
   BorderWidth = 3
   Caption = 'Login'
   ClientHeight = 357
-  ClientWidth = 660
+  ClientWidth = 323
   Color = 11074992
   Font.Charset = ANSI_CHARSET
   Font.Color = 16384
@@ -65,9 +65,9 @@ object frmLogin: TfrmLogin
     Top = 112
     Width = 172
     Height = 26
-    Color = 8249222
+    Color = 8380296
     TabOrder = 0
-    Text = 'okay'
+    Text = 'kTf1JdYcG8'
     OnKeyDown = edtPasswordKeyDown
   end
   object edtUsername: TEdit
@@ -75,9 +75,9 @@ object frmLogin: TfrmLogin
     Top = 64
     Width = 169
     Height = 26
-    Color = 8380296
+    Color = 8446091
     TabOrder = 1
-    Text = 'lolkek4'
+    Text = 'User2'
     OnKeyDown = edtPasswordKeyDown
   end
   object pnlHelp: TPanel
@@ -146,26 +146,5 @@ object frmLogin: TfrmLogin
       OnClick = btnSignUpScreenClick
       ExplicitTop = 4
     end
-  end
-  object Button1: TButton
-    Left = 241
-    Top = 277
-    Width = 75
-    Height = 25
-    Caption = 'Button1'
-    TabOrder = 5
-    OnClick = Button1Click
-  end
-  object DBGrid1: TDBGrid
-    Left = 328
-    Top = 112
-    Width = 664
-    Height = 237
-    TabOrder = 6
-    TitleFont.Charset = ANSI_CHARSET
-    TitleFont.Color = 16384
-    TitleFont.Height = -16
-    TitleFont.Name = 'Arial Rounded MT Bold'
-    TitleFont.Style = []
   end
 end

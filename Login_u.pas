@@ -22,15 +22,12 @@ type
     pnlSignup: TPanel;
     sbtnSignUp: TSpeedButton;
     spnHelp: TSpeedButton;
-    Button1: TButton;
-    DBGrid1: TDBGrid;
     procedure btnSignInClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnSignUpScreenClick(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
     procedure edtPasswordKeyDown(Sender: TObject; var Key: Word;
       Shift: TShiftState);
-    procedure Button1Click(Sender: TObject);
     procedure Button2Click(Sender: TObject);
 
   private
@@ -115,18 +112,7 @@ begin
   frmSignUp.Show;
 end;
 
-procedure TfrmLogin.Button1Click(Sender: TObject);
-var
-  ds: tDataset;
-  datasrc: tDataSource;
-begin
-  ds := DataModule1.viewItem('RE9562810');
 
-  ds.First;
-  datasrc := tDataSource.Create(self);
-  datasrc.DataSet := ds;
-  DBGrid1.DataSource := datasrc;
-end;
 
 procedure TfrmLogin.Button2Click(Sender: TObject);
 begin

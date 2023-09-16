@@ -60,8 +60,6 @@ begin;
 
   self.viewProcedure := viewProcedure;
 
-  DataModule1.loadItemImage(itemid, imgItem);
-
   Inherited Create(Owner, Parent, itemID);
 
 end;
@@ -135,6 +133,9 @@ begin
   imgItem.Height := 165;
   imgItem.Center := true;
   imgItem.Stretch := true;
+  // load image
+
+  DataModule1.loadItemImage(itemid, imgItem);
 
   pnlViewItem := TPanel.Create(self.Owner);
   pnlViewItem.ParentBackground := false;

@@ -175,4 +175,30 @@ object frmCheckout: TfrmCheckout
       ExplicitTop = 9
     end
   end
+  object Panel1: TPanel
+    Left = 288
+    Top = 0
+    Width = 106
+    Height = 41
+    Color = 8118149
+    Font.Charset = ANSI_CHARSET
+    Font.Color = 16384
+    Font.Height = -16
+    Font.Name = 'Arial Rounded MT Bold'
+    Font.Style = []
+    ParentBackground = False
+    ParentFont = False
+    TabOrder = 4
+    object btnReturn: TSpeedButton
+      Left = 1
+      Top = 1
+      Width = 104
+      Height = 39
+      Align = alClient
+      Caption = 'Return Cart'
+      Flat = True
+      OnClick = btnReturnClick
+      ExplicitLeft = -7
+    end
+  end
 end
