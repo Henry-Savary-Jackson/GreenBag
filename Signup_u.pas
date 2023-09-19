@@ -178,6 +178,7 @@ begin
     DataModule1.SignUp(userName, password, userType, homeaddress,
       certificationCode, imgPfp);
 
+
     try
       DataModule1.getCartItems(DataModule1.userName, DataModule1.jwtToken);
 

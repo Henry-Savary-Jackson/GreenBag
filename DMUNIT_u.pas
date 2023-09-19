@@ -13,7 +13,9 @@ uses
 
 type
   TDataModule1 = class(TDataModule)
+    Timer1: TTimer;
     procedure checkIFCartOutdated(Sender: TObject);
+    procedure Timer1Timer(Sender: TObject);
   private
     { Private declarations }
   public
@@ -59,6 +61,9 @@ type
 
     nums = '0123456789';
     special = '!@#$%^&*()-+=.,<>?\/|';
+
+    function ifthenreturn(condition: boolean;
+      trueValue, falsevalue: variant): variant;
 
     procedure Login(username, password: string);
     procedure SignUp(username, password, usertype, homeAddress,
@@ -652,11 +657,24 @@ begin
 end;
 
 // procedure to insert a new item into the database
+function TDataModule1.ifthenreturn(condition: boolean;
+  trueValue, falsevalue: Variant): Variant;
+begin
+  if condition then
+  begin
+    Result := trueValue;
+  end
+  else
+  begin
+    Result := falsevalue;
+  end;
+end;
+
 procedure TDataModule1.insertItem(Name, category, Desc: string;
   Price, stock, maxwithdrawstock, CF, EU, WU, CFProduce, EUProduce,
   WUProduce: double; token: string; Image: tImage = nil);
 var
-  url: string;
+  url, itemid: string;
   body, responseJson: tJsonObject;
   response: TRESTResponse;
 
@@ -683,17 +701,22 @@ begin
 
     response := sendRequest(url, rmPOST, body, token);
 
+    responseJson := tJsonObject.ParseJSONValue(response.Content)
+        as tJsonObject;
+
     if response.StatusCode <> 200 then
     begin
-      responseJson := tJsonObject.ParseJSONValue(response.Content)
-        as tJsonObject;
+
       raise Exception.Create((responseJson.P['error'] as tJsonString).Value);
-      response := sendRequest(url);
     end;
+
+    itemid := (responseJson.P['data[0].ItemID'] as tJsonString).Value;
+
 
     if Image <> nil then
     begin
       // send request to update image if indicated
+      setItemImage(itemid, token, image);
     end;
 
   finally
@@ -963,6 +986,7 @@ begin
 
     // get image as a png
 
+    Result := TPngImage.Create();
     Result.Assign(ResizedImage.Picture.Graphic);
 
   finally
@@ -1216,7 +1240,7 @@ begin
   try
     Image.Picture.SaveToStream(strmImageBytes);
 
-    url := format('%s/users/%s/profileImage', [baseUrl, username]);
+    url := format('%s/item/%s/image', [baseUrl, itemid]);
 
     response := sendRequest(url, rmPOST, strmImageBytes, token,
       TRESTContentType.ctIMAGE_PNG);
@@ -1316,6 +1340,8 @@ begin
         // set the profile picture
         setProfilePicture(username, jwtToken, imgPfp);
 
+        self.username := username;
+
       finally
         freeandnil(responseJson);
       end;
@@ -1328,6 +1354,11 @@ begin
     freeandnil(bodyJson);
   end;
 
+end;
+
+procedure TDataModule1.Timer1Timer(Sender: TObject);
+begin
+//
 end;
 
 procedure TDataModule1.updateItem(itemid, Name, category, Desc: string;
@@ -1371,7 +1402,7 @@ begin
       if Image <> nil then
       begin
         // send request to update image if indicated
-        setItemImage(itemid, token, Image);
+        setItemImage(itemid, token, image);
 
       end;
     finally

@@ -120,13 +120,14 @@ object frmBrowse: TfrmBrowse
         object lblHeadingFilters: TLabel
           Left = 1
           Top = 1
-          Width = 221
+          Width = 561
           Height = 18
           Align = alTop
           Alignment = taCenter
           Caption = 'Enter additional filters here:'
           Color = 11074996
           ParentColor = False
+          ExplicitWidth = 221
         end
         object pnlRating: TPanel
           Left = 1

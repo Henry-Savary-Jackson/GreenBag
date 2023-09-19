@@ -7,7 +7,7 @@ uses
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls,
   Vcl.ExtCtrls, DMUnit_u, Data.Win.ADODB, PngImage, Vcl.Imaging.jpeg, Data.DB,
-  Vcl.Buttons;
+  Vcl.Buttons, Math;
 
 type
   TfrmAddItem = class(TForm)
@@ -74,6 +74,10 @@ type
     procedure btnHelpClick(Sender: TObject);
   private
     { Private declarations }
+    // checks whether the image has been modified since the showing of this form.
+    // if not modified, don't bother sending image data.
+    // this heps performance
+    isImageModified : boolean;
   public
     { Public declarations }
     itemID: string;
@@ -107,6 +111,7 @@ var
   sName, sDesc, category: string;
   CF, WU, EU, CFProduce, WUProduce, EUProduce, Price: double;
   stock, maxWithdrawstock: double;
+  imageArg : tImage;
   I: Integer;
 begin
 
@@ -179,6 +184,12 @@ begin
 
   category := cmbCategory.Items[cmbCategory.ItemIndex];
 
+  // if image is modified
+  imageArg := nil;
+
+  if isImageModified then
+    imageArg := imgItem;
+
 
   try
 
@@ -189,7 +200,7 @@ begin
 
         DataModule1.insertItem( sName, category,
           sDesc, Price, stock, maxWithdrawstock, CF, EU, WU, CFProduce,
-          EUProduce, WUProduce,DataModule1.jwtToken ,imgItem);
+          EUProduce, WUProduce,DataModule1.jwtToken ,imageArg);
 
       end
       else
@@ -197,7 +208,7 @@ begin
         // if this is updating an existing item
         DataModule1.updateItem(itemid, sName, category,
           sDesc, Price, stock, maxWithdrawstock, CF, EU, WU, CFProduce,
-          EUProduce, WUProduce,DataModule1.jwtToken,imgItem);
+          EUProduce, WUProduce,DataModule1.jwtToken,imageArg);
 
       end;
 
@@ -207,6 +218,8 @@ begin
       // naviguate back to your products
       frmAddItem.Hide;
       DataModule1.lastForm.Show;
+
+      isImageModified := false;
 
     except
       on e: exception do
@@ -282,8 +295,10 @@ begin
     edtWUProduce.Text := floatTOStrf(dsResult['WUProduce'],
       ffFixed, 8, 2);
 
-//    if dsResult['Description'] <> NUll then
-//      redDesc.lines.Add(dsResult['Description']);
+    redDesc.Clear;
+
+    if dsResult['Description'] <> NUll then
+      redDesc.lines.Add(dsResult['Description']);
 
     cmbCategory.ItemIndex := cmbCategory.Items.IndexOf(dsResult['Category']);
 
@@ -298,6 +313,8 @@ begin
     DataModule1.loadItemImage(itemid, imgItem);
 
     dsResult.Free;
+
+    isImageModified := false;
   end
   else
   begin
@@ -380,6 +397,9 @@ begin
 
       imgItem.Picture.Graphic.Assign(DataModule1.ResizeImage(imgItem,
         128, 128));
+
+
+      isImageModified := true;
     end
     else
     begin

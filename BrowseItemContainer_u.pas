@@ -160,7 +160,7 @@ end;
 procedure BrowseItem.onViewItem(Sender: TObject);
 begin
 
-  self.viewProcedure(self.sellerID, self.itemID);
+  self.viewProcedure(self.itemSeller, self.itemID);
 
 end;
 

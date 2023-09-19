@@ -1699,8 +1699,9 @@ object frmSignUp: TfrmSignUp
     Top = 176
     Width = 121
     Height = 26
-    Color = 8118149
+    Color = 8249222
     TabOrder = 1
+    Text = 'password1+'
     OnKeyDown = FormKeyDown
   end
   object edtUsername: TEdit
@@ -1708,8 +1709,9 @@ object frmSignUp: TfrmSignUp
     Top = 144
     Width = 121
     Height = 26
-    Color = 8118149
+    Color = 8249222
     TabOrder = 2
+    Text = 'u5'
     OnKeyDown = FormKeyDown
   end
   object edtCertification: TEdit

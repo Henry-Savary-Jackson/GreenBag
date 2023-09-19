@@ -69,7 +69,7 @@ type
     procedure FormShow(Sender: TObject);
     procedure onSearchBoxClick(Sender: TObject);
     procedure SearchItems();
-    procedure ViewItem(sellerID, itemID: string);
+    procedure ViewItem(sellername, itemID: string);
     procedure chbCFEnableClick(Sender: TObject);
     procedure spnCFMinChange(Sender: TObject);
     procedure spnEUMinChange(Sender: TObject);
@@ -468,10 +468,10 @@ end;
 
 // procedure given to all browse item containers
 // if the user is the object's seller, rather show them the screen that allows them to edit
-procedure TfrmBrowse.ViewItem(sellerID, itemID: string);
+procedure TfrmBrowse.ViewItem(sellername, itemID: string);
 begin
   // TODO: fix this
-  if DataModule1.username = sellerID then
+  if DataModule1.username = sellername then
   begin
     frmAddItem.itemID := itemID;
     frmAddItem.Show;
