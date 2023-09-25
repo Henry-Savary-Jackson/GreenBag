@@ -1,7 +1,11 @@
 program GreenBag;
 
 uses
-  Vcl.Forms, Vcl.dialogs, System.SysUtils, System.Classes, System.Variants,
+  Vcl.Forms,
+  Vcl.dialogs,
+  System.SysUtils,
+  System.Classes,
+  System.Variants,
   Login_u in 'Login_u.pas' {frmLogin},
   DMUNIT_u in 'DMUNIT_u.pas' {DataModule1: TDataModule},
   Signup_u in 'Signup_u.pas' {frmSignUp},
@@ -15,7 +19,6 @@ uses
   ProductItem_u in 'ProductItem_u.pas',
   BrowseItemContainer_u in 'BrowseItemContainer_u.pas',
   ItemContainer_u in 'ItemContainer_u.pas',
-  SCrypt in 'SCrypt.pas',
   HelpScreen_u in 'HelpScreen_u.pas' {frmHelp};
 
 {$R *.res}

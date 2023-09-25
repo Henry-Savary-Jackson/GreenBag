@@ -133,7 +133,6 @@
         <DCCReference Include="ProductItem_u.pas"/>
         <DCCReference Include="BrowseItemContainer_u.pas"/>
         <DCCReference Include="ItemContainer_u.pas"/>
-        <DCCReference Include="SCrypt.pas"/>
         <DCCReference Include="HelpScreen_u.pas">
             <Form>frmHelp</Form>
         </DCCReference>

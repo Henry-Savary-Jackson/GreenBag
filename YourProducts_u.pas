@@ -8,7 +8,8 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Data.Win.ADODB,
   Vcl.ExtCtrls,
   System.ImageList, DMUnit_u, Vcl.ImgList, Vcl.Imaging.pngimage,
-  System.Generics.Collections, ProductItem_u, Vcl.Buttons;
+  System.Generics.Collections, ProductItem_u, Vcl.Buttons, ActiveX,
+  System.Threading;
 
 type
   TfrmYourProducts = class(TForm)
@@ -138,65 +139,76 @@ var
   currentItem: ProductItem;
 begin
 
-  try
+  ttask.run(
+    procedure
+    begin
+       tthread.Sleep(2000);
+      CoInitialize(nil);
+      try
 
-    try
-      // get info on your products in a range
-      dsResult := datamodule1.getProducts(datamodule1.username, scrollRangeMin,
-        scrollRangeMax);
+        try
+          // get info on your products in a range
+          dsResult := datamodule1.getProducts(datamodule1.username,
+            scrollRangeMin, scrollRangeMax);
 
-      numProducts := datamodule1.getNumProducts(datamodule1.username);
+          numProducts := datamodule1.getNumProducts(datamodule1.username);
 
-      lblNumberProducts.Caption := 'Number of products: ' +
-        inttostr(numProducts);
+          tthread.Synchronize(nil,
+            procedure
+            begin
+              lblNumberProducts.Caption := 'Number of products: ' +
+                inttostr(numProducts);
 
-      if dsResult.Fields.FindField('Status') <> nil then
-      begin
-        showMessage(dsResult['Status']);
-        Exit;
+              if dsResult.Fields.FindField('Status') <> nil then
+              begin
+                showMessage(dsResult['Status']);
+                Exit;
+              end;
+
+              if btnLoadMoreitems <> nil then
+              begin
+                FreeAndNil(btnLoadMoreitems);
+              end;
+
+              // instanitate all the gui objects
+              dsResult.First;
+
+              while not dsResult.Eof do
+              begin
+                currentItem := ProductItem.Create(self, flpnlProducts, dsResult,
+                  self.removeProcedure);
+                items.add(currentItem.itemID, currentItem);
+                dsResult.Next;
+              end;
+
+              // only add the load more button if =this is not the end of the items in the query
+              if items.Count < numProducts then
+              begin
+                btnLoadMoreitems := tButton.Create(self.Owner);
+                btnLoadMoreitems.Caption := 'load More items';
+                btnLoadMoreitems.OnClick := btnLoadMoreItemsClick;
+                btnLoadMoreitems.Parent := flpnlProducts;
+                btnLoadMoreitems.Width := 500;
+              end;
+
+              scrollRangeMin := scrollRangeMin + 10;
+              scrollRangeMax := scrollRangeMax + 10;
+            end);
+
+        except
+          on e: exception do
+          begin
+            showMessage(e.Message);
+          end;
+
+        end;
+
+      finally
+        CoUninitialize;
+        FreeAndNil(dsResult);
+
       end;
-
-      if btnLoadMoreitems <> nil then
-      begin
-        FreeAndNil(btnLoadMoreitems);
-      end;
-
-      // instanitate all the gui objects
-      dsResult.First;
-
-      while not dsResult.Eof do
-      begin
-        currentItem := ProductItem.Create(self, flpnlProducts, dsResult,
-          self.removeProcedure);
-        items.add(currentItem.itemID, currentItem);
-        dsResult.Next;
-      end;
-
-      // only add the load more button if =this is not the end of the items in the query
-      if items.Count < numProducts then
-      begin
-        btnLoadMoreitems := tButton.Create(self.Owner);
-        btnLoadMoreitems.Caption := 'load More items';
-        btnLoadMoreitems.OnClick := btnLoadMoreItemsClick;
-        btnLoadMoreitems.Parent := flpnlProducts;
-        btnLoadMoreitems.Width := 500;
-      end;
-
-      scrollRangeMin := scrollRangeMin + 10;
-      scrollRangeMax := scrollRangeMax + 10;
-
-    except
-      on e: exception do
-      begin
-        showMessage(e.Message);
-      end;
-
-    end;
-
-  finally
-    FreeAndNil(dsResult);
-
-  end;
+    end);
 
 end;
 

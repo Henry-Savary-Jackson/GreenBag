@@ -4,10 +4,11 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
-  System.Classes, Vcl.Graphics,Vcl.buttons,
+  System.Classes, Vcl.Graphics, Vcl.buttons,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
   System.ImageList, Data.Win.ADODB, DMUnit_u, Vcl.ImgList,
-  System.Generics.Collections, Vcl.Imaging.pngimage, ItemContainer_u, Data.DB;
+  System.Generics.Collections, Vcl.Imaging.pngimage, ItemContainer_u, Data.DB,
+  activeX, System.threading;
 
 type
   tViewProcedure = procedure(itemID, sellerID: string) of object;
@@ -26,7 +27,7 @@ type
     lblEU: TLabel;
     imgItem: TImage;
     btnViewItem: tSpeedButton;
-    pnlViewItem : tPanel;
+    pnlViewItem: tPanel;
 
     // user id of seller of this item
     sellerID: string;
@@ -99,7 +100,8 @@ begin
   lblCF.Top := 260;
   lblCF.Width := 82;
   lblCF.Height := 13;
-  lblCF.Caption := 'Carbon Footprint:' + floattoStrf(itemCF, fffixed, 8, 2) + ' t/unit';
+  lblCF.Caption := 'Carbon Footprint:' + floattoStrf(itemCF, fffixed, 8, 2) +
+    ' t/unit';
 
   lblWU := TLabel.Create(self.Owner);
   lblWU.AlignWithMargins := true;
@@ -110,7 +112,8 @@ begin
   lblWU.Top := 300;
   lblWU.Width := 67;
   lblWU.Height := 13;
-  lblWU.Caption := 'Water Usage:' + floattoStrf(itemWU, fffixed, 8, 2)+ ' L/unit';
+  lblWU.Caption := 'Water Usage:' + floattoStrf(itemWU, fffixed, 8, 2) +
+    ' L/unit';
 
   lblEU := TLabel.Create(self.Owner);
   lblEU.AlignWithMargins := true;
@@ -121,7 +124,8 @@ begin
   lblEU.Top := 340;
   lblEU.Width := 71;
   lblEU.Height := 13;
-  lblEU.Caption := 'Energy Usage:' + floattoStrf(itemEU, fffixed, 8, 2) + ' kWh/unit';
+  lblEU.Caption := 'Energy Usage:' + floattoStrf(itemEU, fffixed, 8, 2) +
+    ' kWh/unit';
 
   imgItem := TImage.Create(self.Owner);
   imgItem.Picture.LoadFromFile('cross.png');
@@ -135,9 +139,24 @@ begin
   imgItem.Stretch := true;
   // load image
 
-  DataModule1.loadItemImage(itemid, imgItem);
+  ttask.Run(
+    procedure
+    begin
+       tthread.Sleep(2000);
+      CoInitialize(nil);
+      try
+        imageStream := DataModule1.loadItemImage(itemID);
+        tthread.Synchronize(nil,
+          procedure
+          begin
+            imgItem.Picture.LoadFromStream(imageStream);
+          end);
+      finally
+        CoUninitialize;
+      end
+    end);
 
-  pnlViewItem := TPanel.Create(self.Owner);
+  pnlViewItem := tPanel.Create(self.Owner);
   pnlViewItem.ParentBackground := false;
   pnlViewItem.ParentColor := false;
   pnlViewItem.Parent := self;
@@ -148,7 +167,7 @@ begin
   pnlViewItem.Width := 180;
   pnlViewItem.Height := 50;
 
-  btnViewItem := TSpeedButton.Create(self.Owner);
+  btnViewItem := tSpeedButton.Create(self.Owner);
   btnViewItem.Parent := pnlViewItem;
   btnViewItem.Align := alClient;
   btnViewItem.Flat := true;

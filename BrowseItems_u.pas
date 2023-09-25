@@ -8,7 +8,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
   Vcl.WinXCtrls, DMUnit_u, Data.win.ADODB, Vcl.Imaging.pngimage,
   BrowseItemContainer_u, System.Generics.Collections, Data.DB, Vcl.Samples.Spin,
-  Vcl.Buttons;
+  Vcl.Buttons, System.threading, ActiveX;
 
 type
   TfrmBrowse = class(TForm)
@@ -80,7 +80,6 @@ type
     procedure btnHelpClick(Sender: TObject);
     procedure btnLoadMoreItemsClick(Sender: TObject);
     procedure addQueryResult(dsResult: tAdoDataset; numResults: integer);
-    procedure srchSearchItemsChange(Sender: TObject);
 
   private
     { Private declarations }
@@ -204,6 +203,8 @@ begin
       btnLoadMoreitems := nil;
     end;
 
+    DataModule1.tmCheckCartExpired.Enabled := False;
+
     frmBrowse.Hide;
     frmLogin.Show;
 
@@ -263,6 +264,7 @@ procedure TfrmBrowse.FormShow(Sender: TObject);
 var
   currentCheckbox: TCheckBox;
   i: integer;
+  imageStream: tMemoryStream;
 begin
 
   // add all the categories to gui
@@ -286,7 +288,23 @@ begin
   end;
 
   // load profile picture
-  DataModule1.loadProfilePicture(DataModule1.username, imgProfile);
+  ttask.run(
+    procedure
+    begin
+      imageStream := DataModule1.loadProfilePicture(DataModule1.username);
+      try
+
+        tthread.Synchronize(nil,
+          procedure
+          begin
+            imgProfile.Picture.LoadFromStream(imageStream);
+          end);
+      finally
+        // stream.Free
+
+      end
+
+    end);
 
 end;
 
@@ -384,42 +402,67 @@ begin
 
   end;
 
-  try
-    try
-      // get results as table
-      dsResult := DataModule1.getSearchResults(searchQuery, arrCategories,
-        cfRange, euRange, wuRange, [scrollRangeMin, scrollRangeMax],
-        ratingRange, iNumResults);
+  // disable that to prevent spamming while waiting for callback to finish
 
-      if items = nil then
-        items := TObjectList<BrowseItem>.Create();
+  srchSearchItems.Enabled := False;
+  // run request in separate thread
+  ttask.run(
+    procedure
+    begin
+      try
+        try
 
-      if dsResult.Fields.FindField('Status') <> nil then
-      begin
-        showMessage(dsResult['Status']);
-        Exit;
+          CoInitialize(nil);
+
+          // get results as table
+          dsResult := DataModule1.getSearchResults(searchQuery, arrCategories,
+            cfRange, euRange, wuRange, [scrollRangeMin, scrollRangeMax],
+            ratingRange, iNumResults);
+          try
+
+            if items = nil then
+              items := TObjectList<BrowseItem>.Create();
+
+            if dsResult.Fields.FindField('Status') <> nil then
+            begin
+              showMessage(dsResult['Status']);
+              Exit;
+            end;
+
+            // add to gui
+            tthread.Synchronize(nil,
+              procedure
+              begin
+                addQueryResult(dsResult, iNumResults)
+              end);
+
+            if items.Count = 0 then
+            begin
+              showMessage('There are no items matching your query');
+            end;
+
+          finally
+            dsResult.Free;
+          end
+
+        except
+          on e: exception do
+          begin
+            showMessage(e.Message);
+          end;
+
+        end;
+
+      finally
+        tthread.Synchronize(nil,
+          procedure
+          begin
+            srchSearchItems.Enabled := True;
+          end);
+
+        CounInitialize();
       end;
-
-      // add to gui
-      addQueryResult(dsResult, iNumResults);
-
-      if items.Count = 0 then
-      begin
-        showMessage('There are no items matching your query');
-      end;
-
-    except
-      on e: exception do
-      begin
-        showMessage(e.Message);
-      end;
-
-    end;
-
-  finally
-    if assigned(dsResult) then
-      FreeAndNil(dsResult);
-  end;
+    end);
 
 end;
 
@@ -461,16 +504,12 @@ begin
   spnWUMax.Enabled := spnWUMax.MinValue <> spnWUMax.MaxValue
 end;
 
-procedure TfrmBrowse.srchSearchItemsChange(Sender: TObject);
-begin
-
-end;
 
 // procedure given to all browse item containers
 // if the user is the object's seller, rather show them the screen that allows them to edit
 procedure TfrmBrowse.ViewItem(sellername, itemID: string);
 begin
-  // TODO: fix this
+
   if DataModule1.username = sellername then
   begin
     frmAddItem.itemID := itemID;

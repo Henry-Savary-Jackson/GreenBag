@@ -8,7 +8,7 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls,
   Vcl.ExtCtrls,
   Vcl.Samples.Spin, DMUnit_u, System.Generics.Collections, Data.Win.ADODB,
-  Vcl.Imaging.pngimage, Data.DB, Vcl.Buttons;
+  Vcl.Imaging.pngimage, Data.DB, Vcl.Buttons, ActiveX, System.threading;
 
 type
   TfrmViewItem = class(TForm)
@@ -87,19 +87,40 @@ begin;
     Exit;
   end;
 
-  try
-    DataModule1.addToCart(DataModule1.username, itemID, DataModule1.jwtToken,
-      quantity);
-    frmViewItem.Hide;
-    frmBrowse.Show;
-
-  except
-    on e: exception do
+  btnAddToCart.Enabled := false;
+  ttask.Run(
+    procedure
     begin
-      showMessage(e.Message);
-    end;
+      tthread.Sleep(2000);
+      coinitialize(nil);
+      try
+        try
+          DataModule1.addToCart(DataModule1.username, itemID,
+            DataModule1.jwtToken, quantity);
 
-  end;
+          tthread.Synchronize(nil,
+            procedure
+            begin
+              frmViewItem.Hide;
+              frmBrowse.Show;
+            end);
+
+        except
+          on e: exception do
+          begin
+            showMessage(e.Message);
+          end;
+
+        end;
+      finally
+        couninitialize;
+        tthread.Synchronize(nil,
+          procedure
+          begin
+            btnAddToCart.Enabled := True;
+          end);
+      end
+    end);
 end;
 
 procedure TfrmViewItem.btnBackClick(Sender: TObject);
@@ -121,20 +142,41 @@ var
 
 begin
   rating := trcRating.Position;
-  try
-    DataModule1.sendRating(DataModule1.username, itemID,
-      DataModule1.jwtToken, rating);
 
-    showMessage('Your feedback has been sent.');
-
-  except
-    on e: exception do
+  btnSendRating.Enabled := false;
+  ttask.Run(
+    procedure
     begin
+      tthread.Sleep(2000);
+      coinitialize(nil);
+      try
+        try
 
-      showMessage(e.Message);
-      Exit;
-    end;
-  end;
+          DataModule1.sendRating(DataModule1.username, itemID,
+            DataModule1.jwtToken, rating);
+
+          showMessage('Your feedback has been sent.');
+
+        except
+          on e: exception do
+          begin
+
+            showMessage(e.Message);
+            Exit;
+          end;
+        end;
+      finally
+        couninitialize;
+
+        tthread.Synchronize(nil,
+          procedure
+          begin
+            btnSendRating.Enabled := True;
+          end);
+
+      end
+    end);
+
 end;
 
 procedure TfrmViewItem.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -149,83 +191,123 @@ var
   imageStream: tStream;
 begin
   // get the info of the item
-  dsResult := DataModule1.viewItem(itemID);
 
-  if dsResult.Fields.FindField('Status') <> nil then
-  begin
-    showMessage(dsResult['Status']);
-    FreeAndNil(dsResult);
-    Exit;
-  end;
+  btnAddToCart.Enabled := false;
+  btnSendRating.Enabled := false;
+  ttask.Run(
+    procedure
+    begin
+      coinitialize(nil);
 
-  // write dtaa to gui
-  lblName.Caption := 'Name :' + dsResult['ItemName'];
-  lblSeller.Caption := 'Seller: ' + dsResult['SellerName'];
-  lblPrice.Caption := 'Price: ' + floatToStrf(dsResult['Cost'],
-    ffCurrency, 8, 2);
+      tthread.Sleep(2000);
 
-  price := dsResult['Cost'];
+      try
+        dsResult := DataModule1.viewItem(itemID);
+        try
+          if dsResult.Fields.FindField('Status') <> nil then
+          begin
+            showMessage(dsResult['Status']);
+            FreeAndNil(dsResult);
+            Exit;
+          end;
 
-  lblStock.Caption := 'Stock: ' + inttostr(dsResult['Stock']);
-  if dsResult['Stock'] = 1 then
-  begin
-    lblStock.Caption := lblStock.Caption + ' unit'
-  end
-  else
-  begin
-    lblStock.Caption := lblStock.Caption + ' units'
-  end;
+          tthread.Synchronize(nil,
+            procedure
+            begin
 
-  stock := dsResult['Stock'];
-  lblCF.Caption := 'Carbon footprint through usage: ' +
-    floatToStrf(dsResult['CFUsage'], fffixed, 8, 2) + ' t/unit';
+              // write data to gui
+              lblName.Caption := 'Name :' + dsResult['ItemName'];
+              lblSeller.Caption := 'Seller: ' + dsResult['SellerName'];
+              lblPrice.Caption := 'Price: ' + floatToStrf(dsResult['Cost'],
+                ffCurrency, 8, 2);
 
-  lblEU.Caption := 'Energy consumption through usage: ' +
-    floatToStrf(dsResult['EUUsage'], fffixed, 8, 2) + ' kWh/unit';
+              price := dsResult['Cost'];
 
-  lblWU.Caption := 'Water consumption through usage:' +
-    floatToStrf(dsResult['WUUsage'], fffixed, 8, 2) + ' L/unit';
+              lblStock.Caption := 'Stock: ' + inttostr(dsResult['Stock']);
+              if dsResult['Stock'] = 1 then
+              begin
+                lblStock.Caption := lblStock.Caption + ' unit'
+              end
+              else
+              begin
+                lblStock.Caption := lblStock.Caption + ' units'
+              end;
 
-  lblCFProduce.Caption := 'Carbon footprint for production: ' +
-    floatToStrf(dsResult['CFProduce'], fffixed, 8, 2) + 't/unit';
+              stock := dsResult['Stock'];
+              lblCF.Caption := 'Carbon footprint through usage: ' +
+                floatToStrf(dsResult['CFUsage'], fffixed, 8, 2) + ' t/unit';
 
-  lblEUProduce.Caption := 'Energy usage for production: ' +
-    floatToStrf(dsResult['EUProduce'], fffixed, 8, 2) + ' kWh/unit';
+              lblEU.Caption := 'Energy consumption through usage: ' +
+                floatToStrf(dsResult['EUUsage'], fffixed, 8, 2) + ' kWh/unit';
 
-  lblWUProduce.Caption := 'Water usage for production:' +
-    floatToStrf(dsResult['WUProduce'], fffixed, 8, 2) + ' L/unit';
+              lblWU.Caption := 'Water consumption through usage:' +
+                floatToStrf(dsResult['WUUsage'], fffixed, 8, 2) + ' L/unit';
 
-  if dsResult['avgRating'] = -1 then
-  begin
-    lblRating.Caption := 'Average Rating: No ratings';
-  end
-  else
-  begin
-    lblRating.Caption := ' Average Rating: ' +
-      inttostr(dsResult['avgRating']) + '/5';
-  end;
+              lblCFProduce.Caption := 'Carbon footprint for production: ' +
+                floatToStrf(dsResult['CFProduce'], fffixed, 8, 2) + 't/unit';
 
-  lblCategory.Caption := 'Category: ' + dsResult['Category'];
+              lblEUProduce.Caption := 'Energy usage for production: ' +
+                floatToStrf(dsResult['EUProduce'], fffixed, 8, 2) + ' kWh/unit';
 
-  lblMaxWithdraw.Caption := 'Maximum Stock you can withdraw at once: ' +
-    inttostr(dsResult['MaxWithdrawableStock']);
+              lblWUProduce.Caption := 'Water usage for production:' +
+                floatToStrf(dsResult['WUProduce'], fffixed, 8, 2) + ' L/unit';
 
-  if dsResult['MaxWithdrawableStock'] = 1 then
-  begin
-    lblMaxWithdraw.Caption := lblMaxWithdraw.Caption + ' unit'
-  end
-  else
-  begin
-    lblMaxWithdraw.Caption := lblMaxWithdraw.Caption + ' units'
-  end;
+              if dsResult['avgRating'] = -1 then
+              begin
+                lblRating.Caption := 'Average Rating: No ratings';
+              end
+              else
+              begin
+                lblRating.Caption := ' Average Rating: ' +
+                  inttostr(dsResult['avgRating']) + '/5';
+              end;
 
-  if dsResult['Description'] <> NULL then
-    redDesc.Lines.Add(dsResult['Description']);
+              lblCategory.Caption := 'Category: ' + dsResult['Category'];
 
-  DataModule1.loadItemImage(itemID, imgItem);
+              lblMaxWithdraw.Caption :=
+                'Maximum Stock you can withdraw at once: ' +
+                inttostr(dsResult['MaxWithdrawableStock']);
 
-  spnQuantity.Value := 1;
-  trcRating.Position := 0;
+              if dsResult['MaxWithdrawableStock'] = 1 then
+              begin
+                lblMaxWithdraw.Caption := lblMaxWithdraw.Caption + ' unit'
+              end
+              else
+              begin
+                lblMaxWithdraw.Caption := lblMaxWithdraw.Caption + ' units'
+              end;
+
+              if dsResult['Description'] <> NULL then
+                redDesc.Lines.Add(dsResult['Description']);
+              spnQuantity.Value := 1;
+              trcRating.Position := 0;
+            end);
+
+          imageStream := DataModule1.loadItemImage(itemID);
+          tthread.Synchronize(nil,
+            procedure
+            begin
+              try
+                imgItem.Picture.LoadFromStream(imageStream);
+              finally
+                imageStream.Free;
+              end
+            end);
+
+        finally
+          dsResult.Free;
+        end
+      finally
+        couninitialize;
+        tthread.Synchronize(nil,
+          procedure
+          begin
+            btnAddToCart.Enabled := true;
+            btnSendRating.Enabled := true;
+          end);
+      end
+
+    end);
 
 end;
 

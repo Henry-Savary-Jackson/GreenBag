@@ -81,7 +81,6 @@ object frmBrowse: TfrmBrowse
           Font.Style = []
           ParentFont = False
           TabOrder = 0
-          OnChange = srchSearchItemsChange
           OnInvokeSearch = onSearchBoxClick
         end
         object scrbxCategories: TScrollBox

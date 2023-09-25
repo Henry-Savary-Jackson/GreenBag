@@ -722,7 +722,8 @@ object frmProfile: TfrmProfile
       Font.Style = []
       ParentFont = False
       OnClick = btnChangePasswordClick
-      ExplicitTop = 26
+      ExplicitLeft = -6
+      ExplicitTop = 4
     end
   end
   object Panel1: TPanel

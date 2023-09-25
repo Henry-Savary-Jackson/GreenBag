@@ -6,7 +6,8 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics,
   Vcl.Controls, DMUnit_u, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
-  Vcl.ComCtrls, Vcl.Imaging.pngimage, Vcl.Buttons, System.generics.collections;
+  Vcl.ComCtrls, Vcl.Imaging.pngimage, System.Threading, Vcl.Buttons,
+  System.generics.collections, ActiveX;
 
 type
   TfrmSignUp = class(TForm)
@@ -31,7 +32,6 @@ type
     procedure btnSignUpClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure rgpUserClick(Sender: TObject);
-    function verifyCertificationCode(code: string): integer;
     procedure imgPfpClick(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -146,23 +146,8 @@ begin
 
     if not(length(certificationCode) = 10) then
     begin
-      showMessage('Certificaiton Code must be less than 10 characters.');
+      showMessage('Certificaiton Code can only be 10 characters long.');
       Exit;
-    end;
-
-    case verifyCertificationCode(certificationCode) of
-      DataModule1.notInFile:
-        begin
-          showMessage
-            ('Your certification code doesn''t exist. Please correctly enter your code. If that doesn''t work, please ensure you have properly applied to be a seller.');
-          Exit;
-
-        end;
-      DataModule1.invalidChar:
-        begin
-          showMessage('Your certification code must only consist of numbers.');
-          Exit;
-        end;
     end;
 
   end;
@@ -173,46 +158,64 @@ begin
     Exit;
   end;
 
-  try
-    // try to create user
-    DataModule1.SignUp(userName, password, userType, homeaddress,
-      certificationCode, imgPfp);
-
-
-    try
-      DataModule1.getCartItems(DataModule1.userName, DataModule1.jwtToken);
-
-    except
-      on e: Exception do
-      begin
-        if e.Message.Equals('User doesn''t have a cart.') then
-          DataModule1.CreateUserCart(DataModule1.userName,
-            DataModule1.jwtToken);
-
-      end;
-
-    end;
-
-    frmSignUp.Hide;
-    frmBrowse.Show;
-
-  except
-    on e: exception do
+  btnSignUp.Enabled := false;
+  TTask.Run(
+    procedure
     begin
-      // more user friendly
-      if e.Message = 'The changes you requested to the table were not successful because they would create duplicate value'
-      then
-      begin
-        showMessage('Username already in use.');
-        Exit;
-      end;
-      showMessage(e.Message);
-    end;
+      try
+        try
+          CoInitialize(nil);
+          // try to create user
+          DataModule1.SignUp(userName, password, userType, homeaddress,
+            certificationCode, imgPfp);
 
-  end;
+          try
+            DataModule1.getCartItems(DataModule1.userName,
+              DataModule1.jwtToken);
+
+          except
+            on e: Exception do
+            begin
+              if e.Message.Equals('User doesn''t have a cart.') then
+                DataModule1.CreateUserCart(DataModule1.userName,
+                  DataModule1.jwtToken);
+
+            end;
+
+          end;
+
+          tthread.Synchronize(nil,
+            procedure
+            begin
+              DataModule1.tmCheckCartExpired.Enabled := true;
+
+              frmSignUp.Hide;
+              frmBrowse.Show;
+            end);
+
+          couninitialize();
+
+        except
+          on e: Exception do
+          begin
+            // more user friendly
+            if e.Message = 'The changes you requested to the table were not successful because they would create duplicate value'
+            then
+            begin
+              showMessage('Username already in use.');
+              Exit;
+            end;
+            showMessage(e.Message);
+          end;
+
+        end;
+      finally
+        // ensure to reenable button regardless of exceptions
+        btnSignUp.Enabled := true;
+      end
+    end);
 
 end;
-
 
 procedure TfrmSignUp.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
@@ -221,7 +224,7 @@ end;
 
 // allow for pressing enter while focusing on tedits to sign up
 procedure TfrmSignUp.FormKeyDown(Sender: TObject; var Key: Word;
-  Shift: TShiftState);
+Shift: TShiftState);
 begin
   if Key = vk_return then
   begin
@@ -240,55 +243,5 @@ begin
   edtCertification.Enabled := rgpUser.ItemIndex = 0
 end;
 
-
-
-// make sure the verification code was in the text file
-function TfrmSignUp.verifyCertificationCode(code: string): integer;
-var
-  i: integer;
-  fFile: textfile;
-  sLine: string;
-begin
-
-  for i := 1 to 10 do
-  begin
-    if pos(code[i], DataModule1.nums) = 0 then
-    begin
-      Result := DataModule1.invalidChar;
-      Exit;
-    end;
-  end;
-
-  Result := DataModule1.notInFile;
-
-  if fileExists('SellerCertificationCodes.txt') then
-  begin
-    AssignFile(fFile, 'SellerCertificationCodes.txt');
-    reset(fFile);
-
-    while not eof(fFile) do
-    begin
-      readln(fFile, sLine);
-      if sLine = code then
-      begin
-        Result := DataModule1.success;
-        CloseFile(fFile);
-        Exit;
-      end;
-
-    end;
-
-    CloseFile(fFile);
-
-  end
-  else
-  begin;
-    AssignFile(fFile, 'SellerCertificationCodes.txt');
-    ReWrite(fFile);
-    CloseFile(fFile);
-
-  end;
-
-end;
 
 end.

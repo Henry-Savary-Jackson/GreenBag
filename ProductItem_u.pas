@@ -7,7 +7,8 @@ uses
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Buttons, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ExtCtrls,
   System.ImageList, DMunit_u, Data.Win.ADODB, Vcl.ImgList, Vcl.Imaging.pngimage,
-  ItemContainer_u, addItem_u, System.Generics.Collections, Data.DB;
+  ItemContainer_u, addItem_u, System.Generics.Collections, Data.DB, ActiveX,
+  System.threading;
 
 type
   tRemoveProcedure = procedure(itemID: string) of object;
@@ -17,7 +18,7 @@ type
 
   private
     imgItem, imgRemoveProduct: TImage;
-    pnlViewItem : tPanel;
+    pnlViewItem: tPanel;
     btnViewItem: TSpeedButton;
     lblSales, lblName, lblRevenue: TLabel;
     revenue: double;
@@ -59,6 +60,8 @@ begin
 end;
 
 procedure ProductItem.createDesign();
+var
+  imageStream: tMemoryStream;
 begin
   //
   AlignWithMargins := True;
@@ -107,8 +110,7 @@ begin
   lblSales.Height := 13;
   lblSales.Caption := 'Sales: ' + intToStr(Sales);
 
-
-  pnlViewItem := TPanel.Create(self.Owner);
+  pnlViewItem := tPanel.Create(self.Owner);
   pnlViewItem.Parent := self;
   pnlViewItem.Left := 45;
   pnlViewItem.Top := 135;
@@ -120,7 +122,7 @@ begin
 
   btnViewItem := TSpeedButton.Create(self.Owner);
   btnViewItem.Parent := pnlViewItem;
-  btnViewItem.Flat := true ;
+  btnViewItem.Flat := True;
   btnViewItem.Align := alClient;
   btnViewItem.Caption := 'View Item';
   btnViewItem.OnClick := self.viewItem;
@@ -140,11 +142,30 @@ begin
   imgRemoveProduct.OnClick := self.onRemoveClick;
   imgRemoveProduct.Hint := 'Remove this item from your catalogue.';
   imgRemoveProduct.ParentShowHint := false;
-  imgRemoveProduct.ShowHint := true;
+  imgRemoveProduct.ShowHint := True;
 
   // load image
 
-  DataModule1.loadItemImage(itemid, imgItem);
+  ttask.Run(
+    procedure
+    begin
+       tthread.Sleep(2000);
+      coinitialize(nil);
+      try
+        imageStream := DataModule1.loadItemImage(itemID);
+        tthread.Synchronize(nil,
+          procedure
+          begin
+            try
+              imgItem.Picture.LoadFromStream(imageStream);
+            finally
+              imageStream.Free;
+            end
+          end);
+      finally
+        couninitialize();
+      end
+    end);
 
 end;
 
@@ -155,7 +176,7 @@ end;
 
 procedure ProductItem.viewItem(Sender: tObject);
 begin
-  //  when clicking on the view item vraible, open the item on the AddItem screen
+  // when clicking on the view item vraible, open the item on the AddItem screen
   self.Owner.Hide;
   DataModule1.lastForm := self.Owner;
   frmAddItem.itemID := itemID;

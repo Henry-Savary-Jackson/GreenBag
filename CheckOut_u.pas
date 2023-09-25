@@ -8,7 +8,8 @@ uses
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls,
   Vcl.ExtCtrls, Data.win.ADODB,
   Vcl.Samples.Spin, Vcl.Imaging.pngimage, CartItem_u,
-  System.Generics.Collections, ItemContainer_u, DMUnit_u, Vcl.Buttons, Math;
+  System.Generics.Collections, ItemContainer_u, DMUnit_u, Vcl.Buttons, Math,
+  ActiveX, System.threading;
 
 type
   TfrmCheckout = class(TForm)
@@ -63,6 +64,10 @@ end;
 
 procedure TfrmCheckout.btnCheckoutClick(Sender: TObject);
 begin
+
+  // prevent spamming of button while waiting for callback
+  btnCheckout.Enabled := False;
+  btnReturn.Enabled := False;
   try
     if items.Count = 0 then
     begin
@@ -70,11 +75,48 @@ begin
       Exit;
     end;
 
-    DataModule1.CheckoutCart(DataModule1.username, DataModule1.jwtToken);
-    // delete the user's cart and create a new one
-    DataModule1.CreateUserCart(DataModule1.username, DataModule1.jwtToken);
-    frmCheckout.Hide;
-    frmBrowse.Show;
+    ttask.Run(
+      procedure
+      begin
+        try
+
+          CoInitialize(nil);
+          try
+            DataModule1.CheckoutCart(DataModule1.username,
+              DataModule1.jwtToken);
+            // delete the user's cart and create a new one
+            DataModule1.CreateUserCart(DataModule1.username,
+              DataModule1.jwtToken);
+
+            tthread.Synchronize(nil,
+              procedure
+              begin
+                frmCheckout.Hide;
+                frmBrowse.Show;
+              end);
+
+          except
+            on e: exception do
+            begin
+              showMessage(e.Message);
+            end;
+
+          end;
+        finally
+          // renable egardless of errors
+          CounInitialize;
+          tthread.Synchronize(nil,
+            procedure
+            begin
+              btnCheckout.Enabled := true;
+              btnReturn.Enabled := true;
+            end);
+
+        end
+
+      end
+
+      )
 
   except
     on e: exception do
@@ -83,6 +125,7 @@ begin
     end;
 
   end;
+
 end;
 
 procedure TfrmCheckout.btnHelpClick(Sender: TObject);
@@ -95,10 +138,31 @@ end;
 procedure TfrmCheckout.btnReturnClick(Sender: TObject);
 begin
 
-  DataModule1.CancelCart(DataModule1.username, DataModule1.jwtToken);
-  DataModule1.CreateUserCart(DataModule1.username, DataModule1.jwtToken);
-  items.Clear;
-  updateDisplay;
+  // diable buttons to prevent being pressed while waiting for callback to complete
+  btnCheckout.Enabled := False;
+  btnReturn.Enabled := False;
+  ttask.Run(
+    procedure
+    begin
+      CoInitialize(nil);
+      try
+        DataModule1.CancelCart(DataModule1.username, DataModule1.jwtToken);
+        DataModule1.CreateUserCart(DataModule1.username, DataModule1.jwtToken);
+
+        tthread.Synchronize(nil,
+          procedure
+          begin
+            items.Clear;
+            updateDisplay;
+          end);
+      finally
+        // renable them no matter what exceptions occur
+        CounInitialize();
+        btnCheckout.Enabled := true;
+        btnReturn.Enabled := true;
+      end
+    end);
+
 end;
 
 procedure TfrmCheckout.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -119,9 +183,29 @@ end;
 procedure TfrmCheckout.removeItem(shoppingCartItemID: string);
 begin
   try
+
     // change db
-    DataModule1.removeFromCart(shoppingCartItemID, DataModule1.jwtToken, DataModule1.username);
-    updateDisplay;
+    ttask.Run(
+      procedure
+      begin
+        tthread.Sleep(2000);
+        CoInitialize(nil);
+
+        try
+          DataModule1.removeFromCart(shoppingCartItemID, DataModule1.jwtToken,
+            DataModule1.username);
+
+          tthread.Synchronize(nil,
+            procedure
+            begin
+              updateDisplay;
+            end);
+
+        finally
+          CounInitialize();
+        end
+
+      end);
 
   except
     on e: exception do
@@ -145,40 +229,100 @@ begin
 
   items := tObjectList<CartItem>.create();
 
-  dsCartItems := DataModule1.getCartItems(DataModule1.username, DataModule1.jwtToken);
+  btnReturn.Enabled := False;
+  btnCheckout.Enabled := False;
+  ttask.Run(
+    procedure
+    begin
 
-  dsCartItems.First;
+      tthread.Sleep(2000);
+      CoInitialize(nil);
 
-  // instantiate gui for each cart item
-  while not dsCartItems.Eof do
-  begin
+      try
+        dsCartItems := DataModule1.getCartItems(DataModule1.username,
+          DataModule1.jwtToken);
 
-    currentItem := CartItem.create(self, flpnlItems, dsCartItems,
-      self.removeItem, self.updateItemQuantity);
-    items.Add(currentItem);
+        try
 
-    dsCartItems.Next;
-  end;
+          tthread.Synchronize(nil,
+            procedure
+            begin
+              dsCartItems.First;
 
-  updateLabels;
+              // instantiate gui for each cart item
+              while not dsCartItems.Eof do
+              begin
+
+                currentItem := CartItem.create(self, flpnlItems, dsCartItems,
+                  self.removeItem, self.updateItemQuantity);
+                items.Add(currentItem);
+
+                dsCartItems.Next;
+              end;
+
+              updateLabels;
+            end);
+        finally
+          dsCartItems.Free;
+        end
+      finally
+        CounInitialize;
+        tthread.Synchronize(nil,
+          procedure
+          begin
+            btnReturn.Enabled := true;
+            btnCheckout.Enabled := true;
+          end);
+      end
+
+    end);
 
 end;
 
 procedure TfrmCheckout.updateItemQuantity(itemID: string; iQuantity: integer;
-  Cost: double);
+Cost: double);
 begin
-  try
-    DataModule1.addToCart(DataModule1.username, itemID, DataModule1.jwtToken, iQuantity);
-    updateLabels;
 
-  except
-    on e: exception do
+  btnCheckout.Enabled := false;
+  btnReturn.Enabled := false;
+  ttask.Run(
+    procedure
     begin
 
-      showMessage(e.Message);
-    end;
+      tthread.Sleep(2000);
+      try
+        try
+          CoInitialize(nil);
 
-  end;
+          DataModule1.addToCart(DataModule1.username, itemID,
+            DataModule1.jwtToken, iQuantity);
+
+          tthread.Synchronize(nil,
+            procedure
+            begin
+              updateLabels;
+            end);
+
+        except
+          on e: exception do
+          begin
+
+            showMessage(e.Message);
+          end;
+
+        end;
+      finally
+        CounInitialize();
+        tthread.Synchronize(nil,
+          procedure
+          begin
+            btnCheckout.Enabled := true;
+
+            btnReturn.Enabled := true;
+          end);
+      end
+    end);
+
 end;
 
 // update totals

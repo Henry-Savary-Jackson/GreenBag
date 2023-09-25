@@ -7,7 +7,7 @@ uses
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, Vcl.ComCtrls,
   Vcl.ExtCtrls, DMUnit_u, Data.Win.ADODB, PngImage, Vcl.Imaging.jpeg, Data.DB,
-  Vcl.Buttons, Math;
+  Vcl.Buttons, Math, ActiveX, System.threading;
 
 type
   TfrmAddItem = class(TForm)
@@ -77,7 +77,7 @@ type
     // checks whether the image has been modified since the showing of this form.
     // if not modified, don't bother sending image data.
     // this heps performance
-    isImageModified : boolean;
+    isImageModified: boolean;
   public
     { Public declarations }
     itemID: string;
@@ -111,7 +111,7 @@ var
   sName, sDesc, category: string;
   CF, WU, EU, CFProduce, WUProduce, EUProduce, Price: double;
   stock, maxWithdrawstock: double;
-  imageArg : tImage;
+  imageArg: TImage;
   I: Integer;
 begin
 
@@ -149,7 +149,6 @@ begin
     ' Max Withdrawable stock');
   if maxWithdrawstock = INFINITE then
     Exit;
-
 
   CF := getFloatFromStr(edtCF.Text, 'Carbon Footprint');
   if CF = INFINITE then
@@ -190,46 +189,64 @@ begin
   if isImageModified then
     imageArg := imgItem;
 
+  btnSaveChanges.Enabled := false;
+  ttask.run(
+    procedure
+    begin
+      tthread.Sleep(2000);
+      coinitialize(nil);
+      try
 
-  try
+        try
 
-    try
+          if itemID = '' then
+          begin
 
-      if itemID = '' then
-      begin
+            DataModule1.insertItem(sName, category, sDesc, Price, stock,
+              maxWithdrawstock, CF, EU, WU, CFProduce, EUProduce, WUProduce,
+              DataModule1.jwtToken, imageArg);
 
-        DataModule1.insertItem( sName, category,
-          sDesc, Price, stock, maxWithdrawstock, CF, EU, WU, CFProduce,
-          EUProduce, WUProduce,DataModule1.jwtToken ,imageArg);
+          end
+          else
+          begin
+            // if this is updating an existing item
+            DataModule1.updateItem(itemID, sName, category, sDesc, Price, stock,
+              maxWithdrawstock, CF, EU, WU, CFProduce, EUProduce, WUProduce,
+              DataModule1.jwtToken, imageArg);
 
-      end
-      else
-      begin
-        // if this is updating an existing item
-        DataModule1.updateItem(itemid, sName, category,
-          sDesc, Price, stock, maxWithdrawstock, CF, EU, WU, CFProduce,
-          EUProduce, WUProduce,DataModule1.jwtToken,imageArg);
+          end;
 
+          tthread.Synchronize(nil,
+            procedure
+            begin
+              showMessage('Successfully saved changes');
+              // free var from heap  memory
+
+              // naviguate back to your products
+
+              frmAddItem.Hide;
+              DataModule1.lastForm.Show;
+
+              isImageModified := false;
+            end);
+
+        except
+          on e: exception do
+          begin
+            showMessage(e.Message);
+          end;
+
+        end;
+      finally
+        couninitialize();
+
+        tthread.Synchronize(nil,
+          procedure
+          begin
+            btnSaveChanges.Enabled := true;
+          end);
       end;
-
-      showMessage('Successfully saved changes');
-      // free var from heap  memory
-
-      // naviguate back to your products
-      frmAddItem.Hide;
-      DataModule1.lastForm.Show;
-
-      isImageModified := false;
-
-    except
-      on e: exception do
-      begin
-        showMessage(e.Message);
-      end;
-
-    end;
-  finally
-  end;
+    end);
 
 end;
 
@@ -244,77 +261,106 @@ procedure TfrmAddItem.FormShow(Sender: TObject);
 var
   dsResult: tAdoDataset;
   imageStream: tStream;
-  i : integer;
+  I: Integer;
 begin
 
   imgItem.Picture.Graphic := nil;
   cmbCategory.Items.Clear;
 
-  for i := 0 to length(DataModule1.categoryList)-1 do
+  for I := 0 to length(DataModule1.categoryList) - 1 do
   begin
-    cmbCategory.Items.Add(DataModule1.categoryList[i]);
+    cmbCategory.Items.Add(DataModule1.categoryList[I]);
   end;
-
 
   if itemID <> '' then
   begin
-    dsResult := DataModule1.viewItem(self.itemID);
+    // if the item is not a new item, load it from database
+    ttask.run(
+      procedure
+      begin
+        coinitialize(nil);
+        try
+          dsResult := DataModule1.viewItem(self.itemID);
+          if dsResult.Fields.FindField('Status') <> nil then
+          begin
+            showMessage(dsResult['Status']);
+            Exit;
+          end;
 
-    if dsResult.Fields.FindField('Status') <> nil then
-    begin
-      showMessage(dsResult['Status']);
-      Exit;
-    end;
+          tthread.Synchronize(nil,
+            procedure
+            begin
 
-    edtName.Text := dsResult['ItemName'];
+              try
+                edtName.Text := dsResult['ItemName'];
 
-    if dsResult['avgRating'] = -1 then
-    begin
-      lblRating.Caption := 'Average Rating: No ratings';
-    end
-    else
-    begin
-      lblRating.Caption := 'Average Rating: ' +
-        intToStr(dsResult['avgRating']) + '/5';
-    end;
+                if dsResult['avgRating'] = -1 then
+                begin
+                  lblRating.Caption := 'Average Rating: No ratings';
+                end
+                else
+                begin
+                  lblRating.Caption := 'Average Rating: ' +
+                    intToStr(dsResult['avgRating']) + '/5';
+                end;
 
-    edtPrice.Text := floatTOStrf(dsResult['Cost'], ffFixed, 8, 2);
+                edtPrice.Text := floatTOStrf(dsResult['Cost'], ffFixed, 8, 2);
 
-    edtStock.Text := intToStr(dsResult['Stock']);
-    if dsResult['Stock'] = 1 then
-      lblStockUnits.Caption := 'unit';
+                edtStock.Text := intToStr(dsResult['Stock']);
+                if dsResult['Stock'] = 1 then
+                  lblStockUnits.Caption := 'unit';
 
-    edtCF.Text := floatTOStrf(dsResult['CFUsage'], ffFixed, 8, 2);
-    edtEU.Text := floatTOStrf(dsResult['EUUsage'], ffFixed, 8, 2);
-    edtWU.Text := floatTOStrf(dsResult['WUUsage'], ffFixed, 8, 2);
+                edtCF.Text := floatTOStrf(dsResult['CFUsage'], ffFixed, 8, 2);
+                edtEU.Text := floatTOStrf(dsResult['EUUsage'], ffFixed, 8, 2);
+                edtWU.Text := floatTOStrf(dsResult['WUUsage'], ffFixed, 8, 2);
 
-    edtCFProduce.Text := floatTOStrf(dsResult['CFProduce'],
-      ffFixed, 8, 2);
-    edtEUProduce.Text := floatTOStrf(dsResult['EUProduce'],
-      ffFixed, 8, 2);
-    edtWUProduce.Text := floatTOStrf(dsResult['WUProduce'],
-      ffFixed, 8, 2);
+                edtCFProduce.Text := floatTOStrf(dsResult['CFProduce'],
+                  ffFixed, 8, 2);
+                edtEUProduce.Text := floatTOStrf(dsResult['EUProduce'],
+                  ffFixed, 8, 2);
+                edtWUProduce.Text := floatTOStrf(dsResult['WUProduce'],
+                  ffFixed, 8, 2);
 
-    redDesc.Clear;
+                redDesc.Clear;
 
-    if dsResult['Description'] <> NUll then
-      redDesc.lines.Add(dsResult['Description']);
+                if dsResult['Description'] <> NUll then
+                  redDesc.lines.Add(dsResult['Description']);
 
-    cmbCategory.ItemIndex := cmbCategory.Items.IndexOf(dsResult['Category']);
+                cmbCategory.ItemIndex := cmbCategory.Items.IndexOf(dsResult
+                  ['Category']);
 
-    edtMaxWithdrawStock.Text := intToStr(dsResult['MaxWithdrawableStock']);
+                edtMaxWithdrawStock.Text :=
+                  intToStr(dsResult['MaxWithdrawableStock']);
 
-    if dsResult['MaxWithdrawableStock'] = 1 then
-    begin
-      lblmaxwithdrawstockunits.Caption := 'unit';
+                if dsResult['MaxWithdrawableStock'] = 1 then
+                begin
+                  lblmaxwithdrawstockunits.Caption := 'unit';
 
-    end;
+                end;
 
-    DataModule1.loadItemImage(itemid, imgItem);
+                isImageModified := false;
+              finally
+                dsResult.Free;
+              end
 
-    dsResult.Free;
+            end);
 
-    isImageModified := false;
+          imageStream := DataModule1.loadItemImage(itemID);
+          tthread.Synchronize(nil,
+            procedure
+            begin
+              try
+                imgItem.Picture.LoadFromStream(imageStream);
+              finally
+                imageStream.Free;
+              end
+            end);
+
+        finally
+          couninitialize;
+        end
+
+      end);
   end
   else
   begin
@@ -397,7 +443,6 @@ begin
 
       imgItem.Picture.Graphic.Assign(DataModule1.ResizeImage(imgItem,
         128, 128));
-
 
       isImageModified := true;
     end

@@ -9,7 +9,7 @@ uses
   VclTee.TeeGDIPlus, VclTee.TeEngine, VclTee.TeeProcs, VclTee.Chart,
   VclTee.TeeChartLayout, VclTee.Series, DmUnit_u, Data.Win.ADODB,
   System.Generics.Collections, DateUtils, Data.DB, Vcl.Grids, Vcl.DBGrids,
-  Vcl.Buttons;
+  Vcl.Buttons, System.threading, ActiveX;
 
 type
   TfrmProfile = class(TForm)
@@ -150,9 +150,14 @@ begin
       end;
   end;
 
-  DataModule1.changePassword(DataModule1.username, sOldPassword, sNewPassword);
+  ttask.Run(
+    procedure
+    begin
+      DataModule1.changePassword(DataModule1.username, sOldPassword,
+        sNewPassword);
 
-  showMessage('Changed your password successfully');
+      showMessage('Changed your password successfully');
+    end);
 
 end;
 
@@ -169,13 +174,34 @@ begin
     exit
   end;
 
-  DataModule1.Changeusername(DataModule1.username, snewusername,
-    DataModule1.jwtToken);
+  ttask.Run(
+    procedure
+    begin
+      CoInitialize(nil);
+      try
+        try
+          DataModule1.Changeusername(DataModule1.username, snewusername,
+            DataModule1.jwtToken);
 
-  showMessage('Successfully changed username');
+          showMessage('Successfully changed username');
 
-  lblUsername.Caption := snewusername;
-  DataModule1.username := snewusername;
+          tthread.Synchronize(nil,
+            procedure
+            begin
+              lblUsername.caption := snewusername;
+              DataModule1.username := snewusername;
+            end);
+        except
+          on e: exception do
+          begin
+            showMessage(e.Message);
+          end
+        end
+      finally
+
+        CounInitialize;
+      end
+    end)
 
 end;
 
@@ -251,22 +277,39 @@ begin
     end;
   end;
 
-  try
-    // add that amount to user
-    DataModule1.addFunds(DataModule1.username, DataModule1.jwtToken, dExtra);
-
-    // update gui
-    balance := balance + dExtra;
-
-    lblBalance.caption := 'Current Balance: ' + floatToStrf(balance,
-      ffCurrency, 8, 2);
-
-  except
-    on e: exception do
+  ttask.Run(
+    procedure
     begin
-      showMessage(e.Message);
-    end;
-  end;
+      CoInitialize(nil);
+      try
+        try
+          // add that amount to user
+
+          DataModule1.addFunds(DataModule1.username,
+            DataModule1.jwtToken, dExtra);
+
+          // update gui
+          tthread.Synchronize(nil,
+            procedure
+            begin
+              balance := balance + dExtra;
+
+              lblBalance.caption := 'Current Balance: ' + floatToStrf(balance,
+                ffCurrency, 8, 2);
+            end);
+
+        except
+          on e: exception do
+          begin
+            showMessage(e.Message);
+          end;
+        end;
+      finally
+        CounInitialize;
+      end
+
+    end);
+
 end;
 
 // code for all buttons to set up the graph and populate it
@@ -322,67 +365,94 @@ procedure TfrmProfile.FormShow(Sender: TObject);
 var
   dsResult: TADODataSet;
   dateLowerLimit: tDateTime;
-  imageStream: tStream;
+  imageStream: tMemoryStream;
 begin
 
-  dsResult := DataModule1.userInfo(DataModule1.username);
-
-  showTotals(dsResult['UserType']);
-  ShowCategButtons(dsResult['UserType']);
-
-  lblUsername.caption := dsResult['Username'];
-
-  balance := dsResult['Balance'];
-
-  lblBalance.caption := 'Current Balance: ' + floatToStrf(balance,
-    ffCurrency, 8, 2);
-
-  lblSpendingTotal.caption := 'Total Spending: ' +
-    floatToStrf(dsResult['TotalSpending'], ffCurrency, 8, 2);
-
-  lblTotalCF.caption := 'Total Carbon Footprint: ' +
-    floatToStrf(dsResult['TotalCF'], ffFixed, 8, 2) + ' t';
-
-  lblTotalEU.caption := 'Total Energy Usage: ' +
-    floatToStrf(dsResult['TotalEU'], ffFixed, 8, 2) + ' kWh';
-
-  lblTotalWU.caption := 'Total Water Usage: ' + floatToStrf(dsResult['TotalWU'],
-    ffFixed, 8, 2) + ' L';
-
-  if dsResult['UserType'] = 'SELLER' then
-  begin
-
-    lblRevenueTotal.caption := 'Total Revenue: ' +
-      floatToStrf(dsResult['revenue'], ffCurrency, 8, 2);
-
-    lblSales.caption := 'Total Sales: ' + intTOstr(dsResult['TotalSales']);
-    if dsResult['TotalSales'] = 1 then
+  ttask.Run(
+    procedure
     begin
-      lblSales.caption := lblSales.caption + ' unit'
-    end
-    else
-    begin
-      lblSales.caption := lblSales.caption + ' units'
-    end;
+      CoInitialize(nil);
+      try
+        dsResult := DataModule1.userInfo(DataModule1.username);
+        try
+          tthread.Synchronize(nil,
+            procedure
+            begin
+              showTotals(dsResult['UserType']);
+              ShowCategButtons(dsResult['UserType']);
 
-  end;
-  // decrease current date by 9 months
-  dateLowerLimit := IncMonth(Now, -9);
-  // date is first day of the month
-  dateRangeEnd := StrToDate(intTOstr(YearOf(Now)) + '/' +
-    intTOstr(MonthOf(Now) + 1) + '/01');
+              lblUsername.caption := dsResult['Username'];
 
-  // date is first day of next month
-  dateRangeBegin := StrToDate(intTOstr(YearOf(dateLowerLimit)) + '/' +
-    intTOstr(MonthOf(dateLowerLimit)) + '/01');
+              balance := dsResult['Balance'];
 
-  // init chart
-  srsStats.Marks.Visible := False;
+              lblBalance.caption := 'Current Balance: ' + floatToStrf(balance,
+                ffCurrency, 8, 2);
 
-  chrtStats.Title.caption := '';
-  srsStats.Clear;
+              lblSpendingTotal.caption := 'Total Spending: ' +
+                floatToStrf(dsResult['TotalSpending'], ffCurrency, 8, 2);
 
-  DataModule1.loadProfilePicture(DataModule1.username, imgProfilePic);
+              lblTotalCF.caption := 'Total Carbon Footprint: ' +
+                floatToStrf(dsResult['TotalCF'], ffFixed, 8, 2) + ' t';
+
+              lblTotalEU.caption := 'Total Energy Usage: ' +
+                floatToStrf(dsResult['TotalEU'], ffFixed, 8, 2) + ' kWh';
+
+              lblTotalWU.caption := 'Total Water Usage: ' +
+                floatToStrf(dsResult['TotalWU'], ffFixed, 8, 2) + ' L';
+
+              if dsResult['UserType'] = 'SELLER' then
+              begin
+
+                lblRevenueTotal.caption := 'Total Revenue: ' +
+                  floatToStrf(dsResult['revenue'], ffCurrency, 8, 2);
+
+                lblSales.caption := 'Total Sales: ' +
+                  intTOstr(dsResult['TotalSales']);
+                if dsResult['TotalSales'] = 1 then
+                begin
+                  lblSales.caption := lblSales.caption + ' unit'
+                end
+                else
+                begin
+                  lblSales.caption := lblSales.caption + ' units'
+                end;
+
+              end;
+              // decrease current date by 9 months
+              dateLowerLimit := IncMonth(Now, -9);
+              // date is first day of the month
+              dateRangeEnd := StrToDate(intTOstr(YearOf(Now)) + '/' +
+                intTOstr(MonthOf(Now) + 1) + '/01');
+
+              // date is first day of next month
+              dateRangeBegin := StrToDate(intTOstr(YearOf(dateLowerLimit)) + '/'
+                + intTOstr(MonthOf(dateLowerLimit)) + '/01');
+
+              // init chart
+              srsStats.Marks.Visible := False;
+
+              chrtStats.Title.caption := '';
+              srsStats.Clear;
+            end);
+
+          imageStream := DataModule1.loadProfilePicture(DataModule1.username);
+          try
+            tthread.Synchronize(nil,
+              procedure
+              begin
+                imgProfilePic.Picture.LoadFromStream(imageStream);
+              end);
+          finally
+            imageStream.Free;
+          end;
+        finally
+          dsResult.Free;
+        end
+      finally
+        CounInitialize();
+      end
+
+    end);
 
 end;
 
@@ -464,42 +534,78 @@ var
 begin
 
   // get the statistic
-  dsResult := DataModule1.obtainStats(DataModule1.username,
-    DataModule1.jwtToken, statType, dateRangeBegin, dateRangeEnd);
+  flpnlCategories.Enabled := False;
+  btnLeft.Enabled := False;
+  btnRight.Enabled := False;
 
-  if dsResult.Fields.FindField('Status') <> nil then
-  begin
-    showMessage(dsResult['Status']);
-    FreeAndNil(dsResult);
-    exit;
-  end;
-
-  srsStats.Clear;
-
-  dsResult.First;
-  currentDate := dateRangeBegin;
-
-  for i := 0 to 9 do
-  begin
-
-    if (YearOf(currentDate) = dsResult['y']) and
-      (MonthOf(currentDate) = dsResult['m']) then
+  ttask.Run(
+    procedure
     begin
-      // if there is a month in that data for this month, add data to chart
-      srsStats.Add(dsResult['TotalMonth'], intTOstr(dsResult['y']) + '-' +
-        intTOstr(dsResult['m']), clTeeColor);
-      dsResult.Next;
-    end
-    else
-    begin
-      // if there is no data for that month, put 0 for that month on the chart
-      srsStats.Add(0, intTOstr(YearOf(currentDate)) + '-' +
-        intTOstr(MonthOf(currentDate)), clTeeColor);
-    end;
 
-    currentDate := IncMonth(currentDate, 1);
+      CoInitialize(nil);
+      tthread.Sleep(2500);
+      try
+        dsResult := DataModule1.obtainStats(DataModule1.username,
+          DataModule1.jwtToken, statType, dateRangeBegin, dateRangeEnd);
 
-  end;
+        if dsResult.Fields.FindField('Status') <> nil then
+        begin
+          showMessage(dsResult['Status']);
+          FreeAndNil(dsResult);
+          exit;
+        end;
+
+        tthread.Synchronize(nil,
+          procedure
+          var
+            i: integer;
+          begin
+
+            srsStats.Clear;
+
+            dsResult.First;
+            currentDate := dateRangeBegin;
+
+            for i := 0 to 9 do
+            begin
+
+              if (YearOf(currentDate) = dsResult['y']) and
+                (MonthOf(currentDate) = dsResult['m']) then
+              begin
+                // if there is a month in that data for this month, add data to chart
+                srsStats.Add(dsResult['TotalMonth'], intTOstr(dsResult['y']) +
+                  '-' + intTOstr(dsResult['m']), clTeeColor);
+                dsResult.Next;
+              end
+              else
+              begin
+                // if there is no data for that month, put 0 for that month on the chart
+                srsStats.Add(0, intTOstr(YearOf(currentDate)) + '-' +
+                  intTOstr(MonthOf(currentDate)), clTeeColor);
+              end;
+
+              currentDate := IncMonth(currentDate, 1);
+
+            end;
+          end);
+
+      finally
+        // this is good practice apparently
+        CounInitialize();
+        // renable chart buttons
+
+        tthread.Synchronize(nil,
+          procedure
+          begin
+            flpnlCategories.Enabled := true;
+            btnLeft.Enabled := true;
+            btnRight.Enabled := true;
+          end);
+
+      end
+
+    end);
+
 end;
 
 end.

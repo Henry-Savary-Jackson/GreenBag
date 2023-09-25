@@ -4,8 +4,8 @@ interface
 
 uses
   System.SysUtils, System.Classes, System.Variants, Data.Win.ADODB, Data.DB,
-  sCrypt, System.Generics.Collections, Datasnap.Provider, Vcl.dialogs,
-  Vcl.ComCtrls,
+  System.Generics.Collections, Datasnap.Provider, Vcl.dialogs,
+  Vcl.ComCtrls, ActiveX,
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.ExtCtrls, PngImage,
   System.Win.ComObj, ADOInt,
   dateutils, stdctrls, System.JSON, System.Threading, REST.Types,
@@ -13,9 +13,9 @@ uses
 
 type
   TDataModule1 = class(TDataModule)
-    Timer1: TTimer;
+    tmCheckCartExpired: TTimer;
     procedure checkIFCartOutdated(Sender: TObject);
-    procedure Timer1Timer(Sender: TObject);
+    procedure tmCheckCartExpiredTimer(Sender: TObject);
   private
     { Private declarations }
   public
@@ -75,11 +75,11 @@ type
 
     procedure changePassword(username, oldpassword, newpassword: string);
 
-    procedure loadProfilePicture(username: string; Image: tImage);
+    function loadProfilePicture(username: string): tMemoryStream;
 
     procedure setProfilePicture(username, token: string; imgPfp: tImage);
 
-    procedure loadItemImage(itemid: string; Image: tImage);
+    function loadItemImage(itemid: string): tMemoryStream;
 
     procedure setItemImage(itemid, token: string; Image: tImage);
 
@@ -551,24 +551,16 @@ begin
 
 end;
 
-procedure TDataModule1.loadProfilePicture(username: string; Image: tImage);
+function TDataModule1.loadProfilePicture(username: string): tMemoryStream;
 var
   url: string;
   responseJson: tJsonObject;
-  stream: tMemoryStream;
 
 begin
   url := format('%s/users/%s/profileImage', [baseUrl, username]);
 
-  try
-    stream := tMemoryStream.Create();
-    TDownloadURL.DownloadRawBytes(url, stream);
-    Image.Picture.LoadFromStream(stream);
-
-  finally
-
-    stream.Free;
-  end;
+  Result := tMemoryStream.Create();
+  TDownloadURL.DownloadRawBytes(url, Result);
 
 end;
 
@@ -658,7 +650,7 @@ end;
 
 // procedure to insert a new item into the database
 function TDataModule1.ifthenreturn(condition: boolean;
-  trueValue, falsevalue: Variant): Variant;
+  trueValue, falsevalue: variant): variant;
 begin
   if condition then
   begin
@@ -701,8 +693,7 @@ begin
 
     response := sendRequest(url, rmPOST, body, token);
 
-    responseJson := tJsonObject.ParseJSONValue(response.Content)
-        as tJsonObject;
+    responseJson := tJsonObject.ParseJSONValue(response.Content) as tJsonObject;
 
     if response.StatusCode <> 200 then
     begin
@@ -712,11 +703,10 @@ begin
 
     itemid := (responseJson.P['data[0].ItemID'] as tJsonString).Value;
 
-
     if Image <> nil then
     begin
       // send request to update image if indicated
-      setItemImage(itemid, token, image);
+      setItemImage(itemid, token, Image);
     end;
 
   finally
@@ -792,25 +782,18 @@ begin
   end;
 end;
 
-procedure TDataModule1.loadItemImage(itemid: string; Image: tImage);
+function TDataModule1.loadItemImage(itemid: string): tMemoryStream;
 var
   url: string;
   body, responseJson: tJsonObject;
   response: TRESTResponse;
-  stream: tMemoryStream;
 begin
 
   url := format('%s/item/%s/image', [baseUrl, itemid]);
 
-  try
-    stream := tMemoryStream.Create();
-    TDownloadURL.DownloadRawBytes(url, stream);
-    Image.Picture.LoadFromStream(stream);
+  Result := tMemoryStream.Create();
+  TDownloadURL.DownloadRawBytes(url, Result);
 
-  finally
-
-    stream.Free;
-  end;
 end;
 
 // function used to check credentials entered and login a user if successful
@@ -986,7 +969,7 @@ begin
 
     // get image as a png
 
-    Result := TPngImage.Create();
+    Result := tpngImage.Create();
     Result.Assign(ResizedImage.Picture.Graphic);
 
   finally
@@ -1321,6 +1304,9 @@ begin
     bodyJson.AddPair('UserType', usertype);
     bodyJson.AddPair('HomeAddress', homeAddress);
 
+    if usertype.Equals('SELLER') then
+      bodyJson.AddPair('certificationCode', certificationcode);
+
     try
       response := sendRequest(url, rmPOST, bodyJson);
 
@@ -1356,13 +1342,46 @@ begin
 
 end;
 
-procedure TDataModule1.Timer1Timer(Sender: TObject);
+procedure TDataModule1.tmCheckCartExpiredTimer(Sender: TObject);
 begin
-//
+  // run this code in a separate thread
+  TTask.Run(
+    procedure
+    begin
+
+      try
+        //
+        CoInitialize(nil);
+        // this line is needed ,as ado is not multithreaded by default
+        self.getCartItems(self.username, self.jwtToken);
+        Couninitialize();
+      except
+        on e: Exception do
+        begin
+
+          if e.Message = 'User doesn''t have a cart.' then
+          begin
+            showMessage
+              ('Your cart is expired, so your cart''s items will be returned and you will be given a new cart.');
+            CoInitialize(nil);
+            self.CreateUserCart(self.username, self.jwtToken);
+            Couninitialize();
+          end
+          else
+          begin
+            showMessage(e.Message);
+          end
+
+        end;
+
+      end;
+
+    end);
+
 end;
 
 procedure TDataModule1.updateItem(itemid, Name, category, Desc: string;
-  Price, stock, maxwithdrawstock, CF, EU, WU, CFProduce, EUProduce,
+Price, stock, maxwithdrawstock, CF, EU, WU, CFProduce, EUProduce,
   WUProduce: double; token: string; Image: tImage = nil);
 var
   url: string;
@@ -1402,7 +1421,7 @@ begin
       if Image <> nil then
       begin
         // send request to update image if indicated
-        setItemImage(itemid, token, image);
+        setItemImage(itemid, token, Image);
 
       end;
     finally
