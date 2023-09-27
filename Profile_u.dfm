@@ -96,7 +96,7 @@ object frmProfile: TfrmProfile
     Height = 121
     TabOrder = 2
     object imgProfilePic: TImage
-      Left = 0
+      Left = 6
       Top = 0
       Width = 129
       Height = 121

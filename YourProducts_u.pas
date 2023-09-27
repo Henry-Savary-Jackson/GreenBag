@@ -33,14 +33,15 @@ type
 
   private
     { Private declarations }
+    scrollRangeMin: integer;
+    scrollRangeMax: integer;
 
   public
     { Public declarations }
     items: tObjectDictionary<string, ProductItem>;
     // these 2 variables specify the range in which items must be loaded
     // for example, load the the items between the 40th (including) and 50th item
-    scrollRangeMin: integer;
-    scrollRangeMax: integer;
+
     btnLoadMoreitems: tButton;
     procedure updateItemsDisplay;
   end;
@@ -142,7 +143,6 @@ begin
   ttask.run(
     procedure
     begin
-       tthread.Sleep(2000);
       CoInitialize(nil);
       try
 

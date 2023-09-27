@@ -457,21 +457,42 @@ begin
 end;
 
 procedure TfrmProfile.imgProfilePicClick(Sender: TObject);
+var
+  imageStream: tMemoryStream;
 begin
+
   // open filchooser
   DataModule1.loadImageFromFile(imgProfilePic, self);
 
+  // create an image stream
+  imageStream := tMemoryStream.Create;
+
   try
-    DataModule1.setProfilePicture(DataModule1.username, DataModule1.jwtToken,
-      imgProfilePic);
 
-  except
-    on e: exception do
-    begin
-      showMessage(e.Message);
-    end;
+    imgProfilePic.Picture.SaveToStream(imageStream);
 
-  end;
+    // run request to api asynchronously
+    ttask.Run(
+      procedure
+      begin
+
+        try
+
+          DataModule1.setProfilePicture(DataModule1.username,
+            DataModule1.jwtToken, imageStream);
+
+        except
+          on e: exception do
+          begin
+            showMessage(e.Message);
+          end;
+
+        end;
+      end);
+
+  finally
+     imageStream.Free;
+  end
 
 end;
 

@@ -65,9 +65,9 @@ object frmLogin: TfrmLogin
     Top = 112
     Width = 172
     Height = 26
-    Color = 8446091
+    Color = 8511886
     TabOrder = 0
-    Text = 'password2+'
+    Text = 'OfYh5el1Fg'
     OnKeyDown = edtPasswordKeyDown
   end
   object edtUsername: TEdit
@@ -75,9 +75,9 @@ object frmLogin: TfrmLogin
     Top = 64
     Width = 169
     Height = 26
-    Color = 8446091
+    Color = 8511886
     TabOrder = 1
-    Text = 'user56'
+    Text = 'User2'
     OnKeyDown = edtPasswordKeyDown
   end
   object pnlHelp: TPanel
