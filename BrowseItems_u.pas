@@ -79,7 +79,7 @@ type
     procedure chbRatingsEnableClick(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
     procedure btnLoadMoreItemsClick(Sender: TObject);
-    procedure addQueryResult(dsResult: tAdoDataset; numResults: integer);
+    procedure addQueryResult(dsResult: tAdoDataset);
 
   private
     { Private declarations }
@@ -108,7 +108,7 @@ uses
 {$R *.dfm}
 
 // this is the read the results of a query for items, and instantiate gui for the results
-procedure TfrmBrowse.addQueryResult(dsResult: tAdoDataset; numResults: integer);
+procedure TfrmBrowse.addQueryResult(dsResult: tAdoDataset);
 var
   iMinRating: integer;
 begin
@@ -139,7 +139,7 @@ begin
   end;
 
   // only add the load more button if this is not the end of the items in the query
-  if numResults <> 0 then
+  if dsResult.RecordCount <> 0 then
   begin
     btnLoadMoreitems := tButton.Create(self.Owner);
     btnLoadMoreitems.Caption := 'load More items';
@@ -417,7 +417,7 @@ begin
           // get results as table
           dsResult := DataModule1.getSearchResults(searchQuery, arrCategories,
             cfRange, euRange, wuRange, [scrollRangeMin, scrollRangeMax],
-            ratingRange, iNumResults);
+            ratingRange);
           try
 
             if items = nil then
@@ -433,7 +433,7 @@ begin
             tthread.Synchronize(nil,
               procedure
               begin
-                addQueryResult(dsResult, iNumResults)
+                addQueryResult(dsResult);
               end);
 
             if items.Count = 0 then
