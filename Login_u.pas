@@ -85,16 +85,21 @@ begin
 
           // create cart is user doesn't have one
 
-          try
-            DataModule1.getCartItems(DataModule1.userName,
-              DataModule1.jwtToken);
+          if not DataModule1.usertype.Equals('ADMIN') then
+          begin
 
-          except
-            on e: Exception do
-            begin
-              if e.Message.Equals('User doesn''t have a cart.') then
-                DataModule1.CreateUserCart(DataModule1.userName,
-                  DataModule1.jwtToken);
+            try
+              DataModule1.getCartItems(DataModule1.userName,
+                DataModule1.jwtToken);
+
+            except
+              on e: Exception do
+              begin
+                if e.Message.Equals('User doesn''t have a cart.') then
+                  DataModule1.CreateUserCart(DataModule1.userName,
+                    DataModule1.jwtToken);
+
+              end;
 
             end;
 

@@ -142,7 +142,6 @@ begin
   ttask.Run(
     procedure
     begin
-       tthread.Sleep(2000);
       CoInitialize(nil);
       try
         imageStream := DataModule1.loadItemImage(itemID);

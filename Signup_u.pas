@@ -28,6 +28,10 @@ type
     btnSignIn: TSpeedButton;
     pnlSignUp: TPanel;
     btnSignUp: TSpeedButton;
+    lblEmail: TLabel;
+    edtEmail: TEdit;
+    pnlApply: TPanel;
+    btnApplication: TSpeedButton;
     procedure btnLoginScreenClick(Sender: TObject);
     procedure btnSignUpClick(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -35,6 +39,7 @@ type
     procedure imgPfpClick(Sender: TObject);
     procedure btnHelpClick(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure btnApplicationClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -47,9 +52,15 @@ var
 implementation
 
 uses
-  Login_u, BrowseItems_u, HelpScreen_u;
+  Login_u, BrowseItems_u, HelpScreen_u, sendApplication_u;
 
 {$R *.dfm}
+
+procedure TfrmSignUp.btnApplicationClick(Sender: TObject);
+begin
+  frmSignUp.Hide;
+  frmsendApplication.Show;
+end;
 
 procedure TfrmSignUp.btnHelpClick(Sender: TObject);
 begin
@@ -66,7 +77,8 @@ end;
 
 procedure TfrmSignUp.btnSignUpClick(Sender: TObject);
 var
-  UserId, userName, password, homeaddress, userType, certificationCode: string;
+  UserId, userName, email, password, homeaddress, userType,
+    certificationCode: string;
 
 begin
 
@@ -88,6 +100,20 @@ begin
   if password = '' then
   begin
     showMessage('Please enter a password.');
+    Exit;
+  end;
+
+  email := edtEmail.Text;
+
+  if email = '' then
+  begin
+    showMessage('Please enter an Email.');
+    Exit;
+  end;
+
+  if length(email) > 64 then
+  begin
+    showMessage('Email must be less than or equal to 64 characters.');
     Exit;
   end;
 
@@ -166,19 +192,24 @@ begin
         try
           CoInitialize(nil);
           // try to create user
-          DataModule1.SignUp(userName, password, userType, homeaddress,
+          DataModule1.SignUp(userName, email, password, userType, homeaddress,
             certificationCode, imgPfp);
 
-          try
-            DataModule1.getCartItems(DataModule1.userName,
-              DataModule1.jwtToken);
+          if not DataModule1.userType.Equals('ADMIN') then
+          begin
 
-          except
-            on e: Exception do
-            begin
-              if e.Message.Equals('User doesn''t have a cart.') then
-                DataModule1.CreateUserCart(DataModule1.userName,
-                  DataModule1.jwtToken);
+            try
+              DataModule1.getCartItems(DataModule1.userName,
+                DataModule1.jwtToken);
+
+            except
+              on e: Exception do
+              begin
+                if e.Message.Equals('User doesn''t have a cart.') then
+                  DataModule1.CreateUserCart(DataModule1.userName,
+                    DataModule1.jwtToken);
+
+              end;
 
             end;
 
@@ -194,7 +225,6 @@ begin
             end);
 
           couninitialize();
-
         except
           on e: Exception do
           begin
@@ -240,8 +270,8 @@ end;
 
 procedure TfrmSignUp.rgpUserClick(Sender: TObject);
 begin
-  edtCertification.Enabled := rgpUser.ItemIndex = 0
+  edtCertification.Enabled := rgpUser.ItemIndex = 0;
+  pnlApply.Visible := rgpUser.ItemIndex = 0;
 end;
-
 
 end.

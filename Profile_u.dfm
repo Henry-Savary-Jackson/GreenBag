@@ -32,7 +32,7 @@ object frmProfile: TfrmProfile
     ParentFont = False
   end
   object pnlBack: TPanel
-    Left = 13
+    Left = 8
     Top = 8
     Width = 75
     Height = 33
@@ -640,7 +640,7 @@ object frmProfile: TfrmProfile
         end
       end
       object pnlRight: TPanel
-        Left = 382
+        Left = 383
         Top = 263
         Width = 75
         Height = 33
@@ -722,7 +722,7 @@ object frmProfile: TfrmProfile
       Font.Style = []
       ParentFont = False
       OnClick = btnChangePasswordClick
-      ExplicitLeft = -6
+      ExplicitLeft = 0
       ExplicitTop = 4
     end
   end
@@ -752,6 +752,34 @@ object frmProfile: TfrmProfile
       ParentFont = False
       OnClick = btnChangeUsernameClick
       ExplicitTop = 0
+    end
+  end
+  object Panel2: TPanel
+    Left = 72
+    Top = 72
+    Width = 184
+    Height = 33
+    BorderWidth = 1
+    Color = 8118149
+    ParentBackground = False
+    TabOrder = 6
+    OnClick = btnBackClick
+    object btnApplications: TSpeedButton
+      Left = 2
+      Top = 2
+      Width = 180
+      Height = 29
+      Align = alClient
+      Caption = 'Review Applications'
+      Flat = True
+      Font.Charset = ANSI_CHARSET
+      Font.Color = 16384
+      Font.Height = -16
+      Font.Name = 'Arial Rounded MT Bold'
+      Font.Style = []
+      ParentFont = False
+      OnClick = btnApplicationsClick
+      ExplicitLeft = 0
     end
   end
 end

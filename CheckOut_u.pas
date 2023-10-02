@@ -188,7 +188,6 @@ begin
     ttask.Run(
       procedure
       begin
-        tthread.Sleep(2000);
         CoInitialize(nil);
 
         try
@@ -235,7 +234,6 @@ begin
     procedure
     begin
 
-      tthread.Sleep(2000);
       CoInitialize(nil);
 
       try
@@ -289,7 +287,6 @@ begin
     procedure
     begin
 
-      tthread.Sleep(2000);
       try
         try
           CoInitialize(nil);

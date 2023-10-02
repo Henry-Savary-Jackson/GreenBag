@@ -9,7 +9,9 @@ uses
   Vcl.Graphics, Vcl.Controls, Vcl.Forms, Vcl.ExtCtrls, PngImage,
   System.Win.ComObj, ADOInt,
   dateutils, stdctrls, System.JSON, System.Threading, REST.Types,
-  Data.Bind.Components, REST.Client, IdServerIOHandler, Data.Bind.ObjectScope;
+  Data.Bind.Components, REST.Client, IdServerIOHandler, Data.Bind.ObjectScope,
+  JOSE.Core.JWT,
+  JOSE.Core.Builder, JOSE.Types.Bytes;
 
 type
   TDataModule1 = class(TDataModule)
@@ -22,6 +24,7 @@ type
     { Public declarations }
     // stores these global vairables for all screen\
     username: string;
+    usertype: string;
     jwtToken: string;
     // sotres the user's current shopping cart
 
@@ -87,7 +90,7 @@ type
 
     procedure Login(username, password: string);
 
-    procedure SignUp(username, password, usertype, homeAddress,
+    procedure SignUp(username, email, password, usertype, homeAddress,
       certificationcode: string; imgPfp: tImage);
 
     procedure changePassword(username, oldpassword, newpassword: string);
@@ -135,6 +138,18 @@ type
       CFRange, EURange, WURange, resultRange, ratingRange: array of integer)
       : tADODataSet;
 
+    // APPLICATION METHODS
+
+    function getApplications(iMin, iMax: integer; token: string): tADODataSet;
+
+    procedure denyApplication(applicationID, reason, token: string);
+
+    procedure acceptApplication(applicationID, token: string);
+
+    procedure sendApplication(email, explanation: string);
+
+    function getApplication(applicationID, token: string): tADODataSet;
+
     // UTILITIES
 
     function ifthenreturn(condition: boolean;
@@ -146,6 +161,7 @@ type
 
     function ResizeImage(Image: tImage; width, height: integer): tpngImage;
 
+    function getUserTypeFromToken(token: string): string;
 
 
     // WEB UTILITIES
@@ -353,7 +369,8 @@ begin
     queryParams.Add(TPair<string, variant>.Create('indexRange', iMin));
     queryParams.Add(TPair<string, variant>.Create('indexRange', iMax));
 
-    response := sendRequest(url, rmGet,nil,'',ctAPPLICATION_JSON, queryParams);
+    response := sendRequest(url, rmGET, nil, '', ctAPPLICATION_JSON,
+      queryParams);
     try
 
       if response.StatusCode <> 200 then
@@ -470,6 +487,7 @@ begin
 
         // get the jwt token from the succsful login attempt
         jwtToken := (responseBody.P['data[0].token'] as tJsonString).Value;
+        usertype := (responseBody.P['data[0].UserType'] as tJsonString).Value;
         self.username := username;
 
       finally
@@ -487,7 +505,7 @@ begin
 end;
 
 // a function used to create a new user in the database and return the new user's userid for use by the program
-procedure TDataModule1.SignUp(username, password, usertype, homeAddress,
+procedure TDataModule1.SignUp(username, email, password, usertype, homeAddress,
   certificationcode: string; imgPfp: tImage);
 var
   url: string;
@@ -510,8 +528,9 @@ begin
     if usertype.Equals('SELLER') then
       bodyJson.AddPair('certificationCode', certificationcode);
 
+    response := sendRequest(url, rmPOST, bodyJson);
+
     try
-      response := sendRequest(url, rmPOST, bodyJson);
 
       responseJson := tJsonObject.ParseJSONValue(response.Content)
         as tJsonObject;
@@ -525,6 +544,7 @@ begin
         end;
 
         jwtToken := (responseJson.P['data[0].token'] as tJsonString).Value;
+        usertype := (responseJson.P['data[0].UserType'] as tJsonString).Value;
 
         imageStream := tMemoryStream.Create;
 
@@ -831,6 +851,10 @@ end;
 // current cart has expired
 procedure TDataModule1.tmCheckCartExpiredTimer(Sender: TObject);
 begin
+
+  if usertype.Equals('ADMIN') then
+    Exit;
+
   // run this code in a separate thread
   TTask.Run(
     procedure
@@ -1195,6 +1219,14 @@ begin
     response := sendRequest(url, rmGET, nil, '', ctAPPLICATION_JSON,
       queryParams);
 
+    if response.StatusCode <> 200 then
+    begin
+      responseJson := tJsonObject.ParseJSONValue(response.Content)
+        as tJsonObject;
+      raise Exception.Create((responseJson.P['error'] as tJsonString).Value);
+      freeandnil(responseJson);
+    end;
+
     Result := responseBodyToDataset(response.Content);
 
   finally
@@ -1205,6 +1237,185 @@ begin
 
 end;
 
+
+// APPLICATIONS
+
+function TDataModule1.getApplications(iMin, iMax: integer; token: string)
+  : tADODataSet;
+var
+  url, currentCateg: string;
+  responseJson: tJsonObject;
+  response: TRESTResponse;
+  queryParams: TList<TPair<String, variant>>;
+begin
+
+  url := format('%s/application', [baseUrl]);
+
+  // stores query parameters to put in the url
+  queryParams := TList < TPair < String, variant >>.Create;
+  try
+    queryParams.Add(TPair<String, variant>.Create('minIndex', iMin));
+    queryParams.Add(TPair<String, variant>.Create('maxIndex', iMax));
+
+    response := sendRequest(url, rmGET, nil, token, ctAPPLICATION_JSON,
+      queryParams);
+    try
+
+      if response.StatusCode <> 200 then
+      begin
+        responseJson := tJsonObject.ParseJSONValue(response.Content)
+          as tJsonObject;
+        raise Exception.Create((responseJson.P['error'] as tJsonString).Value);
+        freeandnil(responseJson);
+      end;
+
+      Result := responseBodyToDataset(response.Content);
+
+    finally
+
+      freeandnil(response);
+
+    end;
+
+  finally
+
+    queryParams.Free;
+  end;
+
+end;
+
+procedure TDataModule1.denyApplication(applicationID, reason, token: string);
+var
+  url, currentCateg: string;
+  body, responseJson: tJsonObject;
+  response: TRESTResponse;
+begin
+
+  url := format('%s/application/%s/deny', [baseUrl, applicationID]);
+
+  body := tJsonObject.Create;
+  try
+
+    body.AddPair('Reason', reason);
+
+    response := sendRequest(url, rmDelete, body, token);
+    try
+
+      if response.StatusCode <> 200 then
+      begin
+        responseJson := tJsonObject.ParseJSONValue(response.Content)
+          as tJsonObject;
+        raise Exception.Create((responseJson.P['error'] as tJsonString).Value);
+        freeandnil(responseJson);
+      end;
+
+    finally
+
+      freeandnil(response);
+
+    end;
+
+  finally
+    body.Free;
+  end;
+
+end;
+
+procedure TDataModule1.acceptApplication(applicationID, token: string);
+var
+  url, currentCateg: string;
+  responseJson: tJsonObject;
+  response: TRESTResponse;
+begin
+
+  url := format('%s/application/%s/approve', [baseUrl, applicationID]);
+
+  response := sendRequest(url, rmPOST, nil, token);
+  try
+
+    if response.StatusCode <> 200 then
+    begin
+      responseJson := tJsonObject.ParseJSONValue(response.Content)
+        as tJsonObject;
+      raise Exception.Create((responseJson.P['error'] as tJsonString).Value);
+      freeandnil(responseJson);
+    end;
+
+  finally
+
+    freeandnil(response);
+
+  end;
+
+end;
+
+procedure TDataModule1.sendApplication(email, explanation: string);
+var
+  url, currentCateg: string;
+  body, responseJson: tJsonObject;
+  response: TRESTResponse;
+begin
+
+  url := format('%s/application/send', [baseUrl]);
+
+  body := tJsonObject.Create;
+  try
+
+    body.AddPair('Email', email);
+    body.AddPair('Explanation', explanation);
+
+    response := sendRequest(url, rmPOST, body, '');
+    try
+
+      if response.StatusCode <> 200 then
+      begin
+        responseJson := tJsonObject.ParseJSONValue(response.Content)
+          as tJsonObject;
+        raise Exception.Create((responseJson.P['error'] as tJsonString).Value);
+        freeandnil(responseJson);
+      end;
+
+    finally
+
+      freeandnil(response);
+
+    end;
+
+  finally
+    body.Free;
+  end;
+end;
+
+function TDataModule1.getApplication(applicationID, token: string): tADODataSet;
+var
+  url, currentCateg: string;
+  body, responseJson: tJsonObject;
+  response: TRESTResponse;
+begin
+
+  url := format('%s/application/%s', [baseUrl, applicationID]);
+
+  response := sendRequest(url, rmGET, nil, token);
+  try
+
+    if response.StatusCode <> 200 then
+    begin
+      responseJson := tJsonObject.ParseJSONValue(response.Content)
+        as tJsonObject;
+      raise Exception.Create((responseJson.P['error'] as tJsonString).Value);
+      freeandnil(responseJson);
+    end;
+
+    Result := responseBodyToDataset(response.Content);
+    // size of text field in mysql
+
+  finally
+
+    freeandnil(response);
+
+  end;
+
+end;
 
 // UTILITIES
 
@@ -1284,7 +1495,7 @@ begin
     end
     else
     begin
-      showMessage('Please choose a file');
+      raise Exception.Create('Please choose a file');
     end;
   finally
     freeandnil(fileChooser);
@@ -1321,6 +1532,14 @@ begin
     // free allocated memory
     freeandnil(ResizedImage);
   end;
+
+end;
+
+function TDataModule1.getUserTypeFromToken(token: string): string;
+var
+  tjwt: tJose;
+  tjBytes: TJOSEBytes;
+begin
 
 end;
 
@@ -1424,6 +1643,7 @@ var
   currentJsonObj: tJsonObject;
   currentFieldName: string;
   currentFieldType: string;
+  currentStringValue: string;
   datafieldsEnumerator: tJsonObject.TEnumerator;
   currField: tField;
   Data: Tjsonarray;
@@ -1474,7 +1694,10 @@ begin
     begin
       Result.FieldDefs.Find(currentFieldName).Size := 256;
     end;
-
+    if currentFieldType.Equals('memo') then
+    begin
+      Result.FieldDefs.Find(currentFieldName).Size := 65536;
+    end;
   end;
 
   Result.CreateDataSet;
@@ -1489,11 +1712,12 @@ begin
 
       case currField.DataType of
 
-        tFieldType.ftString:
+        tFieldType.ftString, tFieldType.ftMemo:
           begin
             Result.Edit;
             Result[currField.DisplayName] :=
-              currentJsonObj.GetValue(currField.DisplayName).Value;
+              (currentJsonObj.P[currField.DisplayName] as tJsonString).Value;
+
           end;
         tFieldType.ftInteger:
           begin
@@ -1540,6 +1764,11 @@ begin
   begin
 
     Result := tFieldType.ftFloat;
+    Exit;
+  end;
+  if s.Equals('memo') then
+  begin
+    Result := tFieldType.ftMemo;
     Exit;
   end;
 

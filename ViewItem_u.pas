@@ -91,7 +91,6 @@ begin;
   ttask.Run(
     procedure
     begin
-      tthread.Sleep(2000);
       coinitialize(nil);
       try
         try
@@ -147,7 +146,6 @@ begin
   ttask.Run(
     procedure
     begin
-      tthread.Sleep(2000);
       coinitialize(nil);
       try
         try
@@ -198,8 +196,6 @@ begin
     procedure
     begin
       coinitialize(nil);
-
-      tthread.Sleep(2000);
 
       try
         dsResult := DataModule1.viewItem(itemID);
@@ -294,6 +290,19 @@ begin
               end
             end);
 
+          if DataModule1.usertype.Equals('ADMIN') then
+          begin
+            pnlRating.Hide;
+            pnlQuantity.Hide;
+            pnlAddToCart.Hide;
+          end
+          else
+          begin
+            pnlRating.Show;
+            pnlQuantity.Show;
+            pnlAddToCart.Show;
+          end
+
         finally
           dsResult.Free;
         end
@@ -302,8 +311,8 @@ begin
         tthread.Synchronize(nil,
           procedure
           begin
-            btnAddToCart.Enabled := true;
-            btnSendRating.Enabled := true;
+            btnAddToCart.Enabled := True;
+            btnSendRating.Enabled := True;
           end);
       end
 

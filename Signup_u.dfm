@@ -15,8 +15,8 @@ object frmSignUp: TfrmSignUp
   PixelsPerInch = 96
   TextHeight = 18
   object lblUsername: TLabel
-    Left = 113
-    Top = 144
+    Left = 81
+    Top = 159
     Width = 82
     Height = 18
     Caption = 'Username'
@@ -28,8 +28,8 @@ object frmSignUp: TfrmSignUp
     ParentFont = False
   end
   object lblPassword: TLabel
-    Left = 105
-    Top = 176
+    Left = 73
+    Top = 191
     Width = 79
     Height = 18
     Caption = 'Password'
@@ -42,7 +42,7 @@ object frmSignUp: TfrmSignUp
   end
   object lblLogin: TLabel
     Left = 96
-    Top = 495
+    Top = 507
     Width = 208
     Height = 18
     Caption = 'Already have an account?'
@@ -67,8 +67,8 @@ object frmSignUp: TfrmSignUp
     ParentFont = False
   end
   object lblHomeAddress: TLabel
-    Left = 49
-    Top = 357
+    Left = 30
+    Top = 397
     Width = 122
     Height = 18
     Caption = 'Home Address:'
@@ -1673,9 +1673,24 @@ object frmSignUp: TfrmSignUp
     Stretch = True
     OnClick = imgPfpClick
   end
+  object lblEmail: TLabel
+    Left = 96
+    Top = 130
+    Width = 43
+    Height = 18
+    Caption = 'Email'
+    Color = 11074994
+    Font.Charset = ANSI_CHARSET
+    Font.Color = 16384
+    Font.Height = -16
+    Font.Name = 'Arial Rounded MT Bold'
+    Font.Style = []
+    ParentColor = False
+    ParentFont = False
+  end
   object rgpUser: TRadioGroup
     Left = 119
-    Top = 213
+    Top = 233
     Width = 185
     Height = 59
     Color = 7987076
@@ -1695,9 +1710,9 @@ object frmSignUp: TfrmSignUp
     OnClick = rgpUserClick
   end
   object edtPassword: TEdit
-    Left = 201
-    Top = 176
-    Width = 121
+    Left = 169
+    Top = 191
+    Width = 152
     Height = 26
     Color = 8249222
     TabOrder = 1
@@ -1705,9 +1720,9 @@ object frmSignUp: TfrmSignUp
     OnKeyDown = FormKeyDown
   end
   object edtUsername: TEdit
-    Left = 201
-    Top = 144
-    Width = 121
+    Left = 169
+    Top = 159
+    Width = 152
     Height = 26
     Color = 8249222
     TabOrder = 2
@@ -1729,7 +1744,7 @@ object frmSignUp: TfrmSignUp
   end
   object redHomeAddress: TRichEdit
     Left = 177
-    Top = 357
+    Top = 373
     Width = 185
     Height = 89
     Color = 7987076
@@ -1771,7 +1786,7 @@ object frmSignUp: TfrmSignUp
   end
   object pnlLogin: TPanel
     Left = 154
-    Top = 520
+    Top = 532
     Width = 81
     Height = 33
     BorderWidth = 1
@@ -1799,8 +1814,8 @@ object frmSignUp: TfrmSignUp
     end
   end
   object pnlSignUp: TPanel
-    Left = 154
-    Top = 452
+    Left = 152
+    Top = 468
     Width = 81
     Height = 33
     BorderWidth = 1
@@ -1824,6 +1839,46 @@ object frmSignUp: TfrmSignUp
       Flat = True
       OnClick = btnSignUpClick
       ExplicitTop = 0
+    end
+  end
+  object edtEmail: TEdit
+    Left = 169
+    Top = 127
+    Width = 212
+    Height = 26
+    Color = 8380296
+    TabOrder = 8
+    Text = 'hsj@gmail.com'
+    OnKeyDown = FormKeyDown
+  end
+  object pnlApply: TPanel
+    Left = 119
+    Top = 325
+    Width = 176
+    Height = 33
+    BorderWidth = 1
+    Color = 8380296
+    Font.Charset = ANSI_CHARSET
+    Font.Color = 16384
+    Font.Height = -16
+    Font.Name = 'Arial Rounded MT Bold'
+    Font.Style = []
+    ParentBackground = False
+    ParentFont = False
+    TabOrder = 9
+    Visible = False
+    OnClick = btnHelpClick
+    object btnApplication: TSpeedButton
+      Left = 2
+      Top = 2
+      Width = 172
+      Height = 29
+      Align = alClient
+      Caption = 'Apply For Seller'
+      Flat = True
+      OnClick = btnApplicationClick
+      ExplicitLeft = 0
+      ExplicitTop = 5
     end
   end
 end

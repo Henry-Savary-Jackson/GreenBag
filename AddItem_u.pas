@@ -193,7 +193,6 @@ begin
   ttask.run(
     procedure
     begin
-      tthread.Sleep(2000);
       coinitialize(nil);
       try
 

@@ -108,8 +108,7 @@ object frmYourProducts: TfrmYourProducts
       Caption = 'Add Item'
       Flat = True
       OnClick = btnAddItemClick
-      ExplicitLeft = 4
-      ExplicitTop = 4
+      ExplicitTop = 0
     end
   end
   object pnlHelp: TPanel

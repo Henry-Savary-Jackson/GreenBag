@@ -287,6 +287,15 @@ begin
 
   end;
 
+  if DataModule1.usertype.Equals('ADMIN') then
+  begin
+    grpCheckout.Hide;
+  end
+  else
+  begin
+    grpCheckout.Show;
+  end;
+
   // load profile picture
   ttask.run(
     procedure
@@ -503,7 +512,6 @@ begin
 
   spnWUMax.Enabled := spnWUMax.MinValue <> spnWUMax.MaxValue
 end;
-
 
 // procedure given to all browse item containers
 // if the user is the object's seller, rather show them the screen that allows them to edit

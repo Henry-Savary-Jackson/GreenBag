@@ -58,6 +58,8 @@ type
     btnChangePassword: TSpeedButton;
     Panel1: TPanel;
     btnChangeUsername: TSpeedButton;
+    Panel2: TPanel;
+    btnApplications: TSpeedButton;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure btnViewProductsClick(Sender: TObject);
     procedure btnBackClick(Sender: TObject);
@@ -81,6 +83,7 @@ type
     procedure btnWUClick(Sender: TObject);
     procedure btnChangePasswordClick(Sender: TObject);
     procedure btnChangeUsernameClick(Sender: TObject);
+    procedure btnApplicationsClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -97,9 +100,15 @@ var
 implementation
 
 uses
-  BrowseItems_u, YourProducts_u, HelpScreen_u;
+  BrowseItems_u, YourProducts_u, HelpScreen_u, reviewApplications_u;
 
 {$R *.dfm}
+
+procedure TfrmProfile.btnApplicationsClick(Sender: TObject);
+begin
+  frmProfile.Hide;
+  frmreviewApplications.Show;
+end;
 
 procedure TfrmProfile.btnBackClick(Sender: TObject);
 begin
@@ -433,6 +442,18 @@ begin
 
               chrtStats.Title.caption := '';
               srsStats.Clear;
+
+              if dsResult['UserType'] = 'ADMIN' then
+              begin
+
+                pnlMain.Hide;
+
+              end
+              else
+              begin
+                pnlMain.Show;
+              end;
+
             end);
 
           imageStream := DataModule1.loadProfilePicture(DataModule1.username);
@@ -462,36 +483,45 @@ var
 begin
 
   // open filchooser
-  DataModule1.loadImageFromFile(imgProfilePic, self);
-
-  // create an image stream
-  imageStream := tMemoryStream.Create;
 
   try
 
+    imageStream := tMemoryStream.Create();
+    DataModule1.loadImageFromFile(imgProfilePic, self);
+
     imgProfilePic.Picture.SaveToStream(imageStream);
 
-    // run request to api asynchronously
-    ttask.Run(
-      procedure
-      begin
+    try
 
-        try
+      // run request to api asynchronously
+      ttask.Run(
+        procedure
+        begin
 
-          DataModule1.setProfilePicture(DataModule1.username,
-            DataModule1.jwtToken, imageStream);
+          try
 
-        except
-          on e: exception do
-          begin
-            showMessage(e.Message);
+            DataModule1.setProfilePicture(DataModule1.username,
+              DataModule1.jwtToken, imageStream);
+
+          except
+            on e: exception do
+            begin
+              showMessage(e.Message);
+            end;
+
           end;
+        end);
 
-        end;
-      end);
+    finally
+      imageStream.Free;
+    end
 
-  finally
-     imageStream.Free;
+  except
+    on e: exception do
+    begin
+      showMessage(e.Message);
+    end
+
   end
 
 end;
@@ -564,7 +594,6 @@ begin
     begin
 
       CoInitialize(nil);
-      tthread.Sleep(2500);
       try
         dsResult := DataModule1.obtainStats(DataModule1.username,
           DataModule1.jwtToken, statType, dateRangeBegin, dateRangeEnd);
